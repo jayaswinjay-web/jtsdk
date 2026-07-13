@@ -3,533 +3,757 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>JTS GO - Programming Language</title>
+  <title>JTS GO - The Programming Language</title>
+  <meta name="description" content="JTS GO is a modern programming language with Python-like syntax and a bytecode virtual machine. Easy to learn, fast to execute.">
   <style>
-    :root {
-      --bg: #0d1117;
-      --bg2: #161b22;
-      --bg3: #21262d;
-      --border: #30363d;
-      --text: #e6edf3;
-      --muted: #8b949e;
-      --accent: #58a6ff;
-      --green: #3fb950;
-      --orange: #d29922;
-      --red: #f85149;
-      --purple: #bc8cff;
-    }
     * { margin: 0; padding: 0; box-sizing: border-box; }
+
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
-      background: var(--bg);
-      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      color: #1a1a2e;
+      background: #fff;
       line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
     }
-    a { color: var(--accent); text-decoration: none; }
+
+    a { color: #2563eb; text-decoration: none; }
     a:hover { text-decoration: underline; }
 
-    /* Hero */
-    .hero {
-      text-align: center;
-      padding: 80px 20px 60px;
-      background: linear-gradient(180deg, #0d1117 0%, #161b22 100%);
-      border-bottom: 1px solid var(--border);
+    /* ===== HEADER ===== */
+    .site-header {
+      background: #1a1a2e;
+      color: #fff;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      border-bottom: 3px solid #2563eb;
     }
-    .hero h1 {
-      font-size: 3.5rem;
-      font-weight: 800;
-      margin-bottom: 16px;
-      background: linear-gradient(135deg, var(--accent), var(--purple));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-    .hero .tagline {
-      font-size: 1.25rem;
-      color: var(--muted);
-      max-width: 600px;
-      margin: 0 auto 32px;
-    }
-    .hero-badges {
-      display: flex;
-      gap: 12px;
-      justify-content: center;
-      flex-wrap: wrap;
-      margin-bottom: 32px;
-    }
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 6px 14px;
-      background: var(--bg3);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      font-size: 0.85rem;
-      color: var(--muted);
-    }
-    .badge .dot {
-      width: 8px; height: 8px;
-      border-radius: 50%;
-      background: var(--green);
-    }
-    .install-cmd {
-      display: inline-flex;
-      align-items: center;
-      gap: 12px;
-      background: var(--bg2);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 14px 24px;
-      font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
-      font-size: 1.1rem;
-      cursor: pointer;
-      transition: border-color 0.2s;
-    }
-    .install-cmd:hover { border-color: var(--accent); }
-    .install-cmd .copy-icon {
-      color: var(--muted);
-      font-size: 0.85rem;
-      transition: color 0.2s;
-    }
-    .install-cmd:hover .copy-icon { color: var(--accent); }
-    .install-cmd .prompt { color: var(--green); }
-    .install-cmd .cmd-text { color: var(--text); }
-
-    /* Sections */
-    .container { max-width: 900px; margin: 0 auto; padding: 0 20px; }
-    section { padding: 60px 0; border-bottom: 1px solid var(--border); }
-    section:last-child { border-bottom: none; }
-    h2 {
-      font-size: 2rem;
-      font-weight: 700;
-      margin-bottom: 12px;
-    }
-    h3 {
-      font-size: 1.25rem;
-      font-weight: 600;
-      margin-bottom: 8px;
-      color: var(--text);
-    }
-    p { color: var(--muted); margin-bottom: 16px; }
-
-    /* Steps */
-    .steps { counter-reset: step; }
-    .step {
-      position: relative;
-      padding: 24px 24px 24px 72px;
-      background: var(--bg2);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      margin-bottom: 16px;
-      transition: border-color 0.2s;
-    }
-    .step:hover { border-color: var(--accent); }
-    .step::before {
-      counter-increment: step;
-      content: counter(step);
-      position: absolute;
-      left: 24px;
-      top: 24px;
-      width: 32px; height: 32px;
-      background: var(--accent);
-      color: var(--bg);
-      border-radius: 50%;
+    .header-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
       display: flex;
       align-items: center;
-      justify-content: center;
+      justify-content: space-between;
+      height: 60px;
+    }
+    .logo {
+      font-size: 1.35rem;
       font-weight: 700;
+      color: #fff;
+      letter-spacing: -0.5px;
+    }
+    .logo span { color: #60a5fa; }
+    nav { display: flex; gap: 28px; align-items: center; }
+    nav a {
+      color: #cbd5e1;
       font-size: 0.9rem;
+      font-weight: 500;
+      transition: color 0.15s;
     }
-    .step h3 { margin-bottom: 6px; }
-    .step p { margin-bottom: 12px; font-size: 0.95rem; }
-    .step .platform-tag {
-      display: inline-block;
-      padding: 2px 8px;
-      border-radius: 4px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      margin-right: 6px;
-      background: var(--bg3);
-      color: var(--muted);
-      border: 1px solid var(--border);
-    }
-    .platform-tag.win { color: var(--accent); border-color: var(--accent); }
-    .platform-tag.linux { color: var(--orange); border-color: var(--orange); }
-    .platform-tag.macos { color: var(--purple); border-color: var(--purple); }
-
-    /* Code blocks */
-    .code-block {
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 16px;
-      font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
-      font-size: 0.9rem;
-      overflow-x: auto;
-      position: relative;
-      margin-bottom: 12px;
-    }
-    .code-block .lang {
-      position: absolute;
-      top: 8px; right: 12px;
-      font-size: 0.7rem;
-      color: var(--muted);
-      text-transform: uppercase;
-    }
-    .code-block .copy-btn {
-      position: absolute;
-      top: 8px; right: 80px;
-      background: var(--bg3);
-      border: 1px solid var(--border);
-      color: var(--muted);
-      padding: 4px 10px;
+    nav a:hover { color: #fff; text-decoration: none; }
+    .nav-cta {
+      background: #2563eb;
+      color: #fff !important;
+      padding: 7px 16px;
       border-radius: 6px;
-      cursor: pointer;
-      font-size: 0.75rem;
-      transition: all 0.2s;
+      font-weight: 600;
+      transition: background 0.15s;
     }
-    .code-block .copy-btn:hover {
-      border-color: var(--accent);
-      color: var(--accent);
-    }
+    .nav-cta:hover { background: #1d4ed8; }
 
-    /* Feature grid */
-    .features {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 16px;
+    /* ===== HERO ===== */
+    .hero {
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+      color: #fff;
+      padding: 80px 24px 72px;
     }
-    .feature-card {
-      background: var(--bg2);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 24px;
-      transition: border-color 0.2s;
-    }
-    .feature-card:hover { border-color: var(--accent); }
-    .feature-card h3 { margin-bottom: 6px; font-size: 1rem; }
-    .feature-card p { margin-bottom: 0; font-size: 0.9rem; }
-    .feature-card .icon {
-      font-size: 1.5rem;
-      margin-bottom: 12px;
-      display: block;
-    }
-
-    /* Syntax example */
-    .syntax-demo {
-      background: var(--bg2);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 24px;
-      margin-top: 16px;
-    }
-    .syntax-demo pre {
-      font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
-      font-size: 0.9rem;
-      line-height: 1.7;
-      color: var(--text);
-      white-space: pre;
-      overflow-x: auto;
-    }
-
-    /* Footer */
-    footer {
-      text-align: center;
-      padding: 40px 20px;
-      color: var(--muted);
-      font-size: 0.85rem;
-      border-top: 1px solid var(--border);
-    }
-    footer a { margin: 0 12px; }
-
-    /* Note callout */
-    .note {
-      background: #1a2332;
-      border: 1px solid #2d5a8a;
-      border-radius: 8px;
-      padding: 16px 20px;
-      margin: 16px 0;
-      font-size: 0.9rem;
-    }
-    .note strong { color: var(--accent); }
-
-    /* Verify */
-    .verify-grid {
+    .hero-inner {
+      max-width: 1200px;
+      margin: 0 auto;
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-top: 16px;
+      gap: 48px;
+      align-items: center;
     }
-    .verify-item {
+    .hero-text h1 {
+      font-size: 3rem;
+      font-weight: 800;
+      line-height: 1.1;
+      margin-bottom: 16px;
+      letter-spacing: -1px;
+    }
+    .hero-text h1 span { color: #60a5fa; }
+    .hero-text p {
+      font-size: 1.15rem;
+      color: #94a3b8;
+      margin-bottom: 28px;
+      max-width: 480px;
+      line-height: 1.7;
+    }
+    .hero-actions {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #2563eb;
+      color: #fff;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      transition: background 0.15s;
+      border: none;
+      cursor: pointer;
+    }
+    .btn-primary:hover { background: #1d4ed8; text-decoration: none; }
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: transparent;
+      color: #94a3b8;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 500;
+      border: 1px solid #334155;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-secondary:hover { border-color: #60a5fa; color: #60a5fa; text-decoration: none; }
+    .hero-version {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 20px;
+      font-size: 0.85rem;
+      color: #64748b;
+    }
+    .hero-version .dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: #22c55e;
+    }
+
+    /* Hero code panel */
+    .hero-code {
+      background: #0f172a;
+      border: 1px solid #1e293b;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+    }
+    .code-header {
       display: flex;
       align-items: center;
-      gap: 10px;
-      background: var(--bg2);
-      border: 1px solid var(--border);
+      gap: 8px;
+      padding: 12px 16px;
+      background: #1e293b;
+      border-bottom: 1px solid #334155;
+    }
+    .code-dot { width: 12px; height: 12px; border-radius: 50%; }
+    .code-dot.r { background: #ef4444; }
+    .code-dot.y { background: #eab308; }
+    .code-dot.g { background: #22c55e; }
+    .code-title {
+      margin-left: 8px;
+      font-size: 0.8rem;
+      color: #64748b;
+      font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+    }
+    .code-body {
+      padding: 20px;
+      font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', Consolas, monospace;
+      font-size: 0.85rem;
+      line-height: 1.8;
+      color: #e2e8f0;
+      overflow-x: auto;
+    }
+    .code-body .kw { color: #c084fc; }
+    .code-body .fn { color: #60a5fa; }
+    .code-body .str { color: #86efac; }
+    .code-body .num { color: #fbbf24; }
+    .code-body .cmt { color: #475569; font-style: italic; }
+    .code-body .op { color: #f472b6; }
+    .code-body .var { color: #e2e8f0; }
+    .code-body .out { color: #64748b; }
+
+    /* ===== MAIN CONTENT ===== */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* Section headings */
+    .section-title {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 8px;
+      letter-spacing: -0.5px;
+    }
+    .section-subtitle {
+      font-size: 1.1rem;
+      color: #64748b;
+      margin-bottom: 40px;
+      max-width: 600px;
+    }
+
+    /* ===== QUICK START ===== */
+    .quickstart {
+      padding: 64px 24px;
+      background: #f8fafc;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .quickstart-grid {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+    .qs-card {
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 28px;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .qs-card:hover {
+      border-color: #2563eb;
+      box-shadow: 0 4px 12px rgba(37,99,235,0.08);
+    }
+    .qs-card .step-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px; height: 28px;
+      background: #2563eb;
+      color: #fff;
+      border-radius: 50%;
+      font-size: 0.8rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+    .qs-card h3 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: #0f172a;
+      margin-bottom: 8px;
+    }
+    .qs-card p {
+      font-size: 0.9rem;
+      color: #64748b;
+      margin-bottom: 16px;
+    }
+    .install-box {
+      background: #0f172a;
       border-radius: 8px;
       padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .install-box:hover { background: #1e293b; }
+    .install-box code {
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 0.85rem;
+      color: #86efac;
+    }
+    .install-box .copy-hint {
+      font-size: 0.75rem;
+      color: #475569;
+      transition: color 0.15s;
+    }
+    .install-box:hover .copy-hint { color: #94a3b8; }
+
+    /* ===== FEATURES ===== */
+    .features-section {
+      padding: 72px 24px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .features-grid {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 32px;
+    }
+    .feature-item h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #0f172a;
+      margin-bottom: 8px;
+    }
+    .feature-item p {
+      font-size: 0.9rem;
+      color: #64748b;
+      line-height: 1.6;
+    }
+    .feature-icon {
+      width: 40px; height: 40px;
+      background: #eff6ff;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 14px;
+      color: #2563eb;
+      font-size: 1.1rem;
+    }
+
+    /* ===== LANGUAGE SHOWCASE ===== */
+    .showcase {
+      padding: 72px 24px;
+      background: #f8fafc;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .showcase-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 48px;
+      align-items: start;
+    }
+    .showcase-features {
+      list-style: none;
+      padding: 0;
+    }
+    .showcase-features li {
+      padding: 14px 0;
+      border-bottom: 1px solid #e2e8f0;
+      display: flex;
+      gap: 12px;
+      align-items: start;
+    }
+    .showcase-features li:last-child { border-bottom: none; }
+    .showcase-features .feat-label {
+      font-weight: 600;
+      color: #0f172a;
+      font-size: 0.95rem;
+      min-width: 140px;
+    }
+    .showcase-features .feat-desc {
+      color: #64748b;
       font-size: 0.9rem;
     }
-    .verify-item .check {
-      color: var(--green);
+    .showcase-features code {
+      background: #f1f5f9;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      color: #2563eb;
+    }
+
+    /* ===== TOOLCHAIN ===== */
+    .toolchain {
+      padding: 72px 24px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .toolchain-grid {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+    }
+    .tool-card {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 24px;
+      text-align: center;
+      transition: border-color 0.15s;
+    }
+    .tool-card:hover { border-color: #2563eb; }
+    .tool-card code {
+      display: block;
+      font-family: 'SF Mono', 'Fira Code', monospace;
       font-size: 1.1rem;
-      flex-shrink: 0;
+      font-weight: 700;
+      color: #2563eb;
+      margin-bottom: 8px;
+    }
+    .tool-card p {
+      font-size: 0.85rem;
+      color: #64748b;
+    }
+
+    /* ===== CTA BANNER ===== */
+    .cta-banner {
+      background: #0f172a;
+      padding: 56px 24px;
+      text-align: center;
+    }
+    .cta-banner h2 {
+      color: #fff;
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+    .cta-banner p {
+      color: #94a3b8;
+      font-size: 1rem;
+      margin-bottom: 24px;
+    }
+
+    /* ===== FOOTER ===== */
+    .site-footer {
+      background: #0f172a;
+      color: #94a3b8;
+      border-top: 1px solid #1e293b;
+      padding: 48px 24px 32px;
+    }
+    .footer-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 40px;
+    }
+    .footer-brand p {
+      font-size: 0.85rem;
+      color: #64748b;
+      margin-top: 8px;
+      line-height: 1.6;
+    }
+    .footer-col h4 {
+      color: #e2e8f0;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 16px;
+    }
+    .footer-col a {
+      display: block;
+      color: #94a3b8;
+      font-size: 0.85rem;
+      padding: 4px 0;
+      transition: color 0.15s;
+    }
+    .footer-col a:hover { color: #e2e8f0; text-decoration: none; }
+    .footer-bottom {
+      max-width: 1200px;
+      margin: 32px auto 0;
+      padding-top: 24px;
+      border-top: 1px solid #1e293b;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.8rem;
+      color: #475569;
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 900px) {
+      .hero-inner { grid-template-columns: 1fr; }
+      .hero-code { display: none; }
+      .quickstart-grid { grid-template-columns: 1fr; }
+      .features-grid { grid-template-columns: 1fr 1fr; }
+      .showcase-inner { grid-template-columns: 1fr; }
+      .toolchain-grid { grid-template-columns: 1fr 1fr; }
+      .footer-inner { grid-template-columns: 1fr 1fr; }
+      nav { display: none; }
     }
     @media (max-width: 600px) {
-      .hero h1 { font-size: 2.2rem; }
-      .verify-grid { grid-template-columns: 1fr; }
+      .hero-text h1 { font-size: 2rem; }
+      .features-grid { grid-template-columns: 1fr; }
+      .toolchain-grid { grid-template-columns: 1fr; }
+      .footer-inner { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
 
+  <!-- Header -->
+  <header class="site-header">
+    <div class="header-inner">
+      <a href="#" class="logo">JTS <span>GO</span></a>
+      <nav>
+        <a href="#quickstart">Get Started</a>
+        <a href="#features">Features</a>
+        <a href="#language">Language</a>
+        <a href="#toolchain">Toolchain</a>
+        <a href="https://github.com/jayaswinjay-web/jtsdk" target="_blank">GitHub</a>
+        <a href="https://www.npmjs.com/package/@jaytechsolutions/jts-go" target="_blank" class="nav-cta">npm</a>
+      </nav>
+    </div>
+  </header>
+
   <!-- Hero -->
-  <div class="hero">
-    <h1>JTS GO</h1>
-    <p class="tagline">A Python-like programming language with a bytecode virtual machine. Simple syntax, fast execution, portable across platforms.</p>
-    <div class="hero-badges">
-      <span class="badge"><span class="dot"></span> Stable v1.0.0</span>
-      <span class="badge">Windows + Linux</span>
-      <span class="badge">Apache 2.0 License</span>
+  <section class="hero">
+    <div class="hero-inner">
+      <div class="hero-text">
+        <h1>The language that <span>gets out of your way</span></h1>
+        <p>JTS GO combines Python's readable syntax with a compiled bytecode virtual machine. Write less, run faster, ship sooner.</p>
+        <div class="hero-actions">
+          <a href="#quickstart" class="btn-primary">Get Started</a>
+          <a href="https://github.com/jayaswinjay-web/jtsdk" target="_blank" class="btn-secondary">View on GitHub</a>
+        </div>
+        <div class="hero-version">
+          <span class="dot"></span>
+          v1.1.0 &mdash; Stable Release
+        </div>
+      </div>
+      <div class="hero-code">
+        <div class="code-header">
+          <span class="code-dot r"></span>
+          <span class="code-dot y"></span>
+          <span class="code-dot g"></span>
+          <span class="code-title">hello.jts</span>
+        </div>
+        <div class="code-body">
+<span class="cmt"># JTS GO</span>
+<span class="kw">func</span> <span class="fn">fib</span>(n)
+    <span class="kw">if</span> n <span class="op">&lt;=</span> <span class="num">1</span>
+        <span class="kw">return</span> n
+    <span class="kw">end</span>
+    <span class="kw">return</span> <span class="fn">fib</span>(n <span class="op">-</span> <span class="num">1</span>) <span class="op">+</span> <span class="fn">fib</span>(n <span class="op">-</span> <span class="num">2</span>)
+<span class="kw">end</span>
+
+<span class="kw">for</span> i <span class="kw">in</span> <span class="num">0</span> <span class="kw">to</span> <span class="num">10</span>
+    <span class="fn">print</span>(<span class="fn">fib</span>(i))
+<span class="kw">end</span>
+<span class="out">0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55</span>
+        </div>
+      </div>
     </div>
-    <div class="install-cmd" onclick="copyInstall()" title="Click to copy">
-      <span class="prompt">$</span>
-      <span class="cmd-text">npm install -g @jaytechsolutions/jts-go</span>
-      <span class="copy-icon" id="copyLabel">[ copy ]</span>
+  </section>
+
+  <!-- Quick Start -->
+  <section class="quickstart" id="quickstart">
+    <div style="max-width:1200px;margin:0 auto;">
+      <h2 class="section-title">Get Started in 60 Seconds</h2>
+      <p class="section-subtitle">One dependency. One command. You're coding.</p>
     </div>
-  </div>
+    <div class="quickstart-grid">
+      <div class="qs-card">
+        <div class="step-num">1</div>
+        <h3>Install Node.js</h3>
+        <p>JTS GO runs on npm. If you don't have Node.js, install it first.</p>
+        <a href="https://nodejs.org" target="_blank" class="btn-secondary" style="font-size:0.85rem;padding:8px 16px;">Download Node.js</a>
+      </div>
+      <div class="qs-card">
+        <div class="step-num">2</div>
+        <h3>Install JTS GO</h3>
+        <p>One global npm install. No build tools, no configuration.</p>
+        <div class="install-box" onclick="copyText('npm install -g @jaytechsolutions/jts-go', this)">
+          <code>$ npm install -g @jaytechsolutions/jts-go</code>
+          <span class="copy-hint">copy</span>
+        </div>
+      </div>
+      <div class="qs-card">
+        <div class="step-num">3</div>
+        <h3>Run Your Code</h3>
+        <p>Create a <code>.jts</code> file and run it instantly.</p>
+        <div class="install-box" onclick="copyText('jts hello.jts', this)">
+          <code>$ jts hello.jts</code>
+          <span class="copy-hint">copy</span>
+        </div>
+      </div>
+    </div>
+  </section>
 
   <!-- Features -->
-  <div class="container">
-    <section>
-      <h2>Why JTS GO?</h2>
-      <div class="features">
-        <div class="feature-card">
-          <span class="icon">&#9889;</span>
-          <h3>Python-like Syntax</h3>
-          <p>Clean, readable code with indentation-based blocks, no braces. Write less, understand more.</p>
+  <section class="features-section" id="features">
+    <div style="max-width:1200px;margin:0 auto;">
+      <h2 class="section-title">Why JTS GO</h2>
+      <p class="section-subtitle">Built for developers who want simplicity without sacrificing performance.</p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-item">
+        <div class="feature-icon">&gt;/</div>
+        <h3>Python-like Syntax</h3>
+        <p>Indentation-based blocks, dynamic typing, clean expressions. If you know Python, you already know most of JTS GO.</p>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon">&gt;&gt;</div>
+        <h3>Bytecode VM</h3>
+        <p>Source code compiles to optimized bytecode and runs on a stack-based virtual machine. Fast startup, fast execution.</p>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon">[ ]</div>
+        <h3>Lists &amp; Collections</h3>
+        <p>First-class list support with literals, indexing, assignment, and append. Mix any types in a single list.</p>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon">fn</div>
+        <h3>First-class Functions</h3>
+        <p>Define functions with <code>func</code>, pass them around, use recursion. Closures and nested functions supported.</p>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon">i/o</div>
+        <h3>Smart Input</h3>
+        <p><code>input()</code> automatically detects numbers, booleans, and strings. No manual type conversion needed.</p>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon">!</div>
+        <h3>One Command Update</h3>
+        <p>Keep your installation current with <code>jts --update</code>. Always running the latest version.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Language Showcase -->
+  <section class="showcase" id="language">
+    <div class="showcase-inner">
+      <div>
+        <h2 class="section-title">Language at a Glance</h2>
+        <p class="section-subtitle" style="margin-bottom:24px;">JTS GO covers all the essentials with a clean, minimal syntax.</p>
+        <ul class="showcase-features">
+          <li>
+            <span class="feat-label">Variables</span>
+            <span class="feat-desc"><code>x = 42</code> &mdash; no type declaration needed</span>
+          </li>
+          <li>
+            <span class="feat-label">Strings</span>
+            <span class="feat-desc"><code>"hello" + " world"</code> &mdash; concatenation with <code>+</code></span>
+          </li>
+          <li>
+            <span class="feat-label">Conditionals</span>
+            <span class="feat-desc"><code>if / else if / else / end</code></span>
+          </li>
+          <li>
+            <span class="feat-label">Loops</span>
+            <span class="feat-desc"><code>for x in 0 to N</code> and <code>while</code></span>
+          </li>
+          <li>
+            <span class="feat-label">Functions</span>
+            <span class="feat-desc"><code>func name(args) ... end</code></span>
+          </li>
+          <li>
+            <span class="feat-label">Lists</span>
+            <span class="feat-desc"><code>[1, 2, 3]</code> with indexing and append</span>
+          </li>
+          <li>
+            <span class="feat-label">Built-ins</span>
+            <span class="feat-desc"><code>print</code>, <code>input</code>, <code>len</code>, <code>type</code>, <code>append</code>, <code>number</code></span>
+          </li>
+          <li>
+            <span class="feat-label">Comments</span>
+            <span class="feat-desc"><code># single line comments</code></span>
+          </li>
+        </ul>
+      </div>
+      <div class="hero-code" style="box-shadow:0 8px 30px rgba(0,0,0,0.12);">
+        <div class="code-header">
+          <span class="code-dot r"></span>
+          <span class="code-dot y"></span>
+          <span class="code-dot g"></span>
+          <span class="code-title">features.jts</span>
         </div>
-        <div class="feature-card">
-          <span class="icon">&#9881;</span>
-          <h3>Bytecode VM</h3>
-          <p>Compiled to bytecode and executed on a stack-based virtual machine for fast, efficient execution.</p>
-        </div>
-        <div class="feature-card">
-          <span class="icon">&#9878;</span>
-          <h3>Dynamic Typing</h3>
-          <p>Number, boolean, string, nil, functions, and lists. No type declarations needed.</p>
-        </div>
-        <div class="feature-card">
-          <span class="icon">&#9881;</span>
-          <h3>Native Functions</h3>
-          <p>Built-in <code>print()</code>, <code>input()</code>, <code>len()</code>, <code>type()</code> functions ready to use.</p>
-        </div>
-        <div class="feature-card">
-          <span class="icon">&#9729;</span>
-          <h3>One Command Install</h3>
-          <p>Install globally with npm. No compilation, no dependencies, no setup hassle.</p>
-        </div>
-        <div class="feature-card">
-          <span class="icon">&#128196;</span>
-          <h3>Simple Toolchain</h3>
-          <p><code>jts</code> to run, <code>jtsc</code> to compile, <code>jtsvm</code> to execute bytecode directly.</p>
+        <div class="code-body" style="background:#fff;color:#1a1a2e;">
+<span class="cmt"># Variables</span>
+<span class="kw">name</span> = <span class="str">"JTS GO"</span>
+<span class="kw">version</span> = <span class="num">1.1</span>
+
+<span class="cmt"># Lists</span>
+<span class="kw">nums</span> = [<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>, <span class="num">5</span>]
+<span class="fn">append</span>(nums, <span class="num">6</span>)
+<span class="fn">print</span>(nums[<span class="num">0</span>])  <span class="cmt"># 1</span>
+
+<span class="cmt"># Smart input</span>
+<span class="kw">age</span> = <span class="fn">input</span>(<span class="str">"Age: "</span>)
+<span class="fn">print</span>(<span class="fn">type</span>(age))  <span class="cmt"># number</span>
+
+<span class="cmt"># Functions</span>
+<span class="kw">func</span> <span class="fn">add</span>(a, b)
+    <span class="kw">return</span> a + b
+<span class="kw">end</span>
+
+<span class="fn">print</span>(<span class="fn">add</span>(<span class="num">3</span>, <span class="num">4</span>))  <span class="cmt"># 7</span>
         </div>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <!-- Prerequisites -->
-    <section>
-      <h2>Prerequisites</h2>
-      <p>You need <strong>Node.js</strong> and <strong>npm</strong> installed on your machine. That's it.</p>
-
-      <div class="steps">
-        <!-- Step 1 -->
-        <div class="step">
-          <h3>Install Node.js</h3>
-          <p>Download and install Node.js (v14 or later). npm is included automatically.</p>
-          <a href="https://nodejs.org" target="_blank" style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:var(--green);color:#0d1117;border-radius:6px;font-weight:600;font-size:0.9rem;margin-bottom:12px;">&#8594; Download Node.js</a>
-          <div class="note">
-            <strong>Note:</strong> Node.js 16+ is recommended. LTS versions (18, 20, 22) are ideal.
-          </div>
-        </div>
-
-        <!-- Step 2 -->
-        <div class="step">
-          <h3>Verify Node.js and npm</h3>
-          <p>Open a terminal and run these commands to confirm the installation:</p>
-          <div class="code-block">
-            <span class="lang">shell</span>
-            <button class="copy-btn" onclick="copyBlock(this)">Copy</button>
-node --version<br>
-npm --version
-          </div>
-          <p>You should see version numbers like <code>v20.x.x</code> and <code>10.x.x</code>.</p>
-        </div>
+  <!-- Toolchain -->
+  <section class="toolchain" id="toolchain">
+    <div style="max-width:1200px;margin:0 auto;">
+      <h2 class="section-title">Toolchain</h2>
+      <p class="section-subtitle">Three commands for every stage of your workflow.</p>
+    </div>
+    <div class="toolchain-grid">
+      <div class="tool-card">
+        <code>jts</code>
+        <p>Compile and run a <code>.jts</code> file in one step</p>
       </div>
-    </section>
-
-    <!-- Installation -->
-    <section>
-      <h2>Installation</h2>
-      <p>Install JTS GO globally with a single npm command. Works on Windows, macOS, and Linux.</p>
-
-      <div class="steps">
-        <!-- Step 3 -->
-        <div class="step">
-          <h3>Install JTS GO</h3>
-          <p><span class="platform-tag win">Windows</span><span class="platform-tag linux">Linux</span><span class="platform-tag macos">macOS</span></p>
-          <div class="code-block">
-            <span class="lang">shell</span>
-            <button class="copy-btn" onclick="copyBlock(this)">Copy</button>
-npm install -g @jaytechsolutions/jts-go
-          </div>
-        </div>
-
-        <!-- Step 4 -->
-        <div class="step">
-          <h3>Verify Installation</h3>
-          <p>Check that the <code>jts</code> command is available:</p>
-          <div class="code-block">
-            <span class="lang">shell</span>
-            <button class="copy-btn" onclick="copyBlock(this)">Copy</button>
-jts --help
-          </div>
-          <p>If you see usage info, you're ready to go.</p>
-        </div>
-
-        <!-- Step 5 -->
-        <div class="step">
-          <h3>Run Your First Program</h3>
-          <p>Create a file called <code>hello.jts</code>:</p>
-          <div class="code-block">
-            <span class="lang">jts</span>
-            <button class="copy-btn" onclick="copyBlock(this)">Copy</button>
-print("Hello, JTS GO!")
-          </div>
-          <p>Then run it:</p>
-          <div class="code-block">
-            <span class="lang">shell</span>
-            <button class="copy-btn" onclick="copyBlock(this)">Copy</button>
-jts hello.jts
-          </div>
-          <p style="color:var(--green);">Output: Hello, JTS GO!</p>
-        </div>
+      <div class="tool-card">
+        <code>jtsc</code>
+        <p>Compile source to <code>.jbc</code> bytecode</p>
       </div>
-    </section>
-
-    <!-- Quick Syntax -->
-    <section>
-      <h2>Quick Syntax Guide</h2>
-      <p>JTS GO uses Python-like syntax with <code>end</code> to close blocks.</p>
-
-      <div class="syntax-demo">
-        <pre>
-<span style="color:var(--muted)"># Variables</span>
-<span style="color:var(--purple)">name</span> = <span style="color:var(--accent)">"JTS GO"</span>
-<span style="color:var(--purple)">version</span> = <span style="color:var(--orange)">1.0</span>
-
-<span style="color:var(--muted)"># Print</span>
-<span style="color:var(--green)">print</span>(<span style="color:var(--accent)">"Welcome to "</span> + name)
-
-<span style="color:var(--muted)"># Conditionals</span>
-<span style="color:var(--purple)">age</span> = <span style="color:var(--orange)">25</span>
-<span style="color:var(--purple)">if</span> age >= <span style="color:var(--orange)">18</span>
-    <span style="color:var(--green)">print</span>(<span style="color:var(--accent)">"Adult"</span>)
-<span style="color:var(--purple)">else</span>
-    <span style="color:var(--green)">print</span>(<span style="color:var(--accent)">"Minor"</span>)
-<span style="color:var(--purple)">end</span>
-
-<span style="color:var(--muted)"># Loop</span>
-<span style="color:var(--purple)">for</span> i <span style="color:var(--purple)">in</span> <span style="color:var(--orange)">0</span> <span style="color:var(--purple)">to</span> <span style="color:var(--orange)">5</span>
-    <span style="color:var(--green)">print</span>(i)
-<span style="color:var(--purple)">end</span>
-
-<span style="color:var(--muted)"># Function</span>
-<span style="color:var(--purple)">func</span> <span style="color:var(--green)">add</span>(a, b)
-    <span style="color:var(--purple)">return</span> a + b
-<span style="color:var(--purple)">end</span>
-
-<span style="color:var(--green)">print</span>(<span style="color:var(--green)">add</span>(<span style="color:var(--orange)">3</span>, <span style="color:var(--orange)">4</span>))</pre>
+      <div class="tool-card">
+        <code>jtsvm</code>
+        <p>Execute compiled bytecode directly</p>
       </div>
-    </section>
-
-    <!-- Toolchain -->
-    <section>
-      <h2>Toolchain</h2>
-      <p>JTS GO provides three commands for different workflows:</p>
-
-      <div class="features" style="grid-template-columns: repeat(3, 1fr);">
-        <div class="feature-card">
-          <h3><code style="color:var(--green);">jts</code></h3>
-          <p>Run a <code>.jts</code> file directly. Combines compilation and execution in one step.</p>
-          <div class="code-block" style="margin-top:12px;">
-jts myfile.jts
-          </div>
-        </div>
-        <div class="feature-card">
-          <h3><code style="color:var(--accent);">jtsc</code></h3>
-          <p>Compile <code>.jts</code> source files to <code>.jtsc</code> bytecode files.</p>
-          <div class="code-block" style="margin-top:12px;">
-jtsc myfile.jts
-          </div>
-        </div>
-        <div class="feature-card">
-          <h3><code style="color:var(--purple);">jtsvm</code></h3>
-          <p>Execute compiled <code>.jtsc</code> bytecode files directly on the VM.</p>
-          <div class="code-block" style="margin-top:12px;">
-jtsvm myfile.jtsc
-          </div>
-        </div>
+      <div class="tool-card">
+        <code>--update</code>
+        <p>Update to the latest version via npm</p>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <!-- Links -->
-    <section style="border-bottom:none;">
-      <h2>Resources</h2>
-      <div class="features">
-        <a href="https://github.com/jayaswinjay-web/jtsdk" target="_blank" class="feature-card" style="text-decoration:none;">
-          <span class="icon">&#128187;</span>
-          <h3>GitHub Repository</h3>
-          <p>Source code, issues, and contributions. Star the repo to show support!</p>
-        </a>
-        <a href="https://www.npmjs.com/package/@jaytechsolutions/jts-go" target="_blank" class="feature-card" style="text-decoration:none;">
-          <span class="icon">&#128230;</span>
-          <h3>npm Package</h3>
-          <p>View the package page, version history, and dependencies.</p>
-        </a>
-        <a href="https://github.com/jayaswinjay-web/jtsdk/tree/main/examples" target="_blank" class="feature-card" style="text-decoration:none;">
-          <span class="icon">&#128196;</span>
-          <h3>Example Programs</h3>
-          <p>8 ready-to-run example programs covering all language features.</p>
-        </a>
+  <!-- CTA -->
+  <section class="cta-banner">
+    <h2>Start building with JTS GO</h2>
+    <p>Install in one command. Write your first program in under a minute.</p>
+    <div class="install-box" style="display:inline-flex;max-width:auto;" onclick="copyText('npm install -g @jaytechsolutions/jts-go', this)">
+      <code style="color:#86efac;">$ npm install -g @jaytechsolutions/jts-go</code>
+      <span class="copy-hint" style="margin-left:16px;">copy</span>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <a href="#" class="logo" style="font-size:1.15rem;">JTS <span>GO</span></a>
+        <p>A modern programming language with Python-like syntax and a bytecode virtual machine. Designed for clarity, built for speed.</p>
       </div>
-    </section>
-  </div>
-
-  <footer>
-    <p>JTS GO &mdash; Created by Jayaswin Jay</p>
-    <p>
-      <a href="https://github.com/jayaswinjay-web/jtsdk">GitHub</a>
-      <a href="https://www.npmjs.com/package/@jaytechsolutions/jts-go">npm</a>
-      <a href="https://github.com/jayaswinjay-web/jtsdk/blob/main/LICENSE">Apache 2.0</a>
-    </p>
+      <div class="footer-col">
+        <h4>Install</h4>
+        <a href="#quickstart">Getting Started</a>
+        <a href="https://www.npmjs.com/package/@jaytechsolutions/jts-go" target="_blank">npm Package</a>
+        <a href="https://github.com/jayaswinjay-web/jtsdk/releases" target="_blank">Releases</a>
+      </div>
+      <div class="footer-col">
+        <h4>Resources</h4>
+        <a href="#language">Language Guide</a>
+        <a href="#toolchain">Toolchain</a>
+        <a href="https://github.com/jayaswinjay-web/jtsdk/tree/main/examples" target="_blank">Examples</a>
+      </div>
+      <div class="footer-col">
+        <h4>Community</h4>
+        <a href="https://github.com/jayaswinjay-web/jtsdk" target="_blank">GitHub</a>
+        <a href="https://github.com/jayaswinjay-web/jtsdk/issues" target="_blank">Issue Tracker</a>
+        <a href="https://github.com/jayaswinjay-web/jtsdk/blob/main/LICENSE" target="_blank">Apache 2.0 License</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2026 JTS GO. Created by Jayaswin Jay.</span>
+      <span>v1.1.0</span>
+    </div>
   </footer>
 
   <script>
-    function copyInstall() {
-      navigator.clipboard.writeText('npm install -g @jaytechsolutions/jts-go');
-      document.getElementById('copyLabel').textContent = '[ copied! ]';
-      setTimeout(() => {
-        document.getElementById('copyLabel').textContent = '[ copy ]';
-      }, 2000);
-    }
-
-    function copyBlock(btn) {
-      const block = btn.closest('.code-block');
-      const text = block.textContent.replace('Copy', '').trim();
+    function copyText(text, el) {
       navigator.clipboard.writeText(text);
-      btn.textContent = 'Copied!';
-      setTimeout(() => { btn.textContent = 'Copy'; }, 2000);
+      const hint = el.querySelector('.copy-hint');
+      if (hint) {
+        hint.textContent = 'copied!';
+        setTimeout(() => { hint.textContent = 'copy'; }, 2000);
+      }
     }
   </script>
 
