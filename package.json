@@ -1,0 +1,44 @@
+{
+  "name": "@jayaswinjay/jts-go",
+  "version": "1.0.0",
+  "description": "JTS GO - The easiest programming language to learn. Development Kit v1.0.",
+  "keywords": [
+    "programming language",
+    "jts",
+    "jts-go",
+    "beginner",
+    "interpreter",
+    "bytecode",
+    "vm"
+  ],
+  "author": "Aswinjay",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jayaswinjay-web/jtsdk.git"
+  },
+  "homepage": "https://github.com/jayaswinjay-web/jtsdk#readme",
+  "bugs": {
+    "url": "https://github.com/jayaswinjay-web/jtsdk/issues"
+  },
+  "bin": {
+    "jts": "bin/jts",
+    "jtsc": "bin/jts",
+    "jtsvm": "bin/jts"
+  },
+  "scripts": {
+    "postinstall": "node install.js"
+  },
+  "files": [
+    "bin/",
+    "install.js",
+    "LICENSE",
+    "README.md"
+  ],
+  "os": [
+    "win32"
+  ],
+  "cpu": [
+    "x64"
+  ]
+}

@@ -1,0 +1,50 @@
+# Functions
+
+# Simple function
+func greet()
+    print("Hello from JTS GO!")
+end
+
+greet()
+
+# Function with parameters
+func say_hello(name)
+    print("Hello, " + name + "!")
+end
+
+say_hello("Alice")
+say_hello("Bob")
+
+# Function with return value
+func add(a, b)
+    return a + b
+end
+
+result = add(3, 4)
+print("3 + 4 = " + result)
+
+# Functions calling other functions
+func square(x)
+    return x * x
+end
+
+func sum_of_squares(a, b)
+    return square(a) + square(b)
+end
+
+print("3^2 + 4^2 = " + sum_of_squares(3, 4))
+
+# Function with logic
+func is_even(n)
+    if n % 2 == 0
+        return true
+    else
+        return false
+    end
+end
+
+for i in 0 to 10
+    if is_even(i)
+        print(i + " is even")
+    end
+end
