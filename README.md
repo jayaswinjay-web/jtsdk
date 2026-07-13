@@ -1,4 +1,4 @@
-# JTS Development Kit v1.0
+# JTS Development Kit v1.0.1
 
 <p align="center">
   <b>JTS GO — The Easiest Programming Language to Learn</b><br>
@@ -146,6 +146,35 @@ end
 print(factorial(5))   # 120
 ```
 
+### Lists
+```jts
+# Create a list
+nums = [1, 2, 3, 4, 5]
+
+# Access elements
+print(nums[0])    # 1
+print(nums[2])    # 3
+
+# Modify elements
+nums[0] = 99
+
+# Append
+append(nums, 6)
+
+# Length
+print(len(nums))  # 6
+
+# Type
+print(type(nums)) # list
+
+# Mixed types
+mixed = ["hello", 42, true]
+print(mixed)       # [hello, 42, true]
+
+# Empty list
+empty = []
+```
+
 ## Example Programs
 
 | Program | Description |
@@ -158,6 +187,7 @@ print(factorial(5))   # 120
 | [functions.jts](examples/functions.jts) | Functions and parameters |
 | [factorial.jts](examples/factorial.jts) | Recursive factorial |
 | [fibonacci.jts](examples/fibonacci.jts) | Recursive Fibonacci |
+| [lists.jts](examples/lists.jts) | Lists and arrays |
 
 ## Documentation
 
@@ -186,5 +216,5 @@ Licensed under the [Apache License 2.0](LICENSE).
 
 <p align="center">
   Made with passion by <b>Aswinjay</b><br>
-  JTS GO v1.0 — 2025
+  JTS GO v1.0.1 — 2025
 </p>
