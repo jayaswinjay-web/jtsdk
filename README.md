@@ -21,7 +21,7 @@ JTS GO is a new programming language designed for **absolute beginners**. If you
 ### Install via npm
 
 ```bash
-npm install -g @jayaswinjay/jts-go
+npm install -g @jaytechsolutions/jts-go
 ```
 
 Then run any `.jts` file:

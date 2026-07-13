@@ -12,7 +12,7 @@
 ### Option 1: Install via npm (Recommended)
 
 ```bash
-npm install -g @jayaswinjay/jts-go
+npm install -g @jaytechsolutions/jts-go
 ```
 
 This installs three commands globally:
