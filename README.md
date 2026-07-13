@@ -1,4 +1,4 @@
-# JTS Development Kit v1.0.1
+# JTS Development Kit v1.1.0
 
 <p align="center">
   <b>JTS GO — The Easiest Programming Language to Learn</b><br>
@@ -207,6 +207,7 @@ Read the full language guide: [Language Documentation](docs/)
 | `jts file.jts` | Compile and run a JTS GO program |
 | `jtsc file.jts` | Compile to bytecode only (.jbc) |
 | `jtsvm file.jbc` | Run a compiled bytecode file |
+| `jts --update` | Update JTS GO to latest version |
 
 ## License
 
@@ -216,5 +217,5 @@ Licensed under the [Apache License 2.0](LICENSE).
 
 <p align="center">
   Made with passion by <b>Aswinjay</b><br>
-  JTS GO v1.0.1 — 2025
+  JTS GO v1.1.0 — 2025
 </p>
