@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>JTS GO - The Programming Language</title>
-  <meta name="description" content="JTS GO is a modern programming language with Python-like syntax and a bytecode virtual machine. Easy to learn, fast to execute.">
+  <title>JTS GO | The Programming Language</title>
+  <meta name="description" content="JTS GO is a modern programming language with Python-like syntax and a bytecode virtual machine.">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -16,17 +16,22 @@
       -webkit-font-smoothing: antialiased;
     }
 
-    a { color: #2563eb; text-decoration: none; }
+    a { color: #c74634; text-decoration: none; }
     a:hover { text-decoration: underline; }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
 
     /* ===== HEADER ===== */
     .site-header {
-      background: #1a1a2e;
-      color: #fff;
+      background: #fff;
+      border-bottom: 1px solid #e0e0e0;
       position: sticky;
       top: 0;
       z-index: 100;
-      border-bottom: 3px solid #2563eb;
     }
     .header-inner {
       max-width: 1200px;
@@ -38,124 +43,125 @@
       height: 60px;
     }
     .logo {
-      font-size: 1.35rem;
+      font-size: 1.4rem;
       font-weight: 700;
-      color: #fff;
+      color: #1a1a2e;
       letter-spacing: -0.5px;
     }
-    .logo span { color: #60a5fa; }
-    nav { display: flex; gap: 28px; align-items: center; }
+    .logo span { color: #c74634; }
+    nav { display: flex; gap: 32px; align-items: center; }
     nav a {
-      color: #cbd5e1;
+      color: #333;
       font-size: 0.9rem;
       font-weight: 500;
       transition: color 0.15s;
     }
-    nav a:hover { color: #fff; text-decoration: none; }
+    nav a:hover { color: #c74634; text-decoration: none; }
     .nav-cta {
-      background: #2563eb;
+      background: #c74634;
       color: #fff !important;
-      padding: 7px 16px;
-      border-radius: 6px;
+      padding: 8px 18px;
+      border-radius: 4px;
       font-weight: 600;
       transition: background 0.15s;
     }
-    .nav-cta:hover { background: #1d4ed8; }
+    .nav-cta:hover { background: #a83828; }
 
     /* ===== HERO ===== */
     .hero {
-      background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
-      color: #fff;
+      background: #fff;
       padding: 80px 24px 72px;
+      border-bottom: 1px solid #e0e0e0;
     }
     .hero-inner {
       max-width: 1200px;
       margin: 0 auto;
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 48px;
+      gap: 60px;
       align-items: center;
     }
     .hero-text h1 {
-      font-size: 3rem;
-      font-weight: 800;
+      font-size: 3.5rem;
+      font-weight: 700;
       line-height: 1.1;
-      margin-bottom: 16px;
+      margin-bottom: 20px;
+      color: #1a1a2e;
       letter-spacing: -1px;
     }
-    .hero-text h1 span { color: #60a5fa; }
+    .hero-text h1 span { color: #c74634; }
     .hero-text p {
-      font-size: 1.15rem;
-      color: #94a3b8;
-      margin-bottom: 28px;
+      font-size: 1.1rem;
+      color: #555;
+      margin-bottom: 32px;
       max-width: 480px;
       line-height: 1.7;
     }
     .hero-actions {
       display: flex;
-      gap: 12px;
+      gap: 16px;
       align-items: center;
       flex-wrap: wrap;
+      margin-bottom: 24px;
     }
     .btn-primary {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      background: #2563eb;
+      background: #c74634;
       color: #fff;
-      padding: 12px 24px;
-      border-radius: 8px;
+      padding: 14px 28px;
+      border-radius: 4px;
       font-size: 1rem;
       font-weight: 600;
       transition: background 0.15s;
       border: none;
       cursor: pointer;
     }
-    .btn-primary:hover { background: #1d4ed8; text-decoration: none; }
+    .btn-primary:hover { background: #a83828; text-decoration: none; }
     .btn-secondary {
       display: inline-flex;
       align-items: center;
       gap: 8px;
       background: transparent;
-      color: #94a3b8;
-      padding: 12px 24px;
-      border-radius: 8px;
+      color: #333;
+      padding: 14px 28px;
+      border-radius: 4px;
       font-size: 1rem;
       font-weight: 500;
-      border: 1px solid #334155;
+      border: 1px solid #ccc;
       cursor: pointer;
       transition: all 0.15s;
     }
-    .btn-secondary:hover { border-color: #60a5fa; color: #60a5fa; text-decoration: none; }
+    .btn-secondary:hover { border-color: #c74634; color: #c74634; text-decoration: none; }
     .hero-version {
       display: inline-flex;
       align-items: center;
-      gap: 8px;
-      margin-top: 20px;
-      font-size: 0.85rem;
-      color: #64748b;
+      gap: 10px;
+      font-size: 1rem;
+      color: #666;
+      font-weight: 500;
     }
     .hero-version .dot {
-      width: 8px; height: 8px;
+      width: 10px; height: 10px;
       border-radius: 50%;
       background: #22c55e;
     }
 
     /* Hero code panel */
     .hero-code {
-      background: #0f172a;
-      border: 1px solid #1e293b;
-      border-radius: 12px;
+      background: #f8f8f8;
+      border: 1px solid #e0e0e0;
+      border-radius: 4px;
       overflow: hidden;
-      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
     }
     .code-header {
       display: flex;
       align-items: center;
       gap: 8px;
-      padding: 12px 16px;
-      background: #1e293b;
-      border-bottom: 1px solid #334155;
+      padding: 10px 16px;
+      background: #f0f0f0;
+      border-bottom: 1px solid #e0e0e0;
     }
     .code-dot { width: 12px; height: 12px; border-radius: 50%; }
     .code-dot.r { background: #ef4444; }
@@ -164,53 +170,46 @@
     .code-title {
       margin-left: 8px;
       font-size: 0.8rem;
-      color: #64748b;
+      color: #888;
       font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
     }
     .code-body {
-      padding: 20px;
+      padding: 24px;
       font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', Consolas, monospace;
       font-size: 0.85rem;
       line-height: 1.8;
-      color: #e2e8f0;
+      color: #333;
       overflow-x: auto;
     }
-    .code-body .kw { color: #c084fc; }
-    .code-body .fn { color: #60a5fa; }
-    .code-body .str { color: #86efac; }
-    .code-body .num { color: #fbbf24; }
-    .code-body .cmt { color: #475569; font-style: italic; }
-    .code-body .op { color: #f472b6; }
-    .code-body .var { color: #e2e8f0; }
-    .code-body .out { color: #64748b; }
+    .code-body .kw { color: #c74634; }
+    .code-body .fn { color: #2563eb; }
+    .code-body .str { color: #16a34a; }
+    .code-body .num { color: #d97706; }
+    .code-body .cmt { color: #999; font-style: italic; }
+    .code-body .op { color: #7c3aed; }
+    .code-body .var { color: #333; }
+    .code-body .out { color: #888; }
 
-    /* ===== MAIN CONTENT ===== */
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 24px;
-    }
-
-    /* Section headings */
+    /* ===== SECTION STYLES ===== */
     .section-title {
-      font-size: 2rem;
+      font-size: 2.2rem;
       font-weight: 700;
-      color: #0f172a;
+      color: #1a1a2e;
       margin-bottom: 8px;
       letter-spacing: -0.5px;
     }
     .section-subtitle {
-      font-size: 1.1rem;
-      color: #64748b;
+      font-size: 1.05rem;
+      color: #666;
       margin-bottom: 40px;
       max-width: 600px;
     }
 
     /* ===== QUICK START ===== */
     .quickstart {
-      padding: 64px 24px;
-      background: #f8fafc;
-      border-bottom: 1px solid #e2e8f0;
+      padding: 72px 24px;
+      background: #f9f9f9;
+      border-bottom: 1px solid #e0e0e0;
     }
     .quickstart-grid {
       max-width: 1200px;
@@ -221,41 +220,36 @@
     }
     .qs-card {
       background: #fff;
-      border: 1px solid #e2e8f0;
-      border-radius: 12px;
-      padding: 28px;
-      transition: border-color 0.15s, box-shadow 0.15s;
-    }
-    .qs-card:hover {
-      border-color: #2563eb;
-      box-shadow: 0 4px 12px rgba(37,99,235,0.08);
+      border: 1px solid #e0e0e0;
+      border-radius: 4px;
+      padding: 32px;
     }
     .qs-card .step-num {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      width: 28px; height: 28px;
-      background: #2563eb;
+      width: 32px; height: 32px;
+      background: #c74634;
       color: #fff;
       border-radius: 50%;
-      font-size: 0.8rem;
+      font-size: 0.9rem;
       font-weight: 700;
       margin-bottom: 16px;
     }
     .qs-card h3 {
-      font-size: 1.05rem;
+      font-size: 1.1rem;
       font-weight: 600;
-      color: #0f172a;
+      color: #1a1a2e;
       margin-bottom: 8px;
     }
     .qs-card p {
       font-size: 0.9rem;
-      color: #64748b;
+      color: #666;
       margin-bottom: 16px;
     }
     .install-box {
-      background: #0f172a;
-      border-radius: 8px;
+      background: #1a1a2e;
+      border-radius: 4px;
       padding: 12px 16px;
       display: flex;
       align-items: center;
@@ -263,7 +257,7 @@
       cursor: pointer;
       transition: background 0.15s;
     }
-    .install-box:hover { background: #1e293b; }
+    .install-box:hover { background: #2a2a4e; }
     .install-box code {
       font-family: 'SF Mono', 'Fira Code', monospace;
       font-size: 0.85rem;
@@ -271,15 +265,15 @@
     }
     .install-box .copy-hint {
       font-size: 0.75rem;
-      color: #475569;
+      color: #666;
       transition: color 0.15s;
     }
-    .install-box:hover .copy-hint { color: #94a3b8; }
+    .install-box:hover .copy-hint { color: #999; }
 
     /* ===== FEATURES ===== */
     .features-section {
       padding: 72px 24px;
-      border-bottom: 1px solid #e2e8f0;
+      border-bottom: 1px solid #e0e0e0;
     }
     .features-grid {
       max-width: 1200px;
@@ -291,38 +285,39 @@
     .feature-item h3 {
       font-size: 1rem;
       font-weight: 600;
-      color: #0f172a;
+      color: #1a1a2e;
       margin-bottom: 8px;
     }
     .feature-item p {
       font-size: 0.9rem;
-      color: #64748b;
+      color: #666;
       line-height: 1.6;
     }
     .feature-icon {
       width: 40px; height: 40px;
-      background: #eff6ff;
-      border-radius: 10px;
+      background: #fef2f2;
+      border-radius: 4px;
       display: flex;
       align-items: center;
       justify-content: center;
       margin-bottom: 14px;
-      color: #2563eb;
+      color: #c74634;
       font-size: 1.1rem;
+      font-weight: 700;
     }
 
     /* ===== LANGUAGE SHOWCASE ===== */
     .showcase {
       padding: 72px 24px;
-      background: #f8fafc;
-      border-bottom: 1px solid #e2e8f0;
+      background: #f9f9f9;
+      border-bottom: 1px solid #e0e0e0;
     }
     .showcase-inner {
       max-width: 1200px;
       margin: 0 auto;
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 48px;
+      gap: 60px;
       align-items: start;
     }
     .showcase-features {
@@ -331,7 +326,7 @@
     }
     .showcase-features li {
       padding: 14px 0;
-      border-bottom: 1px solid #e2e8f0;
+      border-bottom: 1px solid #e0e0e0;
       display: flex;
       gap: 12px;
       align-items: start;
@@ -339,26 +334,26 @@
     .showcase-features li:last-child { border-bottom: none; }
     .showcase-features .feat-label {
       font-weight: 600;
-      color: #0f172a;
+      color: #1a1a2e;
       font-size: 0.95rem;
       min-width: 140px;
     }
     .showcase-features .feat-desc {
-      color: #64748b;
+      color: #666;
       font-size: 0.9rem;
     }
     .showcase-features code {
-      background: #f1f5f9;
+      background: #f1f1f1;
       padding: 2px 6px;
-      border-radius: 4px;
+      border-radius: 3px;
       font-size: 0.85rem;
-      color: #2563eb;
+      color: #c74634;
     }
 
     /* ===== TOOLCHAIN ===== */
     .toolchain {
       padding: 72px 24px;
-      border-bottom: 1px solid #e2e8f0;
+      border-bottom: 1px solid #e0e0e0;
     }
     .toolchain-grid {
       max-width: 1200px;
@@ -368,50 +363,48 @@
       gap: 20px;
     }
     .tool-card {
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
-      border-radius: 10px;
-      padding: 24px;
+      background: #f9f9f9;
+      border: 1px solid #e0e0e0;
+      border-radius: 4px;
+      padding: 28px;
       text-align: center;
-      transition: border-color 0.15s;
     }
-    .tool-card:hover { border-color: #2563eb; }
     .tool-card code {
       display: block;
       font-family: 'SF Mono', 'Fira Code', monospace;
       font-size: 1.1rem;
       font-weight: 700;
-      color: #2563eb;
+      color: #c74634;
       margin-bottom: 8px;
     }
     .tool-card p {
       font-size: 0.85rem;
-      color: #64748b;
+      color: #666;
     }
 
     /* ===== CTA BANNER ===== */
     .cta-banner {
-      background: #0f172a;
-      padding: 56px 24px;
+      background: #c74634;
+      padding: 60px 24px;
       text-align: center;
     }
     .cta-banner h2 {
       color: #fff;
-      font-size: 1.75rem;
+      font-size: 2rem;
       font-weight: 700;
       margin-bottom: 12px;
     }
     .cta-banner p {
-      color: #94a3b8;
-      font-size: 1rem;
-      margin-bottom: 24px;
+      color: #fff;
+      font-size: 1.05rem;
+      margin-bottom: 28px;
+      opacity: 0.9;
     }
 
     /* ===== FOOTER ===== */
     .site-footer {
-      background: #0f172a;
-      color: #94a3b8;
-      border-top: 1px solid #1e293b;
+      background: #1a1a2e;
+      color: #999;
       padding: 48px 24px 32px;
     }
     .footer-inner {
@@ -423,12 +416,12 @@
     }
     .footer-brand p {
       font-size: 0.85rem;
-      color: #64748b;
+      color: #777;
       margin-top: 8px;
       line-height: 1.6;
     }
     .footer-col h4 {
-      color: #e2e8f0;
+      color: #fff;
       font-size: 0.85rem;
       font-weight: 600;
       text-transform: uppercase;
@@ -437,22 +430,22 @@
     }
     .footer-col a {
       display: block;
-      color: #94a3b8;
+      color: #999;
       font-size: 0.85rem;
       padding: 4px 0;
       transition: color 0.15s;
     }
-    .footer-col a:hover { color: #e2e8f0; text-decoration: none; }
+    .footer-col a:hover { color: #fff; text-decoration: none; }
     .footer-bottom {
       max-width: 1200px;
       margin: 32px auto 0;
       padding-top: 24px;
-      border-top: 1px solid #1e293b;
+      border-top: 1px solid #333;
       display: flex;
       justify-content: space-between;
       align-items: center;
       font-size: 0.8rem;
-      color: #475569;
+      color: #666;
     }
 
     /* ===== RESPONSIVE ===== */
@@ -467,7 +460,7 @@
       nav { display: none; }
     }
     @media (max-width: 600px) {
-      .hero-text h1 { font-size: 2rem; }
+      .hero-text h1 { font-size: 2.2rem; }
       .features-grid { grid-template-columns: 1fr; }
       .toolchain-grid { grid-template-columns: 1fr; }
       .footer-inner { grid-template-columns: 1fr; }
@@ -476,7 +469,6 @@
 </head>
 <body>
 
-  <!-- Header -->
   <header class="site-header">
     <div class="header-inner">
       <a href="#" class="logo">JTS <span>GO</span></a>
@@ -491,7 +483,6 @@
     </div>
   </header>
 
-  <!-- Hero -->
   <section class="hero">
     <div class="hero-inner">
       <div class="hero-text">
@@ -503,7 +494,7 @@
         </div>
         <div class="hero-version">
           <span class="dot"></span>
-          v1.1.0 &mdash; Stable Release
+          Version 1.1.0 — Current Release
         </div>
       </div>
       <div class="hero-code">
@@ -531,7 +522,6 @@
     </div>
   </section>
 
-  <!-- Quick Start -->
   <section class="quickstart" id="quickstart">
     <div style="max-width:1200px;margin:0 auto;">
       <h2 class="section-title">Get Started in 60 Seconds</h2>
@@ -565,7 +555,6 @@
     </div>
   </section>
 
-  <!-- Features -->
   <section class="features-section" id="features">
     <div style="max-width:1200px;margin:0 auto;">
       <h2 class="section-title">Why JTS GO</h2>
@@ -605,7 +594,6 @@
     </div>
   </section>
 
-  <!-- Language Showcase -->
   <section class="showcase" id="language">
     <div class="showcase-inner">
       <div>
@@ -614,11 +602,11 @@
         <ul class="showcase-features">
           <li>
             <span class="feat-label">Variables</span>
-            <span class="feat-desc"><code>x = 42</code> &mdash; no type declaration needed</span>
+            <span class="feat-desc"><code>x = 42</code> — no type declaration needed</span>
           </li>
           <li>
             <span class="feat-label">Strings</span>
-            <span class="feat-desc"><code>"hello" + " world"</code> &mdash; concatenation with <code>+</code></span>
+            <span class="feat-desc"><code>"hello" + " world"</code> — concatenation with <code>+</code></span>
           </li>
           <li>
             <span class="feat-label">Conditionals</span>
@@ -646,14 +634,14 @@
           </li>
         </ul>
       </div>
-      <div class="hero-code" style="box-shadow:0 8px 30px rgba(0,0,0,0.12);">
+      <div class="hero-code" style="box-shadow:0 2px 8px rgba(0,0,0,0.08);">
         <div class="code-header">
           <span class="code-dot r"></span>
           <span class="code-dot y"></span>
           <span class="code-dot g"></span>
           <span class="code-title">features.jts</span>
         </div>
-        <div class="code-body" style="background:#fff;color:#1a1a2e;">
+        <div class="code-body" style="background:#fff;color:#333;">
 <span class="cmt"># Variables</span>
 <span class="kw">name</span> = <span class="str">"JTS GO"</span>
 <span class="kw">version</span> = <span class="num">1.1</span>
@@ -678,7 +666,6 @@
     </div>
   </section>
 
-  <!-- Toolchain -->
   <section class="toolchain" id="toolchain">
     <div style="max-width:1200px;margin:0 auto;">
       <h2 class="section-title">Toolchain</h2>
@@ -704,7 +691,6 @@
     </div>
   </section>
 
-  <!-- CTA -->
   <section class="cta-banner">
     <h2>Start building with JTS GO</h2>
     <p>Install in one command. Write your first program in under a minute.</p>
@@ -714,7 +700,6 @@
     </div>
   </section>
 
-  <!-- Footer -->
   <footer class="site-footer">
     <div class="footer-inner">
       <div class="footer-brand">
@@ -742,7 +727,7 @@
     </div>
     <div class="footer-bottom">
       <span>&copy; 2026 JTS GO. Created by Jayaswin Jay.</span>
-      <span>v1.1.0</span>
+      <span>Version 1.1.0</span>
     </div>
   </footer>
 
