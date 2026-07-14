@@ -605,7 +605,7 @@
         <ul class="showcase-features">
           <li>
             <span class="feat-label">Variables</span>
-            <span class="feat-desc"><code>x = 42</code> — no type declaration needed</span>
+            <span class="feat-desc"><code>x = 42</code> or <code>int x = 42</code> — your choice</span>
           </li>
           <li>
             <span class="feat-label">Strings</span>
@@ -646,16 +646,16 @@
         </div>
         <div class="code-body" style="background:#fff;color:#333;">
 <span class="cmt"># Variables</span>
-<span class="kw">name</span> = <span class="str">"JTS GO"</span>
-<span class="kw">version</span> = <span class="num">1.1</span>
+<span class="kw">string</span> name = <span class="str">"JTS GO"</span>
+<span class="kw">float</span> version = <span class="num">1.2</span>
 
 <span class="cmt"># Lists</span>
-<span class="kw">nums</span> = [<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>, <span class="num">5</span>]
+<span class="kw">list</span> nums = [<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>, <span class="num">5</span>]
 <span class="fn">append</span>(nums, <span class="num">6</span>)
 <span class="fn">print</span>(nums[<span class="num">0</span>])  <span class="cmt"># 1</span>
 
 <span class="cmt"># Smart input</span>
-<span class="kw">age</span> = <span class="fn">input</span>(<span class="str">"Age: "</span>)
+<span class="kw">int</span> age = <span class="fn">input</span>(<span class="str">"Age: "</span>)
 <span class="fn">print</span>(<span class="fn">type</span>(age))  <span class="cmt"># number</span>
 
 <span class="cmt"># Functions</span>
