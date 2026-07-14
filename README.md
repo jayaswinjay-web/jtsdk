@@ -1,4 +1,4 @@
-# JTS Development Kit v1.1.0
+# JTS Development Kit v1.2.0
 
 <p align="center">
   <b>JTS GO — The Easiest Programming Language to Learn</b><br>
@@ -57,15 +57,29 @@ Hello, World!
 
 ### Variables
 ```jts
+# Dynamic typing (no keyword needed)
 name = "JTS GO"
-version = 1.1
+version = 1.2
 is_awesome = true
 nothing = nil
 
+# Type-annotated declarations
+int age = 25
+string greeting = "Hello"
+float pi = 3.14
+bool active = true
+list numbers = [1, 2, 3]
+var x = 42
+
+# Unassigned variables (default to nil)
+int count
+string message
+list items
+
 print(name)
-print(version)
-print(is_awesome)
-print(nothing)
+print(age)
+print(pi)
+print(count)    # nil
 ```
 
 ### Arithmetic
@@ -237,5 +251,5 @@ Licensed under the [Apache License 2.0](LICENSE).
 
 <p align="center">
   Made with passion by <b>Jayaswin Jay</b><br>
-  JTS GO v1.1.0 — 2026
+  JTS GO v1.2.0 — 2026
 </p>

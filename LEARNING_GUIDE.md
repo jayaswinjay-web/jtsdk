@@ -133,10 +133,11 @@ This is similar to how Java works, but much simpler.
 
 ## Variables and Data Types
 
-Variables store values. In JTS GO, you don't need to declare the type — it's automatic.
+Variables store values. In JTS GO, you can declare variables in two ways:
 
 ### Creating Variables
 
+**Dynamic typing (no keyword needed):**
 ```jts
 name = "JTS GO"        # String
 age = 25               # Number
@@ -144,9 +145,31 @@ is_student = true      # Boolean
 nothing = nil          # Null/Empty
 ```
 
+**Type-annotated declarations:**
+```jts
+int age = 25           # Integer
+string name = "Alice"  # String
+float pi = 3.14        # Float
+bool active = true     # Boolean
+list nums = [1, 2, 3]  # List
+var x = 42             # Same as dynamic
+```
+
+**Unassigned variables (default to nil):**
+```jts
+int count
+string message
+float temperature
+bool is_ready
+list items
+
+print(count)    # nil
+print(message)  # nil
+```
+
 ### Data Types
 
-JTS GO has four basic data types:
+JTS GO has these data types:
 
 | Type | Description | Example |
 |------|-------------|---------|
@@ -959,9 +982,21 @@ Now that you know the basics of JTS GO, here are some suggestions:
 ```jts
 # Comments use #
 
-# Variables
+# Variables (dynamic)
 x = 10
 name = "Alice"
+
+# Variables (type-annotated)
+int age = 25
+string message = "Hello"
+float pi = 3.14
+bool flag = true
+list nums = [1, 2, 3]
+var y = 42
+
+# Unassigned variables (default to nil)
+int count
+string text
 
 # Strings
 greeting = "Hello, " + name
