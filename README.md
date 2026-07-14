@@ -2,7 +2,7 @@
 
 <p align="center">
   <b>JTS GO — The Easiest Programming Language to Learn</b><br>
-  Python-like syntax. Java-like compilation. Zero boilerplate.
+  Python-like syntax. Bytecode compilation. Zero boilerplate.
 </p>
 
 ---
@@ -30,9 +30,11 @@ Then run any `.jts` file:
 jts hello.jts
 ```
 
-### Download manually
+### Update
 
-Grab the latest release from [Releases](https://github.com/jayaswinjay-web/jtsdk/releases) and add it to your system PATH.
+```bash
+jts --update
+```
 
 ## Hello, World!
 
@@ -56,7 +58,7 @@ Hello, World!
 ### Variables
 ```jts
 name = "JTS GO"
-version = 1.0
+version = 1.1
 is_awesome = true
 nothing = nil
 
@@ -175,6 +177,31 @@ print(mixed)       # [hello, 42, true]
 empty = []
 ```
 
+### Input
+```jts
+# Smart input - auto-detects types
+age = input("Enter your age: ")
+print(type(age))  # number (if you entered a number)
+
+name = input("Enter your name: ")
+print(type(name))  # string
+
+# Number conversion
+num = number("42")
+print(type(num))  # number
+```
+
+## Built-in Functions
+
+| Function | Description |
+|----------|-------------|
+| `print(value)` | Output a value to the console |
+| `input(prompt)` | Read user input (auto-detects type) |
+| `len(value)` | Get length of a string or list |
+| `type(value)` | Get the type of a value |
+| `append(list, value)` | Add an element to a list |
+| `number(string)` | Convert a string to a number |
+
 ## Example Programs
 
 | Program | Description |
@@ -191,14 +218,7 @@ empty = []
 
 ## Documentation
 
-Read the full language guide: [Language Documentation](docs/)
-
-- [Getting Started](docs/getting-started.md)
-- [Syntax Overview](docs/syntax.md)
-- [Data Types](docs/types.md)
-- [Control Flow](docs/control-flow.md)
-- [Functions](docs/functions.md)
-- [Built-in Functions](docs/builtins.md)
+Read the full language guide: [JTS GO Learning Guide](LEARNING_GUIDE.md)
 
 ## Toolchain
 
@@ -216,6 +236,6 @@ Licensed under the [Apache License 2.0](LICENSE).
 ---
 
 <p align="center">
-  Made with passion by <b>Aswinjay</b><br>
-  JTS GO v1.1.0 — 2025
+  Made with passion by <b>Jayaswin Jay</b><br>
+  JTS GO v1.1.0 — 2026
 </p>
