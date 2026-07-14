@@ -497,7 +497,7 @@
         </div>
         <div class="hero-version">
           <span class="dot"></span>
-          Version 1.2.0
+          Version 2.0.0
         </div>
       </div>
       <div class="hero-code">
@@ -590,6 +590,21 @@
         <p><code>input()</code> automatically detects numbers, booleans, and strings. No manual type conversion needed.</p>
       </div>
       <div class="feature-item">
+        <div class="feature-icon">oo</div>
+        <h3>Object-Oriented</h3>
+        <p>Full OOP with classes, methods, inheritance via <code>extends</code>, and <code>self</code>. Clean, Python-like syntax.</p>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon">ML</div>
+        <h3>ML/AI Built-ins</h3>
+        <p>Tensors, matrices, matmul, sigmoid, relu, MSE loss — all built into the language.</p>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon">web</div>
+        <h3>Web Development</h3>
+        <p>HTTP server support with <code>http_server()</code>, <code>http_start()</code>, and <code>http_request()</code>.</p>
+      </div>
+      <div class="feature-item">
         <div class="feature-icon">!</div>
         <h3>One Command Update</h3>
         <p>Keep your installation current with <code>jts --update</code>. Always running the latest version.</p>
@@ -629,7 +644,19 @@
           </li>
           <li>
             <span class="feat-label">Built-ins</span>
-            <span class="feat-desc"><code>print</code>, <code>input</code>, <code>len</code>, <code>type</code>, <code>append</code>, <code>number</code></span>
+            <span class="feat-desc"><code>print</code>, <code>input</code>, <code>len</code>, <code>type</code>, <code>append</code>, <code>number</code>, <code>str</code>, <code>math</code></span>
+          </li>
+          <li>
+            <span class="feat-label">OOP</span>
+            <span class="feat-desc"><code>class / extends / new / self</code> with inheritance</span>
+          </li>
+          <li>
+            <span class="feat-label">ML/AI</span>
+            <span class="feat-desc"><code>tensor</code>, <code>matrix</code>, <code>matmul</code>, <code>sigmoid</code>, <code>relu</code>, <code>mse</code></span>
+          </li>
+          <li>
+            <span class="feat-label">Web Dev</span>
+            <span class="feat-desc"><code>http_server</code>, <code>http_start</code>, <code>http_request</code></span>
           </li>
           <li>
             <span class="feat-label">Comments</span>
@@ -645,25 +672,30 @@
           <span class="code-title">features.jts</span>
         </div>
         <div class="code-body" style="background:#fff;color:#333;">
-<span class="cmt"># Variables</span>
-<span class="kw">string</span> name = <span class="str">"JTS GO"</span>
-<span class="kw">float</span> version = <span class="num">1.2</span>
+<span class="cmt"># Object-Oriented Programming</span>
+<span class="kw">class</span> <span class="fn">Animal</span>
+    <span class="kw">func</span> <span class="fn">init</span>(<span class="kw">self</span>, name)
+        <span class="kw">self</span>.name = name
+    <span class="kw">end</span>
 
-<span class="cmt"># Lists</span>
-<span class="kw">list</span> nums = [<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>, <span class="num">5</span>]
-<span class="fn">append</span>(nums, <span class="num">6</span>)
-<span class="fn">print</span>(nums[<span class="num">0</span>])  <span class="cmt"># 1</span>
-
-<span class="cmt"># Smart input</span>
-<span class="kw">int</span> age = <span class="fn">input</span>(<span class="str">"Age: "</span>)
-<span class="fn">print</span>(<span class="fn">type</span>(age))  <span class="cmt"># number</span>
-
-<span class="cmt"># Functions</span>
-<span class="kw">func</span> <span class="fn">add</span>(a, b)
-    <span class="kw">return</span> a + b
+    <span class="kw">func</span> <span class="fn">speak</span>(<span class="kw">self</span>)
+        <span class="fn">print</span>(<span class="kw">self</span>.name + <span class="str">" says hello!"</span>)
+    <span class="kw">end</span>
 <span class="kw">end</span>
 
-<span class="fn">print</span>(<span class="fn">add</span>(<span class="num">3</span>, <span class="num">4</span>))  <span class="cmt"># 7</span>
+a = <span class="kw">new</span> <span class="fn">Animal</span>(<span class="str">"Cat"</span>)
+a.<span class="fn">speak</span>()  <span class="cmt"># Cat says hello!</span>
+
+<span class="cmt"># Inheritance</span>
+<span class="kw">class</span> <span class="fn">Dog</span> <span class="kw">extends</span> <span class="fn">Animal</span>
+    <span class="kw">func</span> <span class="fn">bark</span>(<span class="kw">self</span>)
+        <span class="fn">print</span>(<span class="kw">self</span>.name + <span class="str">" barks!"</span>)
+    <span class="kw">end</span>
+<span class="kw">end</span>
+
+d = <span class="kw">new</span> <span class="fn">Dog</span>(<span class="str">"Rex"</span>)
+d.<span class="fn">speak</span>()  <span class="cmt"># Rex says hello! (inherited)</span>
+d.<span class="fn">bark</span>()   <span class="cmt"># Rex barks!</span>
         </div>
       </div>
     </div>
@@ -730,7 +762,7 @@
     </div>
     <div class="footer-bottom">
       <span>&copy; 2026 JTS GO. Created by Jayaswin Jay.</span>
-      <span>Version 1.2.0</span>
+      <span>Version 2.0.0</span>
     </div>
   </footer>
 

@@ -21,9 +21,12 @@
 10. [Loops](#loops)
 11. [Functions](#functions)
 12. [Lists](#lists)
-13. [Built-in Functions](#built-in-functions)
-14. [Example Programs](#example-programs)
-15. [Next Steps](#next-steps)
+13. [Object-Oriented Programming](#object-oriented-programming)
+14. [ML/AI Functions](#mlai-functions)
+15. [Web Development](#web-development)
+16. [Built-in Functions](#built-in-functions)
+17. [Example Programs](#example-programs)
+18. [Next Steps](#next-steps)
 
 ---
 
@@ -758,6 +761,163 @@ print(sum_list(numbers))    # 15
 
 ---
 
+## Object-Oriented Programming
+
+JTS GO supports classes with methods, `self` references, field access, and inheritance.
+
+### Defining a Class
+
+```jts
+class Animal
+    func init(self, name)
+        self.name = name
+    end
+
+    func speak(self)
+        print(self.name + " makes a sound")
+    end
+end
+```
+
+- `class ... end` defines a class
+- `init(self, ...)` is the constructor (called automatically with `new`)
+- `self` refers to the current instance
+- Fields are created by assigning to `self.fieldname`
+
+### Creating Instances
+
+```jts
+a = new Animal("Dog")
+a.speak()       # Dog makes a sound
+print(a.name)   # Dog
+```
+
+### Methods
+
+```jts
+class Calculator
+    func init(self)
+        self.result = 0
+    end
+
+    func add(self, x)
+        self.result = self.result + x
+        return self
+    end
+
+    func get(self)
+        return self.result
+    end
+end
+
+calc = new Calculator()
+calc.add(5).add(3)
+print(calc.get())   # 8
+```
+
+### Inheritance
+
+```jts
+class Animal
+    func init(self, name)
+        self.name = name
+    end
+
+    func speak(self)
+        print(self.name + " makes a sound")
+    end
+end
+
+class Dog extends Animal
+    func bark(self)
+        print(self.name + " barks!")
+    end
+end
+
+d = new Dog("Rex")
+d.speak()   # Rex makes a sound (inherited method)
+d.bark()    # Rex barks! (own method)
+```
+
+- `extends` inherits all methods from the parent class
+- The child class can define its own methods
+- Inherited methods work on child instances
+
+---
+
+## ML/AI Functions
+
+JTS GO includes built-in ML/AI functions for numerical computing.
+
+### Tensors
+
+```jts
+t = tensor([1, 2, 3, 4, 5])
+print(t)       # [1, 2, 3, 4, 5]
+print(len(t))  # 5
+```
+
+### Matrices
+
+```jts
+m1 = matrix([[1, 2], [3, 4]])
+m2 = matrix([[5, 6], [7, 8]])
+result = matmul(m1, m2)
+print(result)   # [[19, 22] [43, 50]]
+```
+
+### Activation Functions
+
+```jts
+print(sigmoid(0))    # 0.5
+print(sigmoid(1))    # 0.731...
+print(relu(-5))      # 0
+print(relu(5))       # 5
+```
+
+### Loss Functions
+
+```jts
+predicted = [1.0, 2.0, 3.0]
+actual = [1.1, 2.2, 3.1]
+print(mse(predicted, actual))   # 0.02
+```
+
+### Math Functions
+
+```jts
+print(sqrt(16))              # 4
+print(math("sin", 3.14159))  # ~0
+print(math("cos", 0))        # 1
+print(math("floor", 3.7))    # 3
+print(math("ceil", 3.2))     # 4
+print(math("abs", -42))      # 42
+print(math("log", 2.71828))  # ~1
+print(math("exp", 1))        # ~2.718
+```
+
+---
+
+## Web Development
+
+JTS GO includes HTTP server support for web development.
+
+### Creating a Server
+
+```jts
+server = http_server(8080)
+http_start(server)
+```
+
+### Making HTTP Requests
+
+```jts
+response = http_request("https://api.example.com/data")
+print(response)   # [200, "OK"]
+```
+
+---
+
 ## Built-in Functions
 
 JTS GO comes with these built-in functions:
@@ -1044,6 +1204,17 @@ print("Hello, " + name)
 | `type(value)` | Get type |
 | `append(list, value)` | Add to list |
 | `number(string)` | Convert to number |
+| `str(value)` | Convert to string |
+| `math(func, x)` | Math functions (sin, cos, tan, sqrt, abs, log, exp, pow, floor, ceil, round) |
+| `tensor(data)` | Create a tensor |
+| `matrix(data)` | Create a matrix |
+| `matmul(a, b)` | Matrix multiplication |
+| `sigmoid(x)` | Sigmoid activation |
+| `relu(x)` | ReLU activation |
+| `mse(predicted, actual)` | Mean squared error |
+| `http_server(port)` | Create HTTP server |
+| `http_start(server)` | Start HTTP server |
+| `http_request(url)` | Make HTTP request |
 
 ### Operators
 
@@ -1067,5 +1238,5 @@ print("Hello, " + name)
 
 <p align="center">
   Made with passion by <b>Jayaswin Jay</b><br>
-  JTS GO v1.1.0 — 2026
+  JTS GO v2.0.0 — 2026
 </p>

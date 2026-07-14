@@ -1,18 +1,21 @@
-# JTS Development Kit v1.2.0
+# JTS Development Kit v2.0.0
 
 <p align="center">
   <b>JTS GO — The Easiest Programming Language to Learn</b><br>
-  Python-like syntax. Bytecode compilation. Zero boilerplate.
+  Python-like syntax. Bytecode compilation. OOP. Web Dev. ML/AI. Zero boilerplate.
 </p>
 
 ---
 
 ## What is JTS GO?
 
-JTS GO is a new programming language designed for **absolute beginners**. If you've never written code before, this is where you start.
+JTS GO is a programming language designed for **absolute beginners**. If you've never written code before, this is where you start.
 
 - **Python-like syntax** — readable, indentation-based
+- **Object-Oriented Programming** — classes, methods, inheritance
 - **Dynamic typing** — no need to declare variable types
+- **Built-in ML/AI** — tensors, matrices, activation functions
+- **Web Development** — HTTP server support
 - **Simple toolchain** — one command to run your code
 - **Compiled to bytecode** — fast execution via a virtual machine
 
@@ -48,18 +51,13 @@ Save as `hello.jts` and run:
 jts hello.jts
 ```
 
-Output:
-```
-Hello, World!
-```
-
 ## Language Features
 
 ### Variables
 ```jts
-# Dynamic typing (no keyword needed)
+# Dynamic typing
 name = "JTS GO"
-version = 1.2
+version = 2.0
 is_awesome = true
 nothing = nil
 
@@ -71,67 +69,37 @@ bool active = true
 list numbers = [1, 2, 3]
 var x = 42
 
-# Unassigned variables (default to nil)
-int count
-string message
-list items
-
 print(name)
-print(age)
-print(pi)
-print(count)    # nil
 ```
 
-### Arithmetic
+### Object-Oriented Programming
 ```jts
-a = 10
-b = 3
+# Define a class
+class Animal
+    func init(self, name)
+        self.name = name
+    end
 
-print(a + b)    # 13
-print(a - b)    # 7
-print(a * b)    # 30
-print(a / b)    # 3.33333
-print(a % b)    # 1
-```
-
-### Strings
-```jts
-first = "Hello"
-second = "World"
-print(first + " " + second)   # Hello World
-print(len("JTS"))             # 3
-print(type("hello"))          # string
-```
-
-### If/Else
-```jts
-score = 85
-
-if score >= 90
-    print("Grade: A")
-else if score >= 80
-    print("Grade: B")
-else if score >= 70
-    print("Grade: C")
-else
-    print("Grade: F")
+    func speak(self)
+        print(self.name + " makes a sound")
+    end
 end
-```
 
-### While Loops
-```jts
-count = 0
-while count < 5
-    print(count)
-    count = count + 1
-end
-```
+# Create an instance
+a = new Animal("Dog")
+a.speak()           # Dog makes a sound
+print(a.name)       # Dog
 
-### For Loops
-```jts
-for i in 0 to 10
-    print(i)
+# Inheritance
+class Dog extends Animal
+    func bark(self)
+        print(self.name + " barks!")
+    end
 end
+
+d = new Dog("Rex")
+d.speak()           # Rex makes a sound (inherited)
+d.bark()            # Rex barks! (own method)
 ```
 
 ### Functions
@@ -140,69 +108,84 @@ func greet(name)
     print("Hello, " + name + "!")
 end
 
-greet("Alice")
-
 func add(a, b)
     return a + b
 end
 
-result = add(3, 4)
-print(result)   # 7
-```
-
-### Recursion
-```jts
-func factorial(n)
-    if n <= 1
-        return 1
-    end
-    return n * factorial(n - 1)
-end
-
-print(factorial(5))   # 120
+print(add(3, 4))   # 7
 ```
 
 ### Lists
 ```jts
-# Create a list
 nums = [1, 2, 3, 4, 5]
-
-# Access elements
-print(nums[0])    # 1
-print(nums[2])    # 3
-
-# Modify elements
-nums[0] = 99
-
-# Append
+print(nums[0])       # 1
 append(nums, 6)
-
-# Length
-print(len(nums))  # 6
-
-# Type
-print(type(nums)) # list
-
-# Mixed types
-mixed = ["hello", 42, true]
-print(mixed)       # [hello, 42, true]
-
-# Empty list
-empty = []
+print(len(nums))     # 6
 ```
 
-### Input
+### Control Flow
 ```jts
-# Smart input - auto-detects types
-age = input("Enter your age: ")
-print(type(age))  # number (if you entered a number)
+# If/Else
+if score >= 90
+    print("A")
+else
+    print("B")
+end
 
-name = input("Enter your name: ")
-print(type(name))  # string
+# While loop
+i = 0
+while i < 5
+    print(i)
+    i = i + 1
+end
 
-# Number conversion
-num = number("42")
-print(type(num))  # number
+# For loop
+for i in 0 to 10
+    print(i)
+end
+```
+
+### ML/AI Functions
+```jts
+# Tensors
+t = tensor([1, 2, 3, 4, 5])
+print(t)
+
+# Matrices
+m1 = matrix([[1, 2], [3, 4]])
+m2 = matrix([[5, 6], [7, 8]])
+result = matmul(m1, m2)
+print(result)
+
+# Activation functions
+print(sigmoid(0))    # 0.5
+print(relu(-5))      # 0
+print(relu(5))       # 5
+
+# Loss functions
+print(mse([1, 2, 3], [1.1, 2.2, 3.1]))
+```
+
+### Web Development
+```jts
+# Create and start an HTTP server
+server = http_server(8080)
+http_start(server)
+```
+
+### Math Functions
+```jts
+print(sqrt(16))        # 4
+print(math("sin", 3.14159))  # ~0
+print(math("floor", 3.7))    # 3
+print(math("abs", -42))      # 42
+```
+
+### String Conversion
+```jts
+print(str(42))          # "42"
+print(str(true))        # "true"
+print(str(nil))         # "nil"
 ```
 
 ## Built-in Functions
@@ -211,28 +194,22 @@ print(type(num))  # number
 |----------|-------------|
 | `print(value)` | Output a value to the console |
 | `input(prompt)` | Read user input (auto-detects type) |
-| `len(value)` | Get length of a string or list |
+| `len(value)` | Get length of a string, list, tensor, or matrix |
 | `type(value)` | Get the type of a value |
 | `append(list, value)` | Add an element to a list |
 | `number(string)` | Convert a string to a number |
-
-## Example Programs
-
-| Program | Description |
-|---------|-------------|
-| [hello.jts](examples/hello.jts) | Your first program |
-| [variables.jts](examples/variables.jts) | Data types and variables |
-| [arithmetic.jts](examples/arithmetic.jts) | Math operations |
-| [conditionals.jts](examples/conditionals.jts) | If/else statements |
-| [loops.jts](examples/loops.jts) | While and for loops |
-| [functions.jts](examples/functions.jts) | Functions and parameters |
-| [factorial.jts](examples/factorial.jts) | Recursive factorial |
-| [fibonacci.jts](examples/fibonacci.jts) | Recursive Fibonacci |
-| [lists.jts](examples/lists.jts) | Lists and arrays |
-
-## Documentation
-
-Read the full language guide: [JTS GO Learning Guide](LEARNING_GUIDE.md)
+| `str(value)` | Convert a value to a string |
+| `math(func, x)` | Math functions (sin, cos, tan, sqrt, abs, log, exp, pow, floor, ceil, round) |
+| `sqrt(x)` | Square root |
+| `tensor(data)` | Create a tensor from a list |
+| `matrix(data)` | Create a matrix from nested lists |
+| `matmul(a, b)` | Matrix multiplication |
+| `sigmoid(x)` | Sigmoid activation: 1 / (1 + e^(-x)) |
+| `relu(x)` | ReLU activation: max(0, x) |
+| `mse(predicted, actual)` | Mean squared error loss |
+| `http_server(port)` | Create an HTTP server |
+| `http_start(server)` | Start the HTTP server |
+| `http_request(url)` | Make an HTTP request |
 
 ## Toolchain
 
@@ -243,6 +220,10 @@ Read the full language guide: [JTS GO Learning Guide](LEARNING_GUIDE.md)
 | `jtsvm file.jbc` | Run a compiled bytecode file |
 | `jts --update` | Update JTS GO to latest version |
 
+## Documentation
+
+Read the full language guide: [JTS GO Learning Guide](LEARNING_GUIDE.md)
+
 ## License
 
 Licensed under the [Apache License 2.0](LICENSE).
@@ -251,5 +232,5 @@ Licensed under the [Apache License 2.0](LICENSE).
 
 <p align="center">
   Made with passion by <b>Jayaswin Jay</b><br>
-  JTS GO v1.2.0 — 2026
+  JTS GO v2.0.0 — 2026
 </p>
