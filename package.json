@@ -1,7 +1,7 @@
 {
   "name": "@jaytechsolutions/jts-go",
-  "version": "2.0.0",
-  "description": "JTS GO - The easiest programming language to learn. Development Kit v2.0.0 with OOP, Web Dev, and ML/AI.",
+  "version": "2.0.2",
+  "description": "JTS GO - The easiest programming language to learn. Development Kit v2.0.2 with fixed try/catch, dict/list/string methods, and scanner bug fixes.",
   "keywords": [
     "programming language",
     "jts",
