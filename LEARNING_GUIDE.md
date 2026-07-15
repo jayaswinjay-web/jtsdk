@@ -21,12 +21,16 @@
 10. [Loops](#loops)
 11. [Functions](#functions)
 12. [Lists](#lists)
-13. [Object-Oriented Programming](#object-oriented-programming)
-14. [ML/AI Functions](#mlai-functions)
-15. [Web Development](#web-development)
-16. [Built-in Functions](#built-in-functions)
-17. [Example Programs](#example-programs)
-18. [Next Steps](#next-steps)
+13. [Dictionaries](#dictionaries)
+14. [Object-Oriented Programming](#object-oriented-programming)
+15. [Error Handling (Try/Catch)](#error-handling-trycatch)
+16. [String Methods](#string-methods)
+17. [File I/O](#file-io)
+18. [ML/AI Functions](#mlai-functions)
+19. [Web Development](#web-development)
+20. [Built-in Functions](#built-in-functions)
+21. [Example Programs](#example-programs)
+22. [Next Steps](#next-steps)
 
 ---
 
@@ -75,7 +79,7 @@ npm install -g @jaytechsolutions/jts-go
 jts --version
 ```
 
-You should see the version number (e.g., `1.1.0`).
+You should see the version number (e.g., `2.0.2`).
 
 ### Updating JTS GO
 
@@ -263,8 +267,9 @@ result = (2 + 3) * 4  # 20 (parentheses first)
 
 ```jts
 x = 10
-x = x + 5    # x is now 15
-x = x * 2    # x is now 30
+x += 5      # x is now 15 (shorthand for x = x + 5)
+x -= 3      # x is now 12 (shorthand for x = x - 3)
+x *= 2      # x is now 24 (shorthand for x = x * 2)
 ```
 
 ---
@@ -400,18 +405,18 @@ else
 end
 ```
 
-### If/Else If/Else Statement
+### If/Elif/Else Statement
 
 ```jts
 score = 85
 
 if score >= 90
     print("Grade: A")
-else if score >= 80
+elif score >= 80
     print("Grade: B")
-else if score >= 70
+elif score >= 70
     print("Grade: C")
-else if score >= 60
+elif score >= 60
     print("Grade: D")
 else
     print("Grade: F")
@@ -528,6 +533,48 @@ for i in 0 to 10
     end
 end
 print(count)    # 6 (0, 2, 4, 6, 8, 10)
+```
+
+### Break and Continue
+
+Use `break` to exit a loop early and `continue` to skip to the next iteration.
+
+```jts
+# Break: stop at 5
+for i in 0 to 10
+    if i == 5
+        break
+    end
+    print(i)
+end
+# Output: 0, 1, 2, 3, 4
+```
+
+```jts
+# Continue: skip 3
+for i in 0 to 6
+    if i == 3
+        continue
+    end
+    print(i)
+end
+# Output: 0, 1, 2, 4, 5
+```
+
+```jts
+# While loop with break and continue
+i = 0
+while i < 10
+    i = i + 1
+    if i == 3
+        continue
+    end
+    if i == 7
+        break
+    end
+    print(i)
+end
+# Output: 1, 2, 4, 5, 6
 ```
 
 ---
@@ -845,6 +892,207 @@ d.bark()    # Rex barks! (own method)
 
 ---
 
+## Dictionaries
+
+Dictionaries store key-value pairs. Keys must be strings.
+
+### Creating Dictionaries
+
+```jts
+# Empty dictionary
+empty = {}
+
+# With values
+person = {"name": "Alice", "age": 30, "active": true}
+
+# Accessing values
+print(person["name"])    # Alice
+print(person["age"])     # 30
+```
+
+### Modifying Dictionaries
+
+```jts
+d = {"name": "JTS"}
+d["version"] = "2.0"
+d["name"] = "JTS GO"
+print(d)    # {name: JTS GO, version: 2.0}
+```
+
+### Dictionary Examples
+
+```jts
+# Counting with a dictionary
+word = "hello world"
+count = {}
+for i in 0 to len(word) - 1
+    ch = word[i]
+    if ch in count
+        count[ch] = count[ch] + 1
+    else
+        count[ch] = 1
+    end
+end
+```
+
+---
+
+## Error Handling (Try/Catch)
+
+Use `try`/`catch` to handle errors without crashing your program.
+
+### Basic Try/Catch
+
+```jts
+try
+    throw "Something went wrong!"
+catch e
+    print("Caught: " + e)
+end
+# Output: Caught: Something went wrong!
+```
+
+### How It Works
+
+1. Code inside `try` runs normally
+2. If `throw` is executed, execution jumps to `catch`
+3. The error value is stored in the catch variable (`e`)
+4. Execution continues after the `end`
+
+### Throwing Values
+
+You can throw any value (string, number, etc.):
+
+```jts
+try
+    throw 42
+catch e
+    print("Error code: " + e)
+end
+# Output: Error code: 42
+```
+
+### Try/Catch Without Error Variable
+
+```jts
+try
+    throw "oops"
+catch
+    print("Something failed!")
+end
+```
+
+---
+
+## String Methods
+
+JTS GO provides built-in methods for string manipulation. Call them on any string variable using dot notation.
+
+### upper() and lower()
+
+```jts
+s = "hello"
+print(s.upper())    # HELLO
+
+t = "WORLD"
+print(t.lower())    # world
+```
+
+### trim()
+
+Removes leading and trailing whitespace:
+
+```jts
+s = "  hello  "
+print(s.trim())     # hello
+```
+
+### contains()
+
+Check if a string contains a substring:
+
+```jts
+s = "hello world"
+print(s.contains("world"))    # true
+print(s.contains("xyz"))      # false
+```
+
+### replace()
+
+Replace occurrences of a substring:
+
+```jts
+s = "hello world"
+print(s.replace("world", "JTS"))    # hello JTS
+```
+
+### substring()
+
+Extract a portion of the string:
+
+```jts
+s = "hello"
+print(s.substring(0, 3))    # hel
+print(s.substring(1, 4))    # ell
+```
+
+### starts_with() and ends_with()
+
+```jts
+s = "hello world"
+print(s.starts_with("hello"))    # true
+print(s.ends_with("world"))      # true
+```
+
+---
+
+## File I/O
+
+JTS GO can read from and write to files.
+
+### Writing to a File
+
+```jts
+write_file("output.txt", "Hello from JTS!")
+```
+
+### Reading from a File
+
+```jts
+content = read_file("output.txt")
+print(content)    # Hello from JTS!
+```
+
+### File I/O Example
+
+```jts
+# Write data
+write_file("data.txt", "Line 1\nLine 2\nLine 3")
+
+# Read it back
+content = read_file("data.txt")
+print(content)
+
+# Build and save a report
+name = "JTS GO"
+version = "2.0.2"
+report = name + " version " + version
+write_file("report.txt", report)
+print("Report saved!")
+```
+
+### String Methods on File Content
+
+```jts
+content = read_file("data.txt")
+if content.contains("error")
+    print("File contains errors!")
+end
+print(len(content) + " characters read")
+```
+
+---
+
 ## ML/AI Functions
 
 JTS GO includes built-in ML/AI functions for numerical computing.
@@ -1023,9 +1271,9 @@ print("Quotient: " + divide(num1, num2))
 for i in 1 to 100
     if i % 15 == 0
         print("FizzBuzz")
-    else if i % 3 == 0
+    elif i % 3 == 0
         print("Fizz")
-    else if i % 5 == 0
+    elif i % 5 == 0
         print("Buzz")
     else
         print(i)
@@ -1043,7 +1291,7 @@ while guess != secret
     guess = input("Guess the number: ")
     if guess < secret
         print("Too low!")
-    else if guess > secret
+    elif guess > secret
         print("Too high!")
     else
         print("Congratulations! You got it!")
@@ -1167,6 +1415,8 @@ result = 5 + 3 * 2
 # Conditionals
 if x > 10
     print("Big")
+elif x > 5
+    print("Medium")
 else
     print("Small")
 end
@@ -1180,6 +1430,17 @@ while x > 0
     x = x - 1
 end
 
+# Break and Continue
+for i in 0 to 10
+    if i == 3
+        continue
+    end
+    if i == 7
+        break
+    end
+    print(i)
+end
+
 # Functions
 func add(a, b)
     return a + b
@@ -1188,10 +1449,36 @@ end
 # Lists
 nums = [1, 2, 3]
 append(nums, 4)
+nums.sort()
+
+# Dictionaries
+d = {"name": "JTS", "version": "2.0"}
+print(d["name"])
+
+# Compound Assignment
+x = 10
+x += 5
+x -= 3
+
+# Try/Catch
+try
+    throw "error"
+catch e
+    print(e)
+end
 
 # Input/Output
 name = input("Name: ")
 print("Hello, " + name)
+
+# File I/O
+write_file("out.txt", "data")
+content = read_file("out.txt")
+
+# String Methods
+s = "hello"
+print(s.upper())
+print(s.contains("ell"))
 ```
 
 ### Built-in Functions
@@ -1215,6 +1502,30 @@ print("Hello, " + name)
 | `http_server(port)` | Create HTTP server |
 | `http_start(server)` | Start HTTP server |
 | `http_request(url)` | Make HTTP request |
+| `read_file(path)` | Read file contents |
+| `write_file(path, data)` | Write to file |
+
+### String Methods
+
+| Method | Description |
+|--------|-------------|
+| `s.upper()` | Convert to uppercase |
+| `s.lower()` | Convert to lowercase |
+| `s.trim()` | Remove whitespace |
+| `s.contains(sub)` | Check substring |
+| `s.replace(old, new)` | Replace text |
+| `s.substring(start, end)` | Extract substring |
+| `s.starts_with(prefix)` | Check prefix |
+| `s.ends_with(suffix)` | Check suffix |
+
+### List Methods
+
+| Method | Description |
+|--------|-------------|
+| `lst.sort()` | Sort list |
+| `lst.append(value)` | Add element |
+| `lst.remove(value)` | Remove element |
+| `lst.pop()` | Remove last element |
 
 ### Operators
 
@@ -1238,5 +1549,5 @@ print("Hello, " + name)
 
 <p align="center">
   Made with passion by <b>Jayaswin Jay</b><br>
-  JTS GO v2.0.0 — 2026
+  JTS GO v2.0.2 — 2026
 </p>

@@ -1,6 +1,6 @@
 # Control Flow
 
-Control flow lets you make decisions and repeat actions. JTS GO provides `if/else if/else` for branching, `while` for conditional loops, and `for` for counting loops. All blocks end with `end`.
+Control flow lets you make decisions and repeat actions. JTS GO provides `if/elif/else` for branching, `while` for conditional loops, `for` for counting loops, and `break`/`continue` for loop control. All blocks end with `end`.
 
 ## Comparison Operators
 
@@ -124,20 +124,20 @@ else
 end
 ```
 
-### If / Else If / Else (Chained)
+### If / Elif / Else (Chained)
 
-Chain multiple conditions with `else if`.
+Chain multiple conditions with `elif`.
 
 ```jts
 score = 85
 
 if score >= 90
     print("Grade: A")
-else if score >= 80
+elif score >= 80
     print("Grade: B")
-else if score >= 70
+elif score >= 70
     print("Grade: C")
-else if score >= 60
+elif score >= 60
     print("Grade: D")
 else
     print("Grade: F")
@@ -278,15 +278,62 @@ for i in 1 to 21
 end
 ```
 
+## Break and Continue
+
+Use `break` to exit a loop early, and `continue` to skip to the next iteration.
+
+### Break
+
+```jts
+for i in 0 to 10
+    if i == 5
+        break
+    end
+    print(i)
+end
+# Output: 0, 1, 2, 3, 4
+```
+
+### Continue
+
+```jts
+for i in 0 to 6
+    if i == 3
+        continue
+    end
+    print(i)
+end
+# Output: 0, 1, 2, 4, 5
+```
+
+### Break and Continue in While Loops
+
+```jts
+i = 0
+while i < 10
+    i = i + 1
+    if i == 3
+        continue
+    end
+    if i == 7
+        break
+    end
+    print(i)
+end
+# Output: 1, 2, 4, 5, 6
+```
+
 ## Summary
 
 | Construct | Syntax | Ends With |
 |-----------|--------|-----------|
 | If | `if CONDITION` | `end` |
-| Else If | `else if CONDITION` | `end` |
+| Elif | `elif CONDITION` | `end` |
 | Else | `else` | `end` |
 | While | `while CONDITION` | `end` |
 | For | `for VAR in START to END` | `end` |
+| Break | `break` | — |
+| Continue | `continue` | — |
 
 ## Next Steps
 

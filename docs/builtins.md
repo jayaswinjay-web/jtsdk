@@ -126,7 +126,7 @@ print(len("Hello World"))  # 11
 name = input("Enter your name: ")
 if len(name) == 0
     print("You didn't enter anything!")
-else if len(name) > 20
+elif len(name) > 20
     print("Name is too long!")
 else
     print("Hello, " + name + "!")
@@ -204,9 +204,9 @@ func describe(value)
     t = type(value)
     if t == "string"
         print("String of length " + len(value))
-    else if t == "number"
+    elif t == "number"
         print("A number")
-    else if t == "boolean"
+    elif t == "boolean"
         if value
             print("Boolean: true")
         else
@@ -272,6 +272,115 @@ print_type_info(true)
 | `input(prompt)` | Read user input | String |
 | `len(string)` | Count characters | Number |
 | `type(value)` | Check data type | String |
+| `read_file(path)` | Read file contents | String |
+| `write_file(path, data)` | Write data to file | Nothing (nil) |
+
+## String Methods
+
+String methods are called directly on string variables using dot notation.
+
+### upper()
+```jts
+s = "hello"
+print(s.upper())    # HELLO
+```
+
+### lower()
+```jts
+s = "HELLO"
+print(s.lower())    # hello
+```
+
+### trim()
+```jts
+s = "  hello  "
+print(s.trim())     # hello
+```
+
+### contains(substring)
+```jts
+s = "hello world"
+print(s.contains("world"))    # true
+print(s.contains("xyz"))      # false
+```
+
+### replace(old, new)
+```jts
+s = "hello world"
+print(s.replace("world", "JTS"))    # hello JTS
+```
+
+### substring(start, end)
+```jts
+s = "hello"
+print(s.substring(0, 3))    # hel
+print(s.substring(1, 4))    # ell
+```
+
+### starts_with(prefix)
+```jts
+s = "hello world"
+print(s.starts_with("hello"))    # true
+print(s.starts_with("world"))    # false
+```
+
+### ends_with(suffix)
+```jts
+s = "hello world"
+print(s.ends_with("world"))    # true
+print(s.ends_with("hello"))    # false
+```
+
+## List Methods
+
+List methods are called directly on list variables using dot notation.
+
+### sort()
+```jts
+nums = [3, 1, 2]
+nums.sort()
+print(nums)    # [1, 2, 3]
+```
+
+### append(value)
+```jts
+nums = [1, 2]
+nums.append(3)
+print(nums)    # [1, 2, 3]
+```
+
+### remove(value)
+```jts
+nums = [1, 2, 3]
+nums.remove(2)
+print(nums)    # [1, 3]
+```
+
+### pop()
+```jts
+nums = [1, 2, 3]
+nums.pop()
+print(nums)    # [1, 2]
+```
+
+## File I/O
+
+### read_file(path)
+Reads the entire contents of a file and returns it as a string.
+
+```jts
+content = read_file("data.txt")
+print(content)
+```
+
+### write_file(path, data)
+Writes a string to a file. Creates the file if it doesn't exist, overwrites if it does.
+
+```jts
+write_file("output.txt", "Hello from JTS!")
+content = read_file("output.txt")
+print(content)    # Hello from JTS!
+```
 
 ## Next Steps
 

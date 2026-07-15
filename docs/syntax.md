@@ -15,7 +15,7 @@ Comments are ignored by the compiler. Use them to explain your code.
 
 ## Code Blocks and the `end` Keyword
 
-JTS GO uses indentation to define code blocks, terminated by the `end` keyword. Every block that starts with `if`, `while`, `for`, or `func` must end with `end`.
+JTS GO uses indentation to define code blocks, terminated by the `end` keyword. Every block that starts with `if`, `elif`, `while`, `for`, `func`, `class`, `try`, or `catch` must end with `end`.
 
 ```jts
 if temperature > 80
@@ -105,6 +105,56 @@ a = 10
 b = 3
 print("a + b = " + (a + b))        # a + b = 13
 print("(a + b) * 2 = " + ((a + b) * 2))   # (a + b) * 2 = 26
+```
+
+### Compound Assignment
+
+Shorthand operators for modifying variables:
+
+```jts
+x = 10
+x += 5      # Same as: x = x + 5 → 15
+x -= 3      # Same as: x = x - 3 → 12
+x *= 2      # Same as: x = x * 2 → 24
+```
+
+## Elif (Else If)
+
+Chain multiple conditions with `elif`:
+
+```jts
+score = 85
+
+if score >= 90
+    print("Grade: A")
+elif score >= 80
+    print("Grade: B")
+elif score >= 70
+    print("Grade: C")
+else
+    print("Grade: F")
+end
+```
+
+## Dictionaries
+
+Dictionaries store key-value pairs:
+
+```jts
+d = {"name": "JTS", "version": "2.0"}
+print(d["name"])    # JTS
+```
+
+## Try/Catch/Throw
+
+Handle errors gracefully with try/catch:
+
+```jts
+try
+    throw "Something went wrong!"
+catch e
+    print("Caught: " + e)
+end
 ```
 
 ## Built-in Functions

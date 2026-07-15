@@ -10,6 +10,8 @@ JTS GO is dynamically typed. You do not declare a variable's type — it is dete
 | **string** | Text enclosed in double quotes | `"hello"`, `""` |
 | **boolean** | True or false | `true`, `false` |
 | **nil** | Absence of a value | `nil` |
+| **list** | Ordered collection of values | `[1, 2, 3]`, `["a", "b"]` |
+| **dict** | Key-value pairs | `{"name": "JTS", "version": "2.0"}` |
 
 ## Numbers
 
@@ -222,6 +224,53 @@ if "hello"
 end
 ```
 
+## Lists
+
+Lists store multiple values in an ordered collection.
+
+```jts
+numbers = [1, 2, 3, 4, 5]
+fruits = ["apple", "banana", "cherry"]
+mixed = ["hello", 42, true]
+empty = []
+```
+
+### Accessing Elements
+```jts
+fruits = ["apple", "banana", "cherry"]
+print(fruits[0])    # apple (first element, index starts at 0)
+print(fruits[2])    # cherry
+```
+
+### List Methods
+```jts
+nums = [3, 1, 2]
+nums.sort()             # [1, 2, 3]
+nums.append(4)          # [1, 2, 3, 4]
+nums.remove(3)          # [1, 2, 4]
+nums.pop()              # [1, 2]
+```
+
+## Dictionaries
+
+Dictionaries store key-value pairs. Keys must be strings.
+
+```jts
+d = {"name": "JTS", "version": "2.0"}
+print(d)            # {name: JTS, version: 2.0}
+print(d["name"])    # JTS
+```
+
+### Creating Dictionaries
+```jts
+# Empty dictionary
+empty = {}
+
+# With values
+person = {"name": "Alice", "age": 30, "active": true}
+print(person["name"])    # Alice
+```
+
 ## Summary
 
 | Type | Values | Example |
@@ -230,6 +279,8 @@ end
 | string | Text in double quotes | `"hello"` |
 | boolean | `true`, `false` | `true` |
 | nil | `nil` | `nil` |
+| list | Ordered collection | `[1, 2, 3]` |
+| dict | Key-value pairs | `{"a": 1}` |
 
 ## Next Steps
 

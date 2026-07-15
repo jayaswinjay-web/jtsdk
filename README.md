@@ -1,4 +1,4 @@
-# JTS Development Kit v2.0.0
+# JTS Development Kit v2.0.2
 
 <p align="center">
   <b>JTS GO — The Easiest Programming Language to Learn</b><br>
@@ -72,9 +72,100 @@ var x = 42
 print(name)
 ```
 
+### Compound Assignment
+```jts
+x = 10
+x += 5      # x is now 15
+x -= 3      # x is now 12
+x *= 2      # x is now 24
+```
+
+### Control Flow
+```jts
+# If/Else
+score = 85
+
+if score >= 90
+    print("Grade: A")
+elif score >= 80
+    print("Grade: B")
+elif score >= 70
+    print("Grade: C")
+else
+    print("Grade: F")
+end
+```
+
+### Break and Continue
+```jts
+# Skip 3, stop at 7
+i = 0
+while i < 10
+    i = i + 1
+    if i == 3
+        continue
+    end
+    if i == 7
+        break
+    end
+    print(i)
+end
+# Output: 1, 2, 4, 5, 6
+```
+
+### Functions
+```jts
+func greet(name)
+    print("Hello, " + name + "!")
+end
+
+func add(a, b)
+    return a + b
+end
+
+print(add(3, 4))   # 7
+```
+
+### Lists
+```jts
+nums = [3, 1, 2]
+print(nums)         # [3, 1, 2]
+
+nums.sort()
+print(nums)         # [1, 2, 3]
+
+nums.append(4)
+print(nums)         # [1, 2, 3, 4]
+
+nums.remove(3)
+print(nums)         # [1, 2, 4]
+
+nums.pop()
+print(nums)         # [1, 2]
+```
+
+### Dictionaries
+```jts
+d = {"name": "JTS", "version": "2.0"}
+print(d)            # {name: JTS, version: 2.0}
+print(d["name"])    # JTS
+```
+
+### String Methods
+```jts
+s = "hello world"
+print(s.upper())            # HELLO WORLD
+print(s.lower())            # hello world
+print(s.trim())             # hello world
+print(s.contains("world"))  # true
+print(s.replace("world", "JTS"))  # hello JTS
+print(s.substring(0, 5))    # hello
+print(s.starts_with("hello"))  # true
+print(s.ends_with("world"))    # true
+```
+
 ### Object-Oriented Programming
 ```jts
-# Define a class
 class Animal
     func init(self, name)
         self.name = name
@@ -102,47 +193,21 @@ d.speak()           # Rex makes a sound (inherited)
 d.bark()            # Rex barks! (own method)
 ```
 
-### Functions
+### Try/Catch/Throw
 ```jts
-func greet(name)
-    print("Hello, " + name + "!")
+try
+    throw "Something went wrong!"
+catch e
+    print("Caught: " + e)
 end
-
-func add(a, b)
-    return a + b
-end
-
-print(add(3, 4))   # 7
+# Output: Caught: Something went wrong!
 ```
 
-### Lists
+### File I/O
 ```jts
-nums = [1, 2, 3, 4, 5]
-print(nums[0])       # 1
-append(nums, 6)
-print(len(nums))     # 6
-```
-
-### Control Flow
-```jts
-# If/Else
-if score >= 90
-    print("A")
-else
-    print("B")
-end
-
-# While loop
-i = 0
-while i < 5
-    print(i)
-    i = i + 1
-end
-
-# For loop
-for i in 0 to 10
-    print(i)
-end
+write_file("output.txt", "Hello from JTS!")
+content = read_file("output.txt")
+print(content)
 ```
 
 ### ML/AI Functions
@@ -210,6 +275,30 @@ print(str(nil))         # "nil"
 | `http_server(port)` | Create an HTTP server |
 | `http_start(server)` | Start the HTTP server |
 | `http_request(url)` | Make an HTTP request |
+| `read_file(path)` | Read a file's contents as a string |
+| `write_file(path, data)` | Write data to a file |
+
+## String Methods (call on any string)
+
+| Method | Description |
+|--------|-------------|
+| `s.upper()` | Convert to uppercase |
+| `s.lower()` | Convert to lowercase |
+| `s.trim()` | Remove leading/trailing whitespace |
+| `s.contains(sub)` | Check if string contains substring |
+| `s.replace(old, new)` | Replace occurrences |
+| `s.substring(start, end)` | Extract substring |
+| `s.starts_with(prefix)` | Check if starts with prefix |
+| `s.ends_with(suffix)` | Check if ends with suffix |
+
+## List Methods (call on any list)
+
+| Method | Description |
+|--------|-------------|
+| `lst.sort()` | Sort the list in place |
+| `lst.remove(value)` | Remove first occurrence of value |
+| `lst.pop()` | Remove and return the last element |
+| `lst.append(value)` | Add element to the end |
 
 ## Toolchain
 
@@ -240,5 +329,5 @@ For permissions beyond this license, contact: jayaswinjay.web@gmail.com
 
 <p align="center">
   Made with passion by <b>Jayaswin Jay</b><br>
-  JTS GO v2.0.0 — 2026
+  JTS GO v2.0.2 — 2026
 </p>
