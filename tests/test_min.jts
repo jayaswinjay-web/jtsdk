@@ -1,0 +1,3 @@
+func greet(a)
+end
+print("hello")

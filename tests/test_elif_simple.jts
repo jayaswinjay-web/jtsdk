@@ -1,0 +1,6 @@
+print("hello")
+if true
+    print("yes")
+elif false
+    print("no")
+end

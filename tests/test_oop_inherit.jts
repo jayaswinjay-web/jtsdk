@@ -1,0 +1,20 @@
+class Animal
+    func init(self, name)
+        self.name = name
+    end
+
+    func speak(self)
+        print(self.name + " makes a sound")
+    end
+end
+
+class Dog extends Animal
+    func bark(self)
+        print(self.name + " barks!")
+    end
+end
+
+d = new Dog("Rex")
+d.speak()
+d.bark()
+print(d.name)

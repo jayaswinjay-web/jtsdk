@@ -1,0 +1,9 @@
+# Minimal test
+x = 15
+if x < 10
+    print("small")
+elif x < 20
+    print("medium")
+else
+    print("big")
+end

@@ -1,0 +1,34 @@
+# List literal
+nums = [1, 2, 3, 4, 5]
+print(nums)
+
+# Indexing
+print(nums[0])
+print(nums[2])
+
+# Length
+print(len(nums))
+
+# Append
+append(nums, 6)
+print(nums)
+
+# Index assignment
+nums[0] = 99
+print(nums)
+
+# Type
+print(type(nums))
+
+# Empty list
+empty = []
+print(empty)
+
+# Mixed types
+mixed = ["hello", 42, true]
+print(mixed)
+
+# For loop over list
+for i in 0 to len(mixed)
+    print(mixed[i])
+end

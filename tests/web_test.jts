@@ -1,0 +1,4 @@
+# Simple HTTP server test
+html = "<h1>Hello from JTS GO!</h1><p>This website is running on port 3000.</p>"
+srv = http_server(3000, html)
+http_start(srv)

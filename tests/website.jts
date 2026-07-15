@@ -1,0 +1,24 @@
+# JTS GO Official Website
+# Run: jts tests/website.jts
+
+part1 = "<!DOCTYPE html> <html> <head> <meta charset='UTF-8'> <title>JTS GO - The Easiest Programming Language</title> <style> * { margin: 0; padding: 0; box-sizing: border-box; } body { font-family: Segoe UI, Tahoma, sans-serif; background: #0a0a1a; color: #e0e0e0; } .hero { text-align: center; padding: 80px 20px; background: linear-gradient(135deg, #0a0a1a, #1a1a3e); } .hero h1 { font-size: 3em; color: #00ff88; margin-bottom: 10px; } .hero p { font-size: 1.2em; color: #aaa; margin-bottom: 30px; } .btn { display: inline-block; padding: 14px 32px; background: #00ff88; color: #0a0a1a; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 1.1em; margin: 5px; } .btn-dark { background: #16213e; color: #00ff88; border: 2px solid #00ff88; } section { max-width: 900px; margin: 0 auto; padding: 60px 20px; } section h2 { color: #00ccff; font-size: 2em; margin-bottom: 30px; text-align: center; } .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; } .card { background: #16213e; border: 1px solid #0f3460; border-radius: 12px; padding: 25px; } .card h3 { color: #00ff88; margin-bottom: 10px; font-size: 1.3em; } .card p { color: #bbb; line-height: 1.6; } pre { background: #0f3460; border-radius: 8px; padding: 20px; overflow-x: auto; margin: 20px 0; } code { color: #00ff88; font-family: Consolas, monospace; font-size: 0.95em; } .install-box { background: #16213e; border: 2px solid #00ff88; border-radius: 12px; padding: 30px; text-align: center; margin: 30px 0; } .install-box code { font-size: 1.2em; background: #0f3460; padding: 8px 20px; border-radius: 6px; } footer { text-align: center; padding: 40px; background: #0f0f2a; color: #666; border-top: 1px solid #1a1a3e; } footer a { color: #00ff88; text-decoration: none; } .fl { list-style: none; text-align: left; } .fl li { padding: 8px 0; color: #ccc; } </style> </head> <body> "
+
+part2 = "<div class='hero'> <h1>JTS GO</h1> <p>The easiest programming language to learn. Python-like syntax. Bytecode VM. OOP. Web Dev. ML/AI.</p> <a href='#install' class='btn'>Install Now</a> <a href='https://github.com/jayaswinjay-web/jtsdk' class='btn btn-dark'>View on GitHub</a> </div> "
+
+part3 = "<section> <h2>Why JTS GO?</h2> <div class='grid'> <div class='card'><h3>Easy to Learn</h3><p>Python-like syntax with simple keywords. If you can write English, you can write JTS GO.</p></div> <div class='card'><h3>Fast Execution</h3><p>Compiled to bytecode and run on a virtual machine. No interpretation overhead.</p></div> <div class='card'><h3>Object-Oriented</h3><p>Full OOP support with classes, methods, inheritance, and the self keyword.</p></div> <div class='card'><h3>ML/AI Built-in</h3><p>Tensors, matrices, sigmoid, relu, mean squared error - all built into the language.</p></div> <div class='card'><h3>Web Development</h3><p>Built-in HTTP server. Create and serve websites directly from your code.</p></div> <div class='card'><h3>Zero Boilerplate</h3><p>No imports, no declarations, no ceremony. Just write your code and run it.</p></div> </div> </section> "
+
+part4 = "<section> <h2>Code Example</h2> <pre><code> class Animal: func init(name, sound): self.name = name self.sound = sound end func speak(): return self.name + ' says ' + self.sound + '!' end end class Dog extends Animal: func fetch(): return self.name + ' fetches the ball!' end end dog = Dog('Rex', 'Woof') print(dog.speak())  # Rex says Woof! print(dog.fetch())  # Rex fetches the ball! </code></pre> </section> "
+
+part5 = "<section> <h2>ML/AI in 3 Lines</h2> <pre><code> m1 = matrix([[1, 2], [3, 4]]) m2 = matrix([[5, 6], [7, 8]]) print(matmul(m1, m2)) print(sigmoid(0))   # 0.5 print(relu(-5))     # 0 print(mse([1,2,3], [1.1, 2.2, 3.1])) </code></pre> </section> "
+
+part6 = "<section id='install'> <h2>Install</h2> <div class='install-box'> <p style='margin-bottom:15px; color:#aaa;'>Install with npm:</p> <code>npm install -g @jaytechsolutions/jts-go</code> <p style='margin-top:20px; color:#aaa;'>Then run any .jts file:</p> <code>jts your_program.jts</code> </div> <ul class='fl' style='max-width:500px; margin:30px auto;'> <li>Windows support (x64)</li> <li>One command to install</li> <li>No setup required</li> <li>Free to use</li> </ul> </section> "
+
+part7 = "<footer> <p>JTS GO v2.0 | Made by <a href='https://github.com/jayaswinjay-web'>Jayaswin Jay</a></p> <p style='margin-top:10px;'>Copyright 2025-2026 JayTechSolutions. All Rights Reserved.</p> </footer> </body> </html>"
+
+html = part1 + part2 + part3 + part4 + part5 + part6 + part7
+
+print("Starting JTS GO website on port 8080...")
+print("Open http://localhost:8080 in your browser")
+
+srv = http_server(8080, html)
+http_start(srv)

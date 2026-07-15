@@ -1,0 +1,18 @@
+class Animal
+    func init(self, name)
+        self.name = name
+    end
+
+    func speak(self)
+        print(self.name + " says hello!")
+    end
+
+    func greet(self, other)
+        print(self.name + " greets " + other + "!")
+    end
+end
+
+a = new Animal("Cat")
+a.speak()
+a.greet("Dog")
+print(a.name)

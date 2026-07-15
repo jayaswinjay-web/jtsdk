@@ -1,0 +1,28 @@
+# Test type declarations
+int x = 10
+string name = "Alice"
+float pi = 3.14
+bool flag = true
+list nums = [1, 2, 3]
+var y = 42
+
+# Unassigned variables
+int a
+string b
+float c
+bool d
+list e
+var f
+
+print(x)
+print(name)
+print(pi)
+print(flag)
+print(nums)
+print(y)
+print(a)
+print(b)
+print(c)
+print(d)
+print(e)
+print(f)

@@ -1,0 +1,9 @@
+bin/
+*.exe
+*.o
+*.txt
+node_modules/
+jtsdk/
+jts_debug.txt
+test_output.txt
+package-lock.json

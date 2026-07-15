@@ -1,0 +1,7 @@
+# Test try/catch/throw
+print("--- Try/Catch/Throw ---")
+try
+    throw "Something went wrong!"
+catch e
+    print("Caught: " + e)
+end

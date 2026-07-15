@@ -1,0 +1,68 @@
+#ifndef jts_opcodes_h
+#define jts_opcodes_h
+
+typedef enum {
+    OP_CONSTANT,
+    OP_NIL,
+    OP_TRUE,
+    OP_FALSE,
+    OP_POP,
+    OP_DEFINE_GLOBAL,
+    OP_GET_GLOBAL,
+    OP_SET_GLOBAL,
+    OP_ADD,
+    OP_SUBTRACT,
+    OP_MULTIPLY,
+    OP_DIVIDE,
+    OP_MODULO,
+    OP_NEGATE,
+    OP_NOT,
+    OP_EQUAL,
+    OP_NOT_EQUAL,
+    OP_GREATER,
+    OP_LESS,
+    OP_GREATER_EQUAL,
+    OP_LESS_EQUAL,
+    OP_PRINT,
+    OP_JUMP,
+    OP_JUMP_IF_FALSE,
+    OP_LOOP,
+    OP_GET_LOCAL,
+    OP_SET_LOCAL,
+    OP_CALL,
+    OP_LIST,
+    OP_INDEX,
+    OP_INDEX_SET,
+    OP_RETURN,
+    // Control flow
+    OP_BREAK,
+    OP_CONTINUE,
+    OP_SWAP,
+    // Dictionaries
+    OP_DICT,
+    OP_DICT_GET,
+    OP_DICT_SET,
+    // Error handling
+    OP_THROW,
+    OP_TRY_SET_IP,
+    OP_POP_TRY,
+    // OOP
+    OP_CLASS,
+    OP_INHERIT,
+    OP_METHOD,
+    OP_GET_FIELD,
+    OP_SET_FIELD,
+    OP_INVOKE,
+    OP_SUPER,
+    OP_NEW_INSTANCE,
+    OP_GET_PROPERTY,
+    OP_SET_PROPERTY,
+    OP_INVOKE_WITH,
+    OP_SUPER_INVOKE,
+    // Web/ML
+    OP_HTTP_SERVER,
+    OP_TENSOR_OP,
+    OP_MATRIX_OP,
+} OpCode;
+
+#endif

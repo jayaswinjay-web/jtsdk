@@ -1,0 +1,30 @@
+# Loops - while and for
+
+# While loop - count 0 to 4
+print("While loop:")
+count = 0
+while count < 5
+    print(count)
+    count = count + 1
+end
+
+# Countdown
+print("Countdown:")
+n = 5
+while n > 0
+    print(n)
+    n = n - 1
+end
+print("Liftoff!")
+
+# For loop - count 0 to 9
+print("For loop:")
+for i in 0 to 10
+    print(i)
+end
+
+# Multiplication table
+print("5x table:")
+for i in 1 to 11
+    print("5 x " + i + " = " + (5 * i))
+end

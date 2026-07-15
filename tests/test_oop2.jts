@@ -1,0 +1,12 @@
+class Animal
+    func init(self)
+        self.sound = "animal sound"
+    end
+
+    func speak(self)
+        print(self.sound)
+    end
+end
+
+a = new Animal()
+a.speak()

@@ -1,0 +1,38 @@
+# Control flow - if/else
+
+temperature = 75
+
+if temperature > 80
+    print("It's hot outside!")
+else
+    print("It's nice outside!")
+end
+
+# Grading system
+score = 85
+
+if score >= 90
+    print("Grade: A")
+else if score >= 80
+    print("Grade: B")
+else if score >= 70
+    print("Grade: C")
+else if score >= 60
+    print("Grade: D")
+else
+    print("Grade: F")
+end
+
+# Nested if
+age = 25
+has_ticket = true
+
+if age >= 18
+    if has_ticket
+        print("Entry allowed")
+    else
+        print("Need a ticket")
+    end
+else
+    print("Must be 18 or older")
+end

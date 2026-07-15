@@ -1,0 +1,8 @@
+class Animal
+    func init(self, name)
+        self.name = name
+    end
+end
+
+a = new Animal("Cat")
+print(a.name)

@@ -1,0 +1,30 @@
+# Test ML functions
+t = tensor([1, 2, 3, 4, 5])
+print("Tensor: " + str(t))
+
+m1 = matrix([[1, 2], [3, 4]])
+m2 = matrix([[5, 6], [7, 8]])
+result = matmul(m1, m2)
+print("Matrix multiply result: " + str(result))
+
+x = sigmoid(0)
+print("sigmoid(0) = " + str(x))
+
+y = relu(-5)
+print("relu(-5) = " + str(y))
+
+z = relu(5)
+print("relu(5) = " + str(z))
+
+# Test math functions
+a = sqrt(16)
+print("sqrt(16) = " + str(a))
+
+b = math("sin", 3.14159)
+print("sin(pi) ~ " + str(b))
+
+c = math("floor", 3.7)
+print("floor(3.7) = " + str(c))
+
+d = math("abs", -42)
+print("abs(-42) = " + str(d))
