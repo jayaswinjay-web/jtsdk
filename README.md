@@ -226,7 +226,15 @@ Read the full language guide: [JTS GO Learning Guide](LEARNING_GUIDE.md)
 
 ## License
 
-Licensed under the [Apache License 2.0](LICENSE).
+Proprietary Software — Copyright (c) 2025–2026 JayTechSolutions. All Rights Reserved.
+
+**You may:** Install, use, and run JTS GO for personal or commercial purposes.
+
+**You may NOT:** Copy, modify, reverse-engineer, redistribute, or develop competing languages from the source code.
+
+See [PROPRIETARY_LICENSE](PROPRIETARY_LICENSE) for full terms.
+
+For permissions beyond this license, contact: jayaswinjay.web@gmail.com
 
 ---
 
