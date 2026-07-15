@@ -1,0 +1,31 @@
+# Variables and data types
+
+# Numbers
+age = 25
+price = 19.99
+negative = -10
+
+print("Age: " + age)
+print("Price: " + price)
+print("Negative: " + negative)
+
+# Strings
+name = "JTS GO"
+language = "Programming Language"
+print(name)
+print(language)
+
+# Booleans
+is_active = true
+is_new = false
+print(is_active)
+print(is_new)
+
+# Nil
+result = nil
+print(result)
+
+# Type checking
+print(type(age))
+print(type(name))
+print(type(is_active))

@@ -2,8 +2,11 @@ bin/
 *.exe
 *.o
 *.txt
+*.log
 node_modules/
 jtsdk/
 jts_debug.txt
 test_output.txt
 package-lock.json
+.DS_Store
+Thumbs.db

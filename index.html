@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JTS GO | The Programming Language</title>
+  <meta name="description" content="JTS GO is a modern programming language with Python-like syntax and a bytecode virtual machine.">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      color: #1a1a2e;
+      background: #f8f7f4;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a { color: #333; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* ===== HEADER ===== */
+    .site-header {
+      background: #f8f7f4;
+      border-bottom: 1px solid #e8e7e4;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .header-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 64px;
+    }
+    .logo {
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: #1a1a2e;
+      letter-spacing: -0.5px;
+    }
+    .logo span { color: #666; }
+    nav { display: flex; gap: 32px; align-items: center; }
+    nav a {
+      color: #666;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: color 0.15s;
+    }
+    nav a:hover { color: #1a1a2e; text-decoration: none; }
+    .nav-cta {
+      background: #1a1a2e;
+      color: #fff !important;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-weight: 500;
+      transition: background 0.15s;
+    }
+    .nav-cta:hover { background: #2a2a4e; }
+
+    /* ===== HERO ===== */
+    .hero {
+      background: #f8f7f4;
+      padding: 100px 24px 80px;
+      text-align: center;
+    }
+    .hero-inner {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .hero-text h1 {
+      font-size: 4rem;
+      font-weight: 700;
+      line-height: 1.1;
+      margin-bottom: 20px;
+      color: #1a1a2e;
+      letter-spacing: -2px;
+    }
+    .hero-text p {
+      font-size: 1.2rem;
+      color: #666;
+      margin-bottom: 40px;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+      line-height: 1.7;
+    }
+    .hero-actions {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 32px;
+    }
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #1a1a2e;
+      color: #fff;
+      padding: 14px 28px;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 500;
+      transition: background 0.15s;
+      border: none;
+      cursor: pointer;
+    }
+    .btn-primary:hover { background: #2a2a4e; text-decoration: none; }
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: transparent;
+      color: #333;
+      padding: 14px 28px;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 500;
+      border: 1px solid #e0e0e0;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-secondary:hover { border-color: #ccc; text-decoration: none; }
+    .hero-version {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1rem;
+      color: #888;
+      font-weight: 500;
+    }
+    .hero-version .dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: #22c55e;
+    }
+
+    /* Hero code panel */
+    .hero-code {
+      background: #e8e7e4;
+      border: 1px solid #dddcdc;
+      border-radius: 12px;
+      overflow: hidden;
+      max-width: 600px;
+      margin: 0 auto;
+      text-align: left;
+    }
+    .code-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 16px;
+      background: #dddcdc;
+      border-bottom: 1px solid #d0cfcc;
+    }
+    .code-dot { width: 12px; height: 12px; border-radius: 50%; }
+    .code-dot.r { background: #ef4444; }
+    .code-dot.y { background: #eab308; }
+    .code-dot.g { background: #22c55e; }
+    .code-title {
+      margin-left: 8px;
+      font-size: 0.8rem;
+      color: #999;
+      font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+    }
+    .code-body {
+      padding: 20px;
+      font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', Consolas, monospace;
+      font-size: 0.85rem;
+      line-height: 1.8;
+      color: #333;
+      overflow-x: auto;
+      background: #e8e7e4;
+    }
+    .code-body .kw { color: #1a1a2e; }
+    .code-body .fn { color: #555; }
+    .code-body .str { color: #666; }
+    .code-body .num { color: #888; }
+    .code-body .cmt { color: #bbb; font-style: italic; }
+    .code-body .op { color: #777; }
+    .code-body .var { color: #333; }
+    .code-body .out { color: #aaa; }
+
+    /* ===== SECTION STYLES ===== */
+    .section-title {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: #1a1a2e;
+      margin-bottom: 12px;
+      letter-spacing: -1px;
+    }
+    .section-subtitle {
+      font-size: 1.1rem;
+      color: #888;
+      margin-bottom: 48px;
+      max-width: 500px;
+    }
+
+    /* ===== QUICK START ===== */
+    .quickstart {
+      padding: 80px 24px;
+      background: #f0efec;
+      border-top: 1px solid #e8e7e4;
+    }
+    .quickstart-grid {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+    .qs-card {
+      background: #f8f7f4;
+      border: 1px solid #e8e7e4;
+      border-radius: 12px;
+      padding: 32px;
+    }
+    .qs-card .step-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px; height: 28px;
+      background: #1a1a2e;
+      color: #fff;
+      border-radius: 50%;
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+    .qs-card h3 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: #1a1a2e;
+      margin-bottom: 8px;
+    }
+    .qs-card p {
+      font-size: 0.9rem;
+      color: #888;
+      margin-bottom: 16px;
+    }
+    .install-box {
+      background: #e8e7e4;
+      border: 1px solid #dddcdc;
+      border-radius: 8px;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .install-box:hover { background: #dddcdc; }
+    .install-box code {
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 0.85rem;
+      color: #333;
+    }
+    .install-box .copy-hint {
+      font-size: 0.75rem;
+      color: #bbb;
+      transition: color 0.15s;
+    }
+    .install-box:hover .copy-hint { color: #999; }
+
+    /* ===== FEATURES ===== */
+    .features-section {
+      padding: 80px 24px;
+      border-top: 1px solid #e8e7e4;
+    }
+    .features-grid {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 40px;
+    }
+    .feature-item h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #1a1a2e;
+      margin-bottom: 8px;
+    }
+    .feature-item p {
+      font-size: 0.9rem;
+      color: #888;
+      line-height: 1.6;
+    }
+    .feature-icon {
+      width: 40px; height: 40px;
+      background: #f0efec;
+      border: 1px solid #e8e7e4;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+      color: #666;
+      font-size: 1rem;
+      font-weight: 600;
+    }
+
+    /* ===== LANGUAGE SHOWCASE ===== */
+    .showcase {
+      padding: 80px 24px;
+      background: #f0efec;
+      border-top: 1px solid #e8e7e4;
+    }
+    .showcase-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      align-items: start;
+    }
+    .showcase-features {
+      list-style: none;
+      padding: 0;
+    }
+    .showcase-features li {
+      padding: 16px 0;
+      border-bottom: 1px solid #e8e7e4;
+      display: flex;
+      gap: 12px;
+      align-items: start;
+    }
+    .showcase-features li:last-child { border-bottom: none; }
+    .showcase-features .feat-label {
+      font-weight: 600;
+      color: #1a1a2e;
+      font-size: 0.95rem;
+      min-width: 140px;
+    }
+    .showcase-features .feat-desc {
+      color: #888;
+      font-size: 0.9rem;
+    }
+    .showcase-features code {
+      background: #e8e7e4;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      color: #555;
+    }
+
+    /* ===== TOOLCHAIN ===== */
+    .toolchain {
+      padding: 80px 24px;
+      border-top: 1px solid #e8e7e4;
+    }
+    .toolchain-grid {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+    }
+    .tool-card {
+      background: #f0efec;
+      border: 1px solid #e8e7e4;
+      border-radius: 12px;
+      padding: 28px;
+      text-align: center;
+    }
+    .tool-card code {
+      display: block;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #1a1a2e;
+      margin-bottom: 8px;
+    }
+    .tool-card p {
+      font-size: 0.85rem;
+      color: #888;
+    }
+
+    /* ===== CTA BANNER ===== */
+    .cta-banner {
+      background: #f0efec;
+      padding: 80px 24px;
+      text-align: center;
+      border-top: 1px solid #e8e7e4;
+    }
+    .cta-banner h2 {
+      color: #1a1a2e;
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      letter-spacing: -0.5px;
+    }
+    .cta-banner p {
+      color: #888;
+      font-size: 1.05rem;
+      margin-bottom: 32px;
+    }
+
+    /* ===== FOOTER ===== */
+    .site-footer {
+      background: #f0efec;
+      border-top: 1px solid #e8e7e4;
+      padding: 48px 24px 32px;
+    }
+    .footer-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 40px;
+    }
+    .footer-brand p {
+      font-size: 0.85rem;
+      color: #999;
+      margin-top: 8px;
+      line-height: 1.6;
+    }
+    .footer-col h4 {
+      color: #1a1a2e;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 16px;
+    }
+    .footer-col a {
+      display: block;
+      color: #888;
+      font-size: 0.85rem;
+      padding: 4px 0;
+      transition: color 0.15s;
+    }
+    .footer-col a:hover { color: #1a1a2e; text-decoration: none; }
+    .footer-bottom {
+      max-width: 1200px;
+      margin: 32px auto 0;
+      padding-top: 24px;
+      border-top: 1px solid #e8e7e4;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.8rem;
+      color: #bbb;
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 900px) {
+      .quickstart-grid { grid-template-columns: 1fr; }
+      .features-grid { grid-template-columns: 1fr 1fr; }
+      .showcase-inner { grid-template-columns: 1fr; }
+      .toolchain-grid { grid-template-columns: 1fr 1fr; }
+      .footer-inner { grid-template-columns: 1fr 1fr; }
+      nav { display: none; }
+    }
+    @media (max-width: 600px) {
+      .hero-text h1 { font-size: 2.5rem; }
+      .features-grid { grid-template-columns: 1fr; }
+      .toolchain-grid { grid-template-columns: 1fr; }
+      .footer-inner { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <a href="#" class="logo">JTS <span>GO</span></a>
+      <nav>
+        <a href="#quickstart">Get Started</a>
+        <a href="#features">Features</a>
+        <a href="#language">Language</a>
+        <a href="#toolchain">Toolchain</a>
+        <a href="https://github.com/jayaswinjay-web/jtsdk" target="_blank">GitHub</a>
+        <a href="https://www.npmjs.com/package/@jaytechsolutions/jts-go" target="_blank" class="nav-cta">npm</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="hero-inner">
+      <div class="hero-text">
+        <h1>JTS GO</h1>
+        <p>A modern programming language with Python-like syntax and a bytecode virtual machine. Write less, run faster.</p>
+        <div class="hero-actions">
+          <a href="#quickstart" class="btn-primary">Get Started</a>
+          <a href="https://github.com/jayaswinjay-web/jtsdk" target="_blank" class="btn-secondary">View on GitHub</a>
+        </div>
+        <div class="hero-version">
+          <span class="dot"></span>
+          Version 2.0.0
+        </div>
+      </div>
+      <div class="hero-code">
+        <div class="code-header">
+          <span class="code-dot r"></span>
+          <span class="code-dot y"></span>
+          <span class="code-dot g"></span>
+          <span class="code-title">hello.jts</span>
+        </div>
+        <div class="code-body">
+<span class="cmt"># JTS GO</span>
+<span class="kw">func</span> <span class="fn">fib</span>(n)
+    <span class="kw">if</span> n <span class="op">&lt;=</span> <span class="num">1</span>
+        <span class="kw">return</span> n
+    <span class="kw">end</span>
+    <span class="kw">return</span> <span class="fn">fib</span>(n <span class="op">-</span> <span class="num">1</span>) <span class="op">+</span> <span class="fn">fib</span>(n <span class="op">-</span> <span class="num">2</span>)
+<span class="kw">end</span>
+
+<span class="kw">for</span> i <span class="kw">in</span> <span class="num">0</span> <span class="kw">to</span> <span class="num">10</span>
+    <span class="fn">print</span>(<span class="fn">fib</span>(i))
+<span class="kw">end</span>
+<span class="out">0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="quickstart" id="quickstart">
+    <div style="max-width:1200px;margin:0 auto;">
+      <h2 class="section-title">Get Started</h2>
+      <p class="section-subtitle">One command. You're coding.</p>
+    </div>
+    <div class="quickstart-grid">
+      <div class="qs-card">
+        <div class="step-num">1</div>
+        <h3>Install Node.js</h3>
+        <p>JTS GO runs on npm. If you don't have Node.js, install it first.</p>
+        <a href="https://nodejs.org" target="_blank" class="btn-secondary" style="font-size:0.85rem;padding:8px 16px;">Download Node.js</a>
+      </div>
+      <div class="qs-card">
+        <div class="step-num">2</div>
+        <h3>Install JTS GO</h3>
+        <p>One global npm install. No build tools, no configuration.</p>
+        <div class="install-box" onclick="copyText('npm install -g @jaytechsolutions/jts-go', this)">
+          <code>$ npm install -g @jaytechsolutions/jts-go</code>
+          <span class="copy-hint">copy</span>
+        </div>
+      </div>
+      <div class="qs-card">
+        <div class="step-num">3</div>
+        <h3>Run Your Code</h3>
+        <p>Create a <code>.jts</code> file and run it instantly.</p>
+        <div class="install-box" onclick="copyText('jts hello.jts', this)">
+          <code>$ jts hello.jts</code>
+          <span class="copy-hint">copy</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="features-section" id="features">
+    <div style="max-width:1200px;margin:0 auto;">
+      <h2 class="section-title">Features</h2>
+      <p class="section-subtitle">Built for developers who want simplicity without sacrificing performance.</p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-item">
+        <div class="feature-icon">&gt;/</div>
+        <h3>Python-like Syntax</h3>
+        <p>Indentation-based blocks, dynamic typing, clean expressions. If you know Python, you already know most of JTS GO.</p>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon">&gt;&gt;</div>
+        <h3>Bytecode VM</h3>
+        <p>Source code compiles to optimized bytecode and runs on a stack-based virtual machine. Fast startup, fast execution.</p>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon">[ ]</div>
+        <h3>Lists &amp; Collections</h3>
+        <p>First-class list support with literals, indexing, assignment, and append. Mix any types in a single list.</p>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon">fn</div>
+        <h3>First-class Functions</h3>
+        <p>Define functions with <code>func</code>, pass them around, use recursion. Closures and nested functions supported.</p>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon">i/o</div>
+        <h3>Smart Input</h3>
+        <p><code>input()</code> automatically detects numbers, booleans, and strings. No manual type conversion needed.</p>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon">oo</div>
+        <h3>Object-Oriented</h3>
+        <p>Full OOP with classes, methods, inheritance via <code>extends</code>, and <code>self</code>. Clean, Python-like syntax.</p>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon">ML</div>
+        <h3>ML/AI Built-ins</h3>
+        <p>Tensors, matrices, matmul, sigmoid, relu, MSE loss — all built into the language.</p>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon">web</div>
+        <h3>Web Development</h3>
+        <p>HTTP server support with <code>http_server()</code>, <code>http_start()</code>, and <code>http_request()</code>.</p>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon">!</div>
+        <h3>One Command Update</h3>
+        <p>Keep your installation current with <code>jts --update</code>. Always running the latest version.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="showcase" id="language">
+    <div class="showcase-inner">
+      <div>
+        <h2 class="section-title">Language</h2>
+        <p class="section-subtitle" style="margin-bottom:32px;">All the essentials with a clean, minimal syntax.</p>
+        <ul class="showcase-features">
+          <li>
+            <span class="feat-label">Variables</span>
+            <span class="feat-desc"><code>x = 42</code> or <code>int x = 42</code> — your choice</span>
+          </li>
+          <li>
+            <span class="feat-label">Strings</span>
+            <span class="feat-desc"><code>"hello" + " world"</code> — concatenation with <code>+</code></span>
+          </li>
+          <li>
+            <span class="feat-label">Conditionals</span>
+            <span class="feat-desc"><code>if / else if / else / end</code></span>
+          </li>
+          <li>
+            <span class="feat-label">Loops</span>
+            <span class="feat-desc"><code>for x in 0 to N</code> and <code>while</code></span>
+          </li>
+          <li>
+            <span class="feat-label">Functions</span>
+            <span class="feat-desc"><code>func name(args) ... end</code></span>
+          </li>
+          <li>
+            <span class="feat-label">Lists</span>
+            <span class="feat-desc"><code>[1, 2, 3]</code> with indexing and append</span>
+          </li>
+          <li>
+            <span class="feat-label">Built-ins</span>
+            <span class="feat-desc"><code>print</code>, <code>input</code>, <code>len</code>, <code>type</code>, <code>append</code>, <code>number</code>, <code>str</code>, <code>math</code></span>
+          </li>
+          <li>
+            <span class="feat-label">OOP</span>
+            <span class="feat-desc"><code>class / extends / new / self</code> with inheritance</span>
+          </li>
+          <li>
+            <span class="feat-label">ML/AI</span>
+            <span class="feat-desc"><code>tensor</code>, <code>matrix</code>, <code>matmul</code>, <code>sigmoid</code>, <code>relu</code>, <code>mse</code></span>
+          </li>
+          <li>
+            <span class="feat-label">Web Dev</span>
+            <span class="feat-desc"><code>http_server</code>, <code>http_start</code>, <code>http_request</code></span>
+          </li>
+          <li>
+            <span class="feat-label">Comments</span>
+            <span class="feat-desc"><code># single line comments</code></span>
+          </li>
+        </ul>
+      </div>
+      <div class="hero-code" style="box-shadow:0 2px 8px rgba(0,0,0,0.04);">
+        <div class="code-header">
+          <span class="code-dot r"></span>
+          <span class="code-dot y"></span>
+          <span class="code-dot g"></span>
+          <span class="code-title">features.jts</span>
+        </div>
+        <div class="code-body" style="background:#fff;color:#333;">
+<span class="cmt"># Object-Oriented Programming</span>
+<span class="kw">class</span> <span class="fn">Animal</span>
+    <span class="kw">func</span> <span class="fn">init</span>(<span class="kw">self</span>, name)
+        <span class="kw">self</span>.name = name
+    <span class="kw">end</span>
+
+    <span class="kw">func</span> <span class="fn">speak</span>(<span class="kw">self</span>)
+        <span class="fn">print</span>(<span class="kw">self</span>.name + <span class="str">" says hello!"</span>)
+    <span class="kw">end</span>
+<span class="kw">end</span>
+
+a = <span class="kw">new</span> <span class="fn">Animal</span>(<span class="str">"Cat"</span>)
+a.<span class="fn">speak</span>()  <span class="cmt"># Cat says hello!</span>
+
+<span class="cmt"># Inheritance</span>
+<span class="kw">class</span> <span class="fn">Dog</span> <span class="kw">extends</span> <span class="fn">Animal</span>
+    <span class="kw">func</span> <span class="fn">bark</span>(<span class="kw">self</span>)
+        <span class="fn">print</span>(<span class="kw">self</span>.name + <span class="str">" barks!"</span>)
+    <span class="kw">end</span>
+<span class="kw">end</span>
+
+d = <span class="kw">new</span> <span class="fn">Dog</span>(<span class="str">"Rex"</span>)
+d.<span class="fn">speak</span>()  <span class="cmt"># Rex says hello! (inherited)</span>
+d.<span class="fn">bark</span>()   <span class="cmt"># Rex barks!</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="toolchain" id="toolchain">
+    <div style="max-width:1200px;margin:0 auto;">
+      <h2 class="section-title">Toolchain</h2>
+      <p class="section-subtitle">Three commands for every stage of your workflow.</p>
+    </div>
+    <div class="toolchain-grid">
+      <div class="tool-card">
+        <code>jts</code>
+        <p>Compile and run a <code>.jts</code> file in one step</p>
+      </div>
+      <div class="tool-card">
+        <code>jtsc</code>
+        <p>Compile source to <code>.jbc</code> bytecode</p>
+      </div>
+      <div class="tool-card">
+        <code>jtsvm</code>
+        <p>Execute compiled bytecode directly</p>
+      </div>
+      <div class="tool-card">
+        <code>--update</code>
+        <p>Update to the latest version via npm</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta-banner">
+    <h2>Start building with JTS GO</h2>
+    <p>Install in one command. Write your first program in under a minute.</p>
+    <div class="install-box" style="display:inline-flex;max-width:auto;" onclick="copyText('npm install -g @jaytechsolutions/jts-go', this)">
+      <code style="color:#333;">$ npm install -g @jaytechsolutions/jts-go</code>
+      <span class="copy-hint" style="margin-left:16px;">copy</span>
+    </div>
+  </section>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <a href="#" class="logo" style="font-size:1.15rem;">JTS <span>GO</span></a>
+        <p>A modern programming language with Python-like syntax and a bytecode virtual machine. Designed for clarity, built for speed.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Install</h4>
+        <a href="#quickstart">Getting Started</a>
+        <a href="https://www.npmjs.com/package/@jaytechsolutions/jts-go" target="_blank">npm Package</a>
+        <a href="https://github.com/jayaswinjay-web/jtsdk/releases" target="_blank">Releases</a>
+      </div>
+      <div class="footer-col">
+        <h4>Resources</h4>
+        <a href="#language">Language Guide</a>
+        <a href="#toolchain">Toolchain</a>
+        <a href="https://github.com/jayaswinjay-web/jtsdk/tree/main/examples" target="_blank">Examples</a>
+      </div>
+      <div class="footer-col">
+        <h4>Community</h4>
+        <a href="https://github.com/jayaswinjay-web/jtsdk" target="_blank">GitHub</a>
+        <a href="https://github.com/jayaswinjay-web/jtsdk/issues" target="_blank">Issue Tracker</a>
+        <a href="https://github.com/jayaswinjay-web/jtsdk/blob/main/LICENSE" target="_blank">Apache 2.0 License</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2026 JTS GO. Created by Jayaswin Jay.</span>
+      <span>Version 2.0.0</span>
+    </div>
+  </footer>
+
+  <script>
+    function copyText(text, el) {
+      navigator.clipboard.writeText(text);
+      const hint = el.querySelector('.copy-hint');
+      if (hint) {
+        hint.textContent = 'copied!';
+        setTimeout(() => { hint.textContent = 'copy'; }, 2000);
+      }
+    }
+  </script>
+
+</body>
+</html>
