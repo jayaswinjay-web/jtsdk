@@ -1,0 +1,60 @@
+{
+  "name": "jts-go",
+  "displayName": "JTS GO",
+  "description": "Syntax highlighting and language support for JTS GO programming language",
+  "version": "1.0.0",
+  "publisher": "jaytechsolutions",
+  "author": {
+    "name": "Jay Tech Solutions"
+  },
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.74.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "keywords": [
+    "jts",
+    "jts-go",
+    "programming language",
+    "bytecode",
+    "virtual machine"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jayaswinjay-web/jtsdk"
+  },
+  "contributes": {
+    "languages": [
+      {
+        "id": "jts",
+        "aliases": [
+          "JTS GO",
+          "jts"
+        ],
+        "extensions": [
+          ".jts"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "jts",
+        "scopeName": "source.jts",
+        "path": "./syntaxes/jts.tmLanguage.json"
+      }
+    ],
+    "snippets": [
+      {
+        "language": "jts",
+        "path": "./snippets/jts.json"
+      }
+    ]
+  },
+  "activationEvents": [
+    "onLanguage:jts"
+  ],
+  "main": "./extension.js"
+}

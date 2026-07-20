@@ -1,0 +1,168 @@
+{
+  "name": "JTS GO",
+  "scopeName": "source.jts",
+  "fileTypes": ["jts"],
+  "patterns": [
+    { "include": "#comments" },
+    { "include": "#strings" },
+    { "include": "#numbers" },
+    { "include": "#keywords" },
+    { "include": "#type-keywords" },
+    { "include": "#builtins" },
+    { "include": "#methods" },
+    { "include": "#operators" },
+    { "include": "#punctuation" }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.line.number-sign.jts",
+          "match": "#.*$"
+        }
+      ]
+    },
+    "strings": {
+      "patterns": [
+        {
+          "name": "string.quoted.double.jts",
+          "begin": "\"",
+          "end": "\"",
+          "beginCaptures": { "0": { "name": "punctuation.definition.string.begin.jts" } },
+          "endCaptures": { "0": { "name": "punctuation.definition.string.end.jts" } }
+        },
+        {
+          "name": "string.quoted.single.jts",
+          "begin": "'",
+          "end": "'",
+          "beginCaptures": { "0": { "name": "punctuation.definition.string.begin.jts" } },
+          "endCaptures": { "0": { "name": "punctuation.definition.string.end.jts" } }
+        }
+      ]
+    },
+    "numbers": {
+      "patterns": [
+        {
+          "name": "constant.numeric.float.jts",
+          "match": "\\b[0-9]+\\.[0-9]+\\b"
+        },
+        {
+          "name": "constant.numeric.integer.jts",
+          "match": "\\b[0-9]+\\b"
+        }
+      ]
+    },
+    "keywords": {
+      "patterns": [
+        {
+          "name": "keyword.control.jts",
+          "match": "\\b(if|elif|else|while|for|in|to|break|continue|return|end)\\b"
+        },
+        {
+          "name": "keyword.control.error.jts",
+          "match": "\\b(try|catch|throw)\\b"
+        },
+        {
+          "name": "keyword.control.import.jts",
+          "match": "\\b(import)\\b"
+        },
+        {
+          "name": "keyword.declaration.function.jts",
+          "match": "\\b(func)\\b"
+        },
+        {
+          "name": "keyword.declaration.class.jts",
+          "match": "\\b(class|extends|new|self|super)\\b"
+        },
+        {
+          "name": "keyword.operator.logical.jts",
+          "match": "\\b(and|or|not)\\b"
+        },
+        {
+          "name": "keyword.language.nil.jts",
+          "match": "\\b(nil)\\b"
+        },
+        {
+          "name": "constant.language.boolean.jts",
+          "match": "\\b(true|false)\\b"
+        },
+        {
+          "name": "variable.language.self.jts",
+          "match": "\\b(self)\\b"
+        }
+      ]
+    },
+    "type-keywords": {
+      "patterns": [
+        {
+          "name": "storage.type.jts",
+          "match": "\\b(int|float|string|bool|list|var)\\b"
+        }
+      ]
+    },
+    "builtins": {
+      "patterns": [
+        {
+          "name": "support.function.builtin.jts",
+          "match": "\\b(print|input|len|type|str|number|math|sqrt|append|tensor|matrix|matmul|sigmoid|relu|mse|http_server|http_start|http_request|read_file|write_file)\\b"
+        }
+      ]
+    },
+    "methods": {
+      "patterns": [
+        {
+          "match": "\\.((upper|lower|trim|split|contains|replace|substring|starts_with|ends_with)\\s*(?=[(]))",
+          "name": "support.function.method.string.jts"
+        },
+        {
+          "match": "\\.((sort|remove|pop|append)\\s*(?=[(]))",
+          "name": "support.function.method.list.jts"
+        }
+      ]
+    },
+    "operators": {
+      "patterns": [
+        {
+          "name": "keyword.operator.comparison.jts",
+          "match": "==|!=|<=|>=|<|>"
+        },
+        {
+          "name": "keyword.operator.assignment.jts",
+          "match": "\\+=|-=|\\*=|="
+        },
+        {
+          "name": "keyword.operator.arithmetic.jts",
+          "match": "\\+|-|\\*|/|%"
+        }
+      ]
+    },
+    "punctuation": {
+      "patterns": [
+        {
+          "name": "punctuation.bracket.round.jts",
+          "match": "\\(|\\)"
+        },
+        {
+          "name": "punctuation.bracket.square.jts",
+          "match": "\\[|\\]"
+        },
+        {
+          "name": "punctuation.bracket.curly.jts",
+          "match": "\\{|\\}"
+        },
+        {
+          "name": "punctuation.separator.comma.jts",
+          "match": ","
+        },
+        {
+          "name": "punctuation.separator.colon.jts",
+          "match": ":"
+        },
+        {
+          "name": "punctuation.accessor.dot.jts",
+          "match": "\\."
+        }
+      ]
+    }
+  }
+}
