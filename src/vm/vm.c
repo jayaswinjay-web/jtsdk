@@ -28,6 +28,17 @@ void init_vm(void) {
     vm.objects = NULL;
     register_native_functions();
 
+    vm.debug_enabled = false;
+    vm.debug_mode = DEBUG_NONE;
+    vm.debug_step_frame_depth = 0;
+    vm.debug_step_offset = 0;
+    vm.debug_paused = false;
+    vm.debug_just_stopped = false;
+    vm.debug_stop_line = 0;
+    vm.debug_stop_reason = NULL;
+    vm.debug_source = NULL;
+    vm.debug_source_length = 0;
+
     const char* native_names[] = {
         "str", "tensor", "matrix", "matmul", "sigmoid", "relu", "mse",
         "http_server", "http_start", "http_request", "sqrt", "math",
@@ -49,6 +60,10 @@ void free_vm(void) {
     free_table(&vm.globals);
     free_table(&vm.strings);
     free_objects();
+    if (vm.debug_source) {
+        free(vm.debug_source);
+        vm.debug_source = NULL;
+    }
 }
 
 void push(Value value) {
@@ -107,6 +122,161 @@ static bool call(ObjFunction* function, int arg_count) {
     return true;
 }
 
+void vm_set_debug_enabled(bool enabled) {
+    vm.debug_enabled = enabled;
+    if (enabled) {
+        vm.debug_mode = DEBUG_CONTINUE;
+    }
+}
+
+bool vm_is_debug_paused(void) {
+    return vm.debug_paused;
+}
+
+void vm_debug_continue(void) {
+    vm.debug_mode = DEBUG_CONTINUE;
+    vm.debug_paused = false;
+}
+
+void vm_debug_step_in(void) {
+    vm.debug_mode = DEBUG_STEP_IN;
+    vm.debug_paused = false;
+}
+
+void vm_debug_step_over(void) {
+    vm.debug_mode = DEBUG_STEP_OVER;
+    vm.debug_step_frame_depth = vm.frame_count;
+    vm.debug_paused = false;
+}
+
+void vm_debug_step_out(void) {
+    vm.debug_mode = DEBUG_STEP_OUT;
+    vm.debug_step_frame_depth = vm.frame_count;
+    vm.debug_paused = false;
+}
+
+void vm_debug_pause(void) {
+    vm.debug_mode = DEBUG_PAUSE;
+    vm.debug_paused = false;
+}
+
+int vm_get_current_line(void) {
+    if (vm.frame_count == 0) return 0;
+    CallFrame* frame = &vm.frames[vm.frame_count - 1];
+    int offset = (int)(frame->ip - frame->function->chunk.code - 1);
+    if (offset >= 0 && offset < frame->function->chunk.count) {
+        return frame->function->chunk.lines[offset];
+    }
+    return 0;
+}
+
+const char* vm_get_current_file(void) {
+    if (vm.frame_count == 0) return "<script>";
+    CallFrame* frame = &vm.frames[vm.frame_count - 1];
+    if (frame->function->name != NULL) {
+        return frame->function->name->chars;
+    }
+    return "<script>";
+}
+
+const char* vm_get_debug_stop_reason(void) {
+    return vm.debug_stop_reason ? vm.debug_stop_reason : "step";
+}
+
+void vm_set_breakpoints(Chunk* chunk, int* offsets, int count) {
+    chunk_clear_all_breakpoints(chunk);
+    for (int i = 0; i < count; i++) {
+        chunk_set_breakpoint(chunk, offsets[i], true);
+    }
+}
+
+void vm_get_stack_frame_names(const char** names, int* lines, int* count) {
+    *count = vm.frame_count;
+    for (int i = 0; i < vm.frame_count; i++) {
+        CallFrame* frame = &vm.frames[i];
+        if (frame->function->name != NULL) {
+            names[i] = frame->function->name->chars;
+        } else {
+            names[i] = "<script>";
+        }
+        int offset = (int)(frame->ip - frame->function->chunk.code - 1);
+        if (offset >= 0 && offset < frame->function->chunk.count) {
+            lines[i] = frame->function->chunk.lines[offset];
+        } else {
+            lines[i] = 0;
+        }
+    }
+}
+
+void vm_get_variables(int frame_idx, const char** names, Value* values, int* count) {
+    if (frame_idx < 0 || frame_idx >= vm.frame_count) {
+        *count = 0;
+        return;
+    }
+
+    CallFrame* frame = &vm.frames[frame_idx];
+    ObjFunction* func = frame->function;
+
+    int max_locals = func->arity;
+    for (int i = 0; i < func->chunk.debug_func_count; i++) {
+        DebugFuncInfo* df = &func->chunk.debug_funcs[i];
+        if (df->local_count > max_locals) {
+            max_locals = df->local_count;
+        }
+    }
+
+    int idx = 0;
+
+    if (func->arity > 0 && idx < 256) {
+        names[idx] = "self";
+        values[idx] = frame->slots[0];
+        idx++;
+    }
+
+    for (int i = 1; i < max_locals && idx < 256; i++) {
+        if (&frame->slots[i] < vm.stack_top) {
+            char* buf = (char*)malloc(32);
+            snprintf(buf, 32, "var%d", i);
+            names[idx] = buf;
+            values[idx] = frame->slots[i];
+            idx++;
+        }
+    }
+
+    *count = idx;
+}
+
+void vm_get_globals(const char** names, Value* values, int* count, int* total) {
+    int cap = *total;
+    int idx = 0;
+
+    for (int i = 0; i < vm.globals.capacity && idx < cap; i++) {
+        Entry* entry = &vm.globals.entries[i];
+        if (entry->key != NULL) {
+            names[idx] = entry->key->chars;
+            values[idx] = entry->value;
+            idx++;
+        }
+    }
+
+    *count = idx;
+}
+
+const char* vm_get_source(void) {
+    if (vm.frame_count == 0) return NULL;
+    CallFrame* frame = &vm.frames[vm.frame_count - 1];
+    if (frame->function->chunk.source != NULL) {
+        return frame->function->chunk.source;
+    }
+    return NULL;
+}
+
+int vm_get_source_length(void) {
+    if (vm.frame_count == 0) return 0;
+    CallFrame* frame = &vm.frames[vm.frame_count - 1];
+    return frame->function->chunk.source_length;
+}
+
 static InterpretResult run(void) {
     CallFrame* frame = &vm.frames[vm.frame_count - 1];
 
@@ -129,6 +299,40 @@ static InterpretResult run(void) {
     } while (0)
 
     for (;;) {
+        if (vm.debug_enabled) {
+            int current_offset = (int)(frame->ip - frame->function->chunk.code);
+            bool should_stop = false;
+
+            if (vm.debug_mode == DEBUG_STEP_IN) {
+                should_stop = true;
+                vm.debug_stop_reason = "step";
+            } else if (vm.debug_mode == DEBUG_STEP_OVER) {
+                if (vm.frame_count <= vm.debug_step_frame_depth) {
+                    should_stop = true;
+                    vm.debug_stop_reason = "step";
+                }
+            } else if (vm.debug_mode == DEBUG_STEP_OUT) {
+                if (vm.frame_count < vm.debug_step_frame_depth) {
+                    should_stop = true;
+                    vm.debug_stop_reason = "step";
+                }
+            } else if (vm.debug_mode == DEBUG_CONTINUE || vm.debug_mode == DEBUG_PAUSE) {
+                if (chunk_has_breakpoint(&frame->function->chunk, current_offset)) {
+                    should_stop = true;
+                    vm.debug_stop_reason = "breakpoint";
+                }
+            }
+
+            if (should_stop && current_offset > 0) {
+                vm.debug_mode = DEBUG_NONE;
+                vm.debug_paused = true;
+                vm.debug_just_stopped = true;
+                int line = frame->function->chunk.lines[current_offset - 1];
+                vm.debug_stop_line = line;
+                return INTERPRET_OK;
+            }
+        }
+
         uint8_t instruction;
         switch (instruction = READ_BYTE()) {
 
@@ -364,9 +568,7 @@ static InterpretResult run(void) {
 
         case OP_DICT: {
             ObjDict* dict = new_dict();
-            // Count of pairs is on top of stack
             int pair_count = (int)AS_NUMBER(pop());
-            // Keys and values are below: k1, v1, k2, v2, ...
             for (int i = 0; i < pair_count; i++) {
                 Value value = pop();
                 ObjString* key = AS_STRING(pop());
@@ -444,8 +646,6 @@ static InterpretResult run(void) {
         }
 
         case OP_BREAK: {
-            // This should never execute — it's patched at runtime
-            // But if we reach it, it means an unpatched break
             runtime_error("break reached outside of loop patching.");
             return INTERPRET_RUNTIME_ERROR;
         }
@@ -582,9 +782,6 @@ static InterpretResult run(void) {
         case OP_INVOKE_WITH: {
             ObjString* method_name = READ_STRING();
             int arg_count = READ_BYTE();
-            // Stack: [..., receiver, arg1, arg2, ...]
-            // arg_count = number of user args (not counting receiver/self)
-            // peek(arg_count) = receiver
             Value receiver = peek(arg_count);
             if (!IS_OBJ(receiver) || AS_OBJ(receiver)->type != OBJ_INSTANCE) {
                 runtime_error("Only instances have methods.");
@@ -596,15 +793,12 @@ static InterpretResult run(void) {
                 runtime_error("Undefined method '%s'.", method_name->chars);
                 return INTERPRET_RUNTIME_ERROR;
             }
-            // Rearrange: [..., receiver, arg1, arg2] -> [..., func, receiver, arg1, arg2]
             int base = (int)(vm.stack_top - vm.stack) - arg_count - 1;
-            // Shift args right by 1 to make room for receiver after func
             for (int i = arg_count; i >= 0; i--) {
                 vm.stack[base + i + 1] = vm.stack[base + i];
             }
             vm.stack[base] = method_val;
             vm.stack_top++;
-            // Call with arg_count + 1 (including self)
             if (!call(AS_FUNCTION(method_val), arg_count + 1)) {
                 return INTERPRET_RUNTIME_ERROR;
             }
@@ -693,6 +887,8 @@ InterpretResult interpret(const char* source) {
         free_chunk(&chunk);
         return INTERPRET_COMPILE_ERROR;
     }
+
+    chunk_store_source(&chunk, source, (int)strlen(source));
 
     ObjFunction* function = new_function();
     function->chunk = chunk;

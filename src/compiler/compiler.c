@@ -188,6 +188,13 @@ static void add_local(Compiler* compiler, Token name) {
     Local* local = &compiler->locals[compiler->local_count++];
     local->name = name;
     local->depth = -1;
+
+    if (compiler->debug_func != NULL) {
+        Chunk* chunk = current_chunk(compiler);
+        debug_func_add_local(compiler->debug_func,
+                             chunk->count, compiler->local_count - 1,
+                             name.start, name.length, compiler->scope_depth);
+    }
 }
 
 static void declare_variable(Compiler* compiler) {
@@ -482,6 +489,9 @@ static void func_definition(Compiler* compiler) {
     fn_compiler.function = new_function();
     fn_compiler.function->name = copy_string(name.start, name.length);
 
+    Chunk* chunk = current_chunk(compiler);
+    fn_compiler.debug_func = chunk_add_debug_func(chunk, name.start, name.length, 0);
+
     Local* local = &fn_compiler.locals[fn_compiler.local_count++];
     local->depth = 0;
     local->name.start = "";
@@ -508,6 +518,9 @@ static void func_definition(Compiler* compiler) {
             consume(&fn_compiler, TOKEN_RIGHT_PAREN, "Expect ')' after parameters");
         }
         fn_compiler.function->arity = param_count;
+        if (fn_compiler.debug_func) {
+            fn_compiler.debug_func->arity = param_count;
+        }
 
     if (fn_compiler.current.type == TOKEN_NEWLINE) {
         advance(&fn_compiler);
@@ -1278,6 +1291,7 @@ bool compile(const char* source, Chunk* chunk) {
     compiler.panic_mode = false;
     compiler.local_count = 0;
     compiler.scope_depth = 0;
+    compiler.debug_func = chunk_add_debug_func(chunk, "<script>", 8, 0);
 
     compiler.function = new_function();
     compiler.function->name = NULL;

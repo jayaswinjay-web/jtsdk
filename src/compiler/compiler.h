@@ -25,6 +25,7 @@ typedef struct Compiler {
     Local locals[MAX_LOCALS];
     int local_count;
     int scope_depth;
+    DebugFuncInfo* debug_func;
 } Compiler;
 
 bool compile(const char* source, Chunk* chunk);

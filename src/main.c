@@ -45,6 +45,7 @@ static void print_usage(const char* program_name) {
     printf("\nOptions:\n");
     printf("  --version, -v                Show version\n");
     printf("  --update, -u                 Update JTS GO to latest version\n");
+    printf("  --debug                      Run in debug adapter mode (for IDE integration)\n");
     printf("  --help, -h                   Show this help\n");
 }
 
@@ -194,6 +195,141 @@ static void run_file(const char* path, ToolType tool) {
     }
 }
 
+static void debug_run_file(const char* path) {
+    char* source = read_file(path);
+    if (source == NULL) {
+        fprintf(stderr, "Could not read file '%s'\n", path);
+        exit(65);
+    }
+
+    init_vm();
+    vm_set_debug_enabled(true);
+
+    Chunk chunk;
+    init_chunk(&chunk);
+
+    if (!compile(source, &chunk)) {
+        fprintf(stderr, "{\"event\":\"error\",\"message\":\"Compilation failed\"}\n");
+        free_chunk(&chunk);
+        free_vm();
+        free_file(source);
+        exit(65);
+    }
+
+    chunk_store_source(&chunk, source, (int)strlen(source));
+
+    ObjFunction* function = new_function();
+    function->chunk = chunk;
+
+    push(OBJ_VAL(function));
+    vm_call(function, 0);
+
+    fprintf(stderr, "{\"event\":\"started\"}\n");
+
+    char line[4096];
+    for (;;) {
+        if (vm_is_debug_paused()) {
+            int line_num = vm_get_current_line();
+            fprintf(stderr, "{\"event\":\"stopped\",\"reason\":\"%s\",\"line\":%d}\n",
+                    vm_get_debug_stop_reason(), line_num);
+            fflush(stderr);
+        }
+
+        if (fgets(line, sizeof(line), stdin) == NULL) break;
+
+        size_t len = strlen(line);
+        while (len > 0 && (line[len-1] == '\n' || line[len-1] == '\r')) {
+            line[--len] = '\0';
+        }
+        if (len == 0) continue;
+
+        if (strstr(line, "\"command\":\"continue\"")) {
+            vm_debug_continue();
+        } else if (strstr(line, "\"command\":\"stepIn\"")) {
+            vm_debug_step_in();
+        } else if (strstr(line, "\"command\":\"stepOver\"")) {
+            vm_debug_step_over();
+        } else if (strstr(line, "\"command\":\"stepOut\"")) {
+            vm_debug_step_out();
+        } else if (strstr(line, "\"command\":\"setBreakpoints\"")) {
+            chunk_clear_all_breakpoints(&chunk);
+
+            const char* bp = strstr(line, "\"lines\":");
+            if (bp) {
+                bp += 8;
+                while (*bp) {
+                    while (*bp && (*bp < '0' || *bp > '9')) bp++;
+                    if (!*bp) break;
+                    int line_num = atoi(bp);
+                    for (int i = 0; i < chunk.count; i++) {
+                        if (chunk.lines[i] == line_num) {
+                            chunk_set_breakpoint(&chunk, i, true);
+                            break;
+                        }
+                    }
+                    while (*bp && *bp >= '0' && *bp <= '9') bp++;
+                }
+            }
+        } else if (strstr(line, "\"command\":\"scopes\"")) {
+            int frame_count;
+            const char* names[64];
+            int lines[64];
+            vm_get_stack_frame_names(names, lines, &frame_count);
+
+            printf("{\"event\":\"scopes\",\"frames\":[");
+            for (int i = 0; i < frame_count; i++) {
+                if (i > 0) printf(",");
+                printf("{\"name\":\"%s\",\"line\":%d}", names[i], lines[i]);
+            }
+            printf("]}\n");
+            fflush(stdout);
+        } else if (strstr(line, "\"command\":\"variables\"")) {
+            const char* frame_str = strstr(line, "\"frame\":");
+            int frame_idx = 0;
+            if (frame_str) {
+                frame_idx = atoi(frame_str + 8);
+            }
+
+            const char* vnames[256];
+            Value vvalues[256];
+            int vcount = 0;
+            vm_get_variables(frame_idx, vnames, vvalues, &vcount);
+
+            printf("{\"event\":\"variables\",\"variables\":[");
+            for (int i = 0; i < vcount; i++) {
+                if (i > 0) printf(",");
+                printf("{\"name\":\"%s\",\"value\":\"", vnames[i]);
+                print_value(vvalues[i]);
+                printf("\"}");
+            }
+            printf("]}\n");
+            fflush(stdout);
+        } else if (strstr(line, "\"command\":\"globals\"")) {
+            const char* gnames[256];
+            Value gvalues[256];
+            int gcount = 0;
+            int gtotal = 256;
+            vm_get_globals(gnames, gvalues, &gcount, &gtotal);
+
+            printf("{\"event\":\"globals\",\"variables\":[");
+            for (int i = 0; i < gcount; i++) {
+                if (i > 0) printf(",");
+                printf("{\"name\":\"%s\",\"value\":\"", gnames[i]);
+                print_value(gvalues[i]);
+                printf("\"}");
+            }
+            printf("]}\n");
+            fflush(stdout);
+        } else if (strstr(line, "\"command\":\"stop\"")) {
+            break;
+        }
+    }
+
+    free_chunk(&chunk);
+    free_vm();
+    free_file(source);
+}
+
 int main(int argc, const char* argv[]) {
     ToolType tool = detect_tool(argv[0]);
 
@@ -213,6 +349,15 @@ int main(int argc, const char* argv[]) {
         }
         if (strcmp(argv[i], "--update") == 0 || strcmp(argv[i], "-u") == 0) {
             return run_update();
+        }
+        if (strcmp(argv[i], "--debug") == 0) {
+            if (i + 1 < argc) {
+                debug_run_file(argv[i + 1]);
+                return 0;
+            } else {
+                fprintf(stderr, "Usage: jts --debug <file.jts>\n");
+                return 1;
+            }
         }
         run_file(argv[i], tool);
     }

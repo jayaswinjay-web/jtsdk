@@ -2,7 +2,7 @@
   "name": "jts-go",
   "displayName": "JTS GO",
   "description": "Syntax highlighting and language support for JTS GO programming language",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "publisher": "jaytechsolutions",
   "author": {
     "name": "Jay Tech Solutions"
@@ -12,14 +12,16 @@
     "vscode": "^1.74.0"
   },
   "categories": [
-    "Programming Languages"
+    "Programming Languages",
+    "Debuggers"
   ],
   "keywords": [
     "jts",
     "jts-go",
     "programming language",
     "bytecode",
-    "virtual machine"
+    "virtual machine",
+    "debugger"
   ],
   "repository": {
     "type": "git",
@@ -51,10 +53,63 @@
         "language": "jts",
         "path": "./snippets/jts.json"
       }
+    ],
+    "debuggers": [
+      {
+        "type": "jts",
+        "label": "JTS GO",
+        "languages": ["jts"],
+        "configurationAttributes": {
+          "launch": {
+            "required": ["program"],
+            "properties": {
+              "program": {
+                "type": "string",
+                "description": "Path to the JTS GO program to debug",
+                "default": "${workspaceFolder}/${fileBasename}"
+              },
+              "cwd": {
+                "type": "string",
+                "description": "Working directory",
+                "default": "${workspaceFolder}"
+              },
+              "jtsPath": {
+                "type": "string",
+                "description": "Path to the JTS executable",
+                "default": "jts"
+              }
+            }
+          }
+        },
+        "configurationSnippets": [
+          {
+            "label": "JTS GO: Launch",
+            "description": "Launch a JTS GO program for debugging",
+            "body": {
+              "type": "jts",
+              "request": "launch",
+              "name": "Debug JTS GO",
+              "program": "${workspaceFolder}/${fileBasename}",
+              "cwd": "${workspaceFolder}",
+              "jtsPath": "jts"
+            }
+          }
+        ],
+        "initialConfigurations": [
+          {
+            "type": "jts",
+            "request": "launch",
+            "name": "Debug JTS GO",
+            "program": "${workspaceFolder}/${fileBasename}",
+            "cwd": "${workspaceFolder}",
+            "jtsPath": "jts"
+          }
+        ]
+      }
     ]
   },
   "activationEvents": [
-    "onLanguage:jts"
+    "onStartupFinished"
   ],
   "main": "./extension.js"
 }
