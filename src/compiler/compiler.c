@@ -489,7 +489,7 @@ static void func_definition(Compiler* compiler) {
     fn_compiler.function = new_function();
     fn_compiler.function->name = copy_string(name.start, name.length);
 
-    Chunk* chunk = current_chunk(compiler);
+    Chunk* chunk = current_chunk(&fn_compiler);
     fn_compiler.debug_func = chunk_add_debug_func(chunk, name.start, name.length, 0);
 
     Local* local = &fn_compiler.locals[fn_compiler.local_count++];
@@ -1291,10 +1291,10 @@ bool compile(const char* source, Chunk* chunk) {
     compiler.panic_mode = false;
     compiler.local_count = 0;
     compiler.scope_depth = 0;
-    compiler.debug_func = chunk_add_debug_func(chunk, "<script>", 8, 0);
 
     compiler.function = new_function();
     compiler.function->name = NULL;
+    compiler.debug_func = chunk_add_debug_func(&compiler.function->chunk, "<script>", 8, 0);
 
     advance(&compiler);
 

@@ -48,6 +48,7 @@ typedef struct {
     int debug_step_offset;
     bool debug_paused;
     bool debug_just_stopped;
+    bool debug_resume_skip;
     int debug_stop_line;
     const char* debug_stop_reason;
     char* debug_source;
@@ -80,7 +81,7 @@ const char* vm_get_current_file(void);
 const char* vm_get_debug_stop_reason(void);
 void vm_set_breakpoints(Chunk* chunk, int* offsets, int count);
 void vm_get_stack_frame_names(const char** names, int* lines, int* count);
-void vm_get_variables(int frame, const char** names, Value* values, int* count);
+void vm_get_variables(int frame, const char** names, int* name_lengths, Value* values, int* count);
 void vm_get_globals(const char** names, Value* values, int* count, int* total);
 const char* vm_get_source(void);
 int vm_get_source_length(void);

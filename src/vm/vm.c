@@ -34,6 +34,7 @@ void init_vm(void) {
     vm.debug_step_offset = 0;
     vm.debug_paused = false;
     vm.debug_just_stopped = false;
+    vm.debug_resume_skip = false;
     vm.debug_stop_line = 0;
     vm.debug_stop_reason = NULL;
     vm.debug_source = NULL;
@@ -136,31 +137,40 @@ bool vm_is_debug_paused(void) {
 void vm_debug_continue(void) {
     vm.debug_mode = DEBUG_CONTINUE;
     vm.debug_paused = false;
+    vm.debug_resume_skip = true;
 }
 
 void vm_debug_step_in(void) {
     vm.debug_mode = DEBUG_STEP_IN;
     vm.debug_paused = false;
+    vm.debug_resume_skip = false;
 }
 
 void vm_debug_step_over(void) {
     vm.debug_mode = DEBUG_STEP_OVER;
     vm.debug_step_frame_depth = vm.frame_count;
     vm.debug_paused = false;
+    vm.debug_resume_skip = false;
 }
 
 void vm_debug_step_out(void) {
     vm.debug_mode = DEBUG_STEP_OUT;
     vm.debug_step_frame_depth = vm.frame_count;
     vm.debug_paused = false;
+    vm.debug_resume_skip = false;
 }
 
 void vm_debug_pause(void) {
     vm.debug_mode = DEBUG_PAUSE;
     vm.debug_paused = false;
+    vm.debug_resume_skip = true;
 }
 
 int vm_get_current_line(void) {
+    /* If we just stopped, return the precise stop line computed during pause. */
+    if (vm.debug_just_stopped && vm.debug_stop_line > 0) {
+        return vm.debug_stop_line;
+    }
     if (vm.frame_count == 0) return 0;
     CallFrame* frame = &vm.frames[vm.frame_count - 1];
     int offset = (int)(frame->ip - frame->function->chunk.code - 1);
@@ -199,6 +209,10 @@ void vm_get_stack_frame_names(const char** names, int* lines, int* count) {
         } else {
             names[i] = "<script>";
         }
+        if (i == vm.frame_count - 1 && vm.debug_just_stopped && vm.debug_stop_line > 0) {
+            lines[i] = vm.debug_stop_line;
+            continue;
+        }
         int offset = (int)(frame->ip - frame->function->chunk.code - 1);
         if (offset >= 0 && offset < frame->function->chunk.count) {
             lines[i] = frame->function->chunk.lines[offset];
@@ -208,7 +222,7 @@ void vm_get_stack_frame_names(const char** names, int* lines, int* count) {
     }
 }
 
-void vm_get_variables(int frame_idx, const char** names, Value* values, int* count) {
+void vm_get_variables(int frame_idx, const char** names, int* name_lengths, Value* values, int* count) {
     if (frame_idx < 0 || frame_idx >= vm.frame_count) {
         *count = 0;
         return;
@@ -217,29 +231,35 @@ void vm_get_variables(int frame_idx, const char** names, Value* values, int* cou
     CallFrame* frame = &vm.frames[frame_idx];
     ObjFunction* func = frame->function;
 
-    int max_locals = func->arity;
+    /* Find the DebugFuncInfo matching this function by name. */
+    DebugFuncInfo* match = NULL;
     for (int i = 0; i < func->chunk.debug_func_count; i++) {
         DebugFuncInfo* df = &func->chunk.debug_funcs[i];
-        if (df->local_count > max_locals) {
-            max_locals = df->local_count;
+        if (func->name != NULL && df->function_name != NULL &&
+            df->function_name_length == (int)strlen(func->name->chars) &&
+            strncmp(df->function_name, func->name->chars, df->function_name_length) == 0) {
+            match = df;
+            break;
         }
+    }
+    if (match == NULL && func->name == NULL && func->chunk.debug_func_count > 0) {
+        /* <script> */
+        match = &func->chunk.debug_funcs[0];
     }
 
     int idx = 0;
 
-    if (func->arity > 0 && idx < 256) {
-        names[idx] = "self";
-        values[idx] = frame->slots[0];
-        idx++;
-    }
-
-    for (int i = 1; i < max_locals && idx < 256; i++) {
-        if (&frame->slots[i] < vm.stack_top) {
-            char* buf = (char*)malloc(32);
-            snprintf(buf, 32, "var%d", i);
-            names[idx] = buf;
-            values[idx] = frame->slots[i];
-            idx++;
+    if (match != NULL) {
+        for (int i = 0; i < match->local_count && idx < 256; i++) {
+            DebugLocal* local = &match->locals[i];
+            int slot = local->slot;
+            if (local->scope_depth == -1) continue; /* uninitialized */
+            if (slot >= 0 && &frame->slots[slot] < vm.stack_top) {
+                names[idx] = local->name;
+                name_lengths[idx] = local->name_length;
+                values[idx] = frame->slots[slot];
+                idx++;
+            }
         }
     }
 
@@ -301,34 +321,48 @@ static InterpretResult run(void) {
     for (;;) {
         if (vm.debug_enabled) {
             int current_offset = (int)(frame->ip - frame->function->chunk.code);
+            int current_line = 0;
+            if (current_offset >= 0 && current_offset < frame->function->chunk.count) {
+                current_line = frame->function->chunk.lines[current_offset];
+            }
             bool should_stop = false;
 
             if (vm.debug_mode == DEBUG_STEP_IN) {
-                should_stop = true;
-                vm.debug_stop_reason = "step";
+                if (current_line != vm.debug_stop_line) {
+                    should_stop = true;
+                    vm.debug_stop_reason = "step";
+                }
             } else if (vm.debug_mode == DEBUG_STEP_OVER) {
-                if (vm.frame_count <= vm.debug_step_frame_depth) {
+                if (vm.frame_count <= vm.debug_step_frame_depth &&
+                    current_line != vm.debug_stop_line) {
                     should_stop = true;
                     vm.debug_stop_reason = "step";
                 }
             } else if (vm.debug_mode == DEBUG_STEP_OUT) {
-                if (vm.frame_count < vm.debug_step_frame_depth) {
+                if (vm.frame_count < vm.debug_step_frame_depth &&
+                    current_line != vm.debug_stop_line) {
                     should_stop = true;
                     vm.debug_stop_reason = "step";
                 }
             } else if (vm.debug_mode == DEBUG_CONTINUE || vm.debug_mode == DEBUG_PAUSE) {
-                if (chunk_has_breakpoint(&frame->function->chunk, current_offset)) {
-                    should_stop = true;
-                    vm.debug_stop_reason = "breakpoint";
+                /* After resuming from a stop, skip breakpoint checks while we are
+                   still on the line where we stopped (a line spans multiple
+                   instructions, and the breakpoint would otherwise re-trigger). */
+                bool on_stop_line = (vm.debug_resume_skip && current_line == vm.debug_stop_line);
+                if (!on_stop_line) {
+                    vm.debug_resume_skip = false;
+                    if (chunk_has_breakpoint(&frame->function->chunk, current_offset)) {
+                        should_stop = true;
+                        vm.debug_stop_reason = "breakpoint";
+                    }
                 }
             }
 
-            if (should_stop && current_offset > 0) {
+            if (should_stop) {
                 vm.debug_mode = DEBUG_NONE;
                 vm.debug_paused = true;
                 vm.debug_just_stopped = true;
-                int line = frame->function->chunk.lines[current_offset - 1];
-                vm.debug_stop_line = line;
+                vm.debug_stop_line = current_line;
                 return INTERPRET_OK;
             }
         }

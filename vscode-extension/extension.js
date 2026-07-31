@@ -5,16 +5,7 @@ const { spawn } = require('child_process');
 class JTSDebugAdapterDescriptorFactory {
     createDebugAdapterDescriptor(session, executable) {
         const adapterPath = path.join(__dirname, 'debugAdapter.js');
-        const jtsPath = session.configuration.jtsPath || 'jts';
-
-        return new vscode.DebugAdapterInlineImplementation({
-            type: 'jts',
-            label: 'JTS GO Debugger',
-            adapterExecutable: {
-                command: 'node',
-                args: [adapterPath],
-            }
-        });
+        return new vscode.DebugAdapterExecutable('node', [adapterPath], {});
     }
 }
 

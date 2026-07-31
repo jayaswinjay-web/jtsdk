@@ -195,6 +195,21 @@ static void run_file(const char* path, ToolType tool) {
     }
 }
 
+static void chunk_set_breakpoint_at_line_recursive(Chunk* chunk, int line_num) {
+    for (int i = 0; i < chunk->count; i++) {
+        if (chunk->lines[i] == line_num) {
+            chunk_set_breakpoint(chunk, i, true);
+        }
+    }
+    for (int i = 0; i < chunk->constants.count; i++) {
+        Value val = chunk->constants.values[i];
+        if (IS_OBJ(val) && AS_OBJ(val)->type == OBJ_FUNCTION) {
+            ObjFunction* func = AS_FUNCTION(val);
+            chunk_set_breakpoint_at_line_recursive(&func->chunk, line_num);
+        }
+    }
+}
+
 static void debug_run_file(const char* path) {
     char* source = read_file(path);
     if (source == NULL) {
@@ -225,16 +240,10 @@ static void debug_run_file(const char* path) {
     vm_call(function, 0);
 
     fprintf(stderr, "{\"event\":\"started\"}\n");
+    fflush(stderr);
 
     char line[4096];
     for (;;) {
-        if (vm_is_debug_paused()) {
-            int line_num = vm_get_current_line();
-            fprintf(stderr, "{\"event\":\"stopped\",\"reason\":\"%s\",\"line\":%d}\n",
-                    vm_get_debug_stop_reason(), line_num);
-            fflush(stderr);
-        }
-
         if (fgets(line, sizeof(line), stdin) == NULL) break;
 
         size_t len = strlen(line);
@@ -243,16 +252,28 @@ static void debug_run_file(const char* path) {
         }
         if (len == 0) continue;
 
+        bool did_run = false;
         if (strstr(line, "\"command\":\"continue\"")) {
             vm_debug_continue();
+            did_run = true;
         } else if (strstr(line, "\"command\":\"stepIn\"")) {
             vm_debug_step_in();
+            did_run = true;
         } else if (strstr(line, "\"command\":\"stepOver\"")) {
             vm_debug_step_over();
+            did_run = true;
         } else if (strstr(line, "\"command\":\"stepOut\"")) {
             vm_debug_step_out();
+            did_run = true;
         } else if (strstr(line, "\"command\":\"setBreakpoints\"")) {
             chunk_clear_all_breakpoints(&chunk);
+            for (int i = 0; i < chunk.constants.count; i++) {
+                Value val = chunk.constants.values[i];
+                if (IS_OBJ(val) && AS_OBJ(val)->type == OBJ_FUNCTION) {
+                    ObjFunction* func = AS_FUNCTION(val);
+                    chunk_clear_all_breakpoints(&func->chunk);
+                }
+            }
 
             const char* bp = strstr(line, "\"lines\":");
             if (bp) {
@@ -261,15 +282,12 @@ static void debug_run_file(const char* path) {
                     while (*bp && (*bp < '0' || *bp > '9')) bp++;
                     if (!*bp) break;
                     int line_num = atoi(bp);
-                    for (int i = 0; i < chunk.count; i++) {
-                        if (chunk.lines[i] == line_num) {
-                            chunk_set_breakpoint(&chunk, i, true);
-                            break;
-                        }
-                    }
+                    chunk_set_breakpoint_at_line_recursive(&chunk, line_num);
                     while (*bp && *bp >= '0' && *bp <= '9') bp++;
                 }
             }
+            printf("{\"event\":\"breakpointsSet\"}\n");
+            fflush(stdout);
         } else if (strstr(line, "\"command\":\"scopes\"")) {
             int frame_count;
             const char* names[64];
@@ -291,14 +309,15 @@ static void debug_run_file(const char* path) {
             }
 
             const char* vnames[256];
+            int vlengths[256];
             Value vvalues[256];
             int vcount = 0;
-            vm_get_variables(frame_idx, vnames, vvalues, &vcount);
+            vm_get_variables(frame_idx, vnames, vlengths, vvalues, &vcount);
 
             printf("{\"event\":\"variables\",\"variables\":[");
             for (int i = 0; i < vcount; i++) {
                 if (i > 0) printf(",");
-                printf("{\"name\":\"%s\",\"value\":\"", vnames[i]);
+                printf("{\"name\":\"%.*s\",\"value\":\"", vlengths[i], vnames[i]);
                 print_value(vvalues[i]);
                 printf("\"}");
             }
@@ -322,6 +341,21 @@ static void debug_run_file(const char* path) {
             fflush(stdout);
         } else if (strstr(line, "\"command\":\"stop\"")) {
             break;
+        }
+
+        if (did_run) {
+            InterpretResult result = vm_exec();
+            if (vm_is_debug_paused()) {
+                int line_num = vm_get_current_line();
+                fprintf(stderr, "{\"event\":\"stopped\",\"reason\":\"%s\",\"line\":%d}\n",
+                        vm_get_debug_stop_reason(), line_num);
+                fflush(stderr);
+            } else {
+                /* Program ended */
+                fprintf(stderr, "{\"event\":\"terminated\"}\n");
+                fflush(stderr);
+                break;
+            }
         }
     }
 
