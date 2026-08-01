@@ -36,14 +36,43 @@ function activate(context) {
             if (!config.request) {
                 config.request = 'launch';
             }
-            if (!config.program && folder) {
-                const editor = vscode.window.activeTextEditor;
+
+            let program = config.program || '';
+            const editor = vscode.window.activeTextEditor;
+
+            // ${file} may not resolve if no file is open; fall back to the active editor.
+            if (!program ||
+                program === '${file}' ||
+                program === '${workspaceFolder}/${fileBasename}' ||
+                program === '/' ||
+                program === '.') {
                 if (editor) {
-                    config.program = editor.document.fileName;
+                    program = editor.document.fileName;
+                } else if (folder) {
+                    program = path.join(folder.uri.fsPath, 'main.jts');
                 }
             }
-            if (config.program && !config.cwd) {
-                config.cwd = path.dirname(config.program);
+
+            // Resolve workspace folder prefix if still present.
+            if (folder && program.indexOf('${workspaceFolder}') === 0) {
+                program = path.join(folder.uri.fsPath, program.substring('${workspaceFolder}'.length));
+            }
+
+            config.program = program;
+
+            if (!config.cwd) {
+                config.cwd = folder ? folder.uri.fsPath
+                                   : (program ? path.dirname(program) : process.cwd());
+            }
+            if (config.cwd === '${workspaceFolder}' && folder) {
+                config.cwd = folder.uri.fsPath;
+            }
+
+            const fs = require('fs');
+            if (!config.program || !fs.existsSync(config.program)) {
+                vscode.window.showErrorMessage(
+                    'JTS GO: Program file not found. Open a .jts file and press F5 again.');
+                return undefined;
             }
             return config;
         }

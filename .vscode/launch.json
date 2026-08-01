@@ -1,0 +1,13 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "jts",
+            "request": "launch",
+            "name": "Debug JTS GO",
+            "program": "${workspaceFolder}/${fileBasename}",
+            "cwd": "${workspaceFolder}",
+            "jtsPath": "D:\\jts programing language\\jts.exe"
+        }
+    ]
+}

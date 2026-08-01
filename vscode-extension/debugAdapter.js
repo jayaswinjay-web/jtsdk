@@ -121,7 +121,11 @@ function handleVMStdoutData(data) {
         let evt;
         try {
             evt = JSON.parse(trimmed);
-        } catch (e) { continue; }
+        } catch (e) {
+            /* Not a protocol message; this is program output (print, etc.) */
+            sendEvent('output', { category: 'stdout', output: line + '\n' });
+            continue;
+        }
         handleVMResponse(evt);
     }
 }

@@ -8,8 +8,6 @@ const adapter = spawn('node', [path.join(__dirname, 'debugAdapter.js')], {
 let buffer = '';
 let seq = 1;
 let bpsSent = false;
-let localsRef = null;
-let globalsRef = null;
 
 function sendRequest(command, args) {
     const msg = { seq: seq++, type: 'request', command, arguments: args || {} };
@@ -37,32 +35,19 @@ adapter.stderr.on('data', (d) => console.log('[adapter stderr]', d.toString()));
 
 function handleMessage(msg) {
     if (msg.type === 'response') {
-        console.log('RESP', msg.command, msg.success, msg.message || '');
-        if (msg.command === 'scopes' && msg.body) {
-            localsRef = msg.body.scopes[0].variablesReference;
-            globalsRef = msg.body.scopes[1].variablesReference;
-            setTimeout(() => sendRequest('variables', { variablesReference: localsRef }), 100);
-            setTimeout(() => sendRequest('variables', { variablesReference: globalsRef }), 200);
-        }
-        if (msg.command === 'variables') {
-            console.log('  VARS:', JSON.stringify(msg.body.variables));
-        }
-        if (msg.command === 'disconnect') {
-            setTimeout(() => process.exit(0), 300);
-        }
+        console.log('RESP', msg.command, msg.success);
+        if (msg.command === 'disconnect') setTimeout(() => process.exit(0), 300);
     } else if (msg.type === 'event') {
-        console.log('EVENT', msg.event, JSON.stringify(msg.body || {}));
+        console.log('EVENT', msg.event, msg.body ? JSON.stringify(msg.body).slice(0, 120) : '');
         if (msg.event === 'initialized' && !bpsSent) {
             bpsSent = true;
             sendRequest('setBreakpoints', {
                 source: { name: 'debug_func.jts', path: 'D:\\jts programing language\\tests\\debug_func.jts' },
-                breakpoints: [{ line: 2 }]
+                breakpoints: [{ line: 4 }]
             });
         }
         if (msg.event === 'stopped') {
-            sendRequest('stackTrace', { threadId: 1 });
-            setTimeout(() => sendRequest('scopes', { frameId: 0 }), 200);
-            setTimeout(() => sendRequest('continue', {}), 1500);
+            setTimeout(() => sendRequest('continue', {}), 500);
         }
         if (msg.event === 'terminated') {
             setTimeout(() => process.exit(0), 100);
