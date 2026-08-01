@@ -1,6 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#ifdef _WIN32
+#include <direct.h>
+#else
+#include <unistd.h>
+#define _getcwd getcwd
+#endif
 
 #include "common.h"
 #include "vm/vm.h"
@@ -97,7 +103,46 @@ static void repl(void) {
     free_vm();
 }
 
+static void setup_vm_dirs(const char* argv0) {
+    char program_dir[1024];
+    _getcwd(program_dir, sizeof(program_dir));
+
+    char install_dir[1024] = "";
+    if (argv0 != NULL && argv0[0] != '\0') {
+        char exe[1024];
+        snprintf(exe, sizeof(exe), "%s", argv0);
+        if (strchr(exe, '/') == NULL && strchr(exe, '\\') == NULL && strchr(exe, ':') == NULL) {
+            char tmp[2048];
+            snprintf(tmp, sizeof(tmp), "%s\\%s", program_dir, exe);
+            snprintf(exe, sizeof(exe), "%s", tmp);
+        }
+        char* slash = strrchr(exe, '\\');
+        char* fslash = strrchr(exe, '/');
+        char* last = (slash > fslash) ? slash : fslash;
+        if (last != NULL) {
+            *last = '\0';
+            snprintf(install_dir, sizeof(install_dir), "%s", exe);
+        }
+    }
+    vm_set_dirs(program_dir, install_dir);
+}
+
+static void set_script_program_dir(const char* path) {
+    char dir[1024];
+    char tmp[1024];
+    snprintf(tmp, sizeof(tmp), "%s", path);
+    char* slash = strrchr(tmp, '\\');
+    char* fslash = strrchr(tmp, '/');
+    char* last = (slash > fslash) ? slash : fslash;
+    if (last != NULL) {
+        *last = '\0';
+        snprintf(dir, sizeof(dir), "%s", tmp);
+        vm_set_dirs(dir, vm.install_dir);
+    }
+}
+
 static void run_file(const char* path, ToolType tool) {
+    set_script_program_dir(path);
     // Extract the base name without extension for .jbc path
     char jbc_path[1024];
     strncpy(jbc_path, path, sizeof(jbc_path) - 1);
@@ -367,6 +412,7 @@ static void debug_run_file(const char* path) {
 
 int main(int argc, const char* argv[]) {
     set_program_args(argc, argv);
+    setup_vm_dirs(argc > 0 ? argv[0] : NULL);
     ToolType tool = detect_tool(argv[0]);
 
     if (argc == 1) {

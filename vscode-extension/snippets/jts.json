@@ -124,6 +124,13 @@
     ],
     "description": "Import statement"
   },
+  "Bring Scroll": {
+    "prefix": "bring",
+    "body": [
+      "bring ${1:scroll_name}"
+    ],
+    "description": "Bring a scroll (package/library)"
+  },
   "List": {
     "prefix": "list",
     "body": [

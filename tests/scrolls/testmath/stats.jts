@@ -1,0 +1,16 @@
+# math.stats scroll - statistics functions
+func mean(numbers)
+    total = 0
+    for n in numbers
+        total = total + n
+    end
+    return total / len(numbers)
+end
+
+func sum(numbers)
+    total = 0
+    for n in numbers
+        total = total + n
+    end
+    return total
+end

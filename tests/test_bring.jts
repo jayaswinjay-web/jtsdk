@@ -1,0 +1,29 @@
+# Test the bring scroll system
+bring testmath
+bring testmath.stats
+
+# Namespaced access
+print("testmath.add(2, 3) = ", testmath.add(2, 3))
+print("testmath.mul(4, 5) = ", testmath.mul(4, 5))
+print("testmath.pi = ", testmath.pi)
+print("testmath.square(6) = ", testmath.square(6))
+
+# Flat access (scroll globals leak into program namespace)
+print("add(10, 20) = ", add(10, 20))
+print("pi = ", pi)
+print("square(9) = ", square(9))
+
+# Nested sub-scroll namespaced
+print("testmath.stats.mean([1, 2, 3, 4, 5]) = ", testmath.stats.mean([1, 2, 3, 4, 5]))
+print("testmath.stats.sum([1, 2, 3, 4]) = ", testmath.stats.sum([1, 2, 3, 4]))
+
+# Functions from scrolls compose
+data = [3, 1, 4, 1, 5]
+print("stats of ", data, ": mean=", testmath.stats.mean(data), " max=", testmath.max2(testmath.stats.sum(data), 3))
+
+# Bringing the same scroll twice should not double-execute
+bring testmath
+print("bring testmath twice OK")
+
+# Cross-scroll use: use testmath inside a scroll-defined function call
+print("testmath.cube(testmath.add(1, 2)) = ", testmath.cube(testmath.add(1, 2)))

@@ -15,6 +15,25 @@
 
 VM vm;
 
+void vm_set_dirs(const char* program_dir, const char* install_dir) {
+    static char pd[1024];
+    static char id[1024];
+    if (program_dir != NULL) {
+        strncpy(pd, program_dir, sizeof(pd) - 1);
+        pd[sizeof(pd) - 1] = '\0';
+        vm.program_dir = pd;
+    } else {
+        vm.program_dir = NULL;
+    }
+    if (install_dir != NULL) {
+        strncpy(id, install_dir, sizeof(id) - 1);
+        id[sizeof(id) - 1] = '\0';
+        vm.install_dir = id;
+    } else {
+        vm.install_dir = NULL;
+    }
+}
+
 static void reset_stack(void) {
     vm.stack_top = vm.stack;
     vm.frame_count = 0;
@@ -25,6 +44,7 @@ void init_vm(void) {
     reset_stack();
     init_table(&vm.globals);
     init_table(&vm.strings);
+    init_table(&vm.scrolls_loaded);
     vm.objects = NULL;
     register_native_functions();
 
@@ -43,10 +63,11 @@ void init_vm(void) {
     const char* native_names[] = {
         "str", "tensor", "matrix", "matmul", "sigmoid", "relu", "mse",
         "http_server", "http_start", "http_request", "sqrt", "math",
+        "sin", "cos", "tan", "log", "exp",
         "upper", "lower", "trim", "split", "contains", "replace",
         "substring", "starts_with", "ends_with", "length",
         "remove", "pop", "sort",
-        "read_file", "write_file", "import_file",
+        "read_file", "write_file", "import_file", "file_exists",
         "range", "abs", "min", "max", "sum", "pow", "round",
         "floor", "ceil", "rand", "randint", "seed", "shuffle",
         "int", "float", "bool",
@@ -81,6 +102,7 @@ void init_vm(void) {
 void free_vm(void) {
     free_table(&vm.globals);
     free_table(&vm.strings);
+    free_table(&vm.scrolls_loaded);
     free_objects();
     if (vm.debug_source) {
         free(vm.debug_source);
@@ -743,6 +765,55 @@ static InterpretResult run(void) {
 
             if (IS_OBJ(callee) && AS_OBJ(callee)->type == OBJ_STRING) {
                 ObjString* name = AS_STRING(callee);
+
+                if (arg_count >= 1 && IS_DICT(vm.stack_top[-arg_count])) {
+                    ObjDict* receiver_dict = AS_DICT(vm.stack_top[-arg_count]);
+                    Value member;
+                    bool member_found = dict_get(receiver_dict, name, &member);
+                    if (!member_found) {
+                        Value marker;
+                        if (dict_get(receiver_dict, copy_string("\x1fns", 3), &marker) &&
+                            table_get(&vm.globals, name, &member)) {
+                            member_found = true;
+                        }
+                    }
+                    if (member_found) {
+                        int receiver_idx = (int)(vm.stack_top - vm.stack) - arg_count;
+                        int m_argc = arg_count - 1;
+                        if (IS_FUNCTION(member)) {
+                            for (int i = 0; i < m_argc; i++) {
+                                vm.stack[receiver_idx + i] = vm.stack[receiver_idx + 1 + i];
+                            }
+                            vm.stack_top--;
+                            vm.stack[receiver_idx - 1] = member;
+                            if (!call(AS_FUNCTION(member), m_argc)) {
+                                return INTERPRET_RUNTIME_ERROR;
+                            }
+                            frame = &vm.frames[vm.frame_count - 1];
+                        } else if (IS_STRING(member)) {
+                            Value result;
+                            Value* m_args = &vm.stack[receiver_idx + 1];
+                            if (!call_native(AS_CSTRING(member), m_argc, m_args, &result)) {
+                                return INTERPRET_RUNTIME_ERROR;
+                            }
+                            vm.stack_top -= arg_count + 1;
+                            push(result);
+                        } else if (IS_NATIVE(member)) {
+                            Value result;
+                            Value* m_args = &vm.stack[receiver_idx + 1];
+                            if (!AS_NATIVE(member)->function(m_argc, m_args, &result)) {
+                                return INTERPRET_RUNTIME_ERROR;
+                            }
+                            vm.stack_top -= arg_count + 1;
+                            push(result);
+                        } else {
+                            runtime_error("Namespace member '%s' is not callable.", name->chars);
+                            return INTERPRET_RUNTIME_ERROR;
+                        }
+                        break;
+                    }
+                }
+
                 Value result;
                 if (call_native(name->chars, arg_count,
                                 vm.stack_top - arg_count, &result)) {
@@ -1108,6 +1179,25 @@ static InterpretResult run(void) {
         case OP_GET_PROPERTY: {
             ObjString* name = READ_STRING();
             Value obj = peek(0);
+            if (IS_DICT(obj)) {
+                ObjDict* dict = AS_DICT(obj);
+                Value value;
+                if (dict_get(dict, name, &value)) {
+                    pop();
+                    push(value);
+                    break;
+                }
+                Value marker;
+                if (dict_get(dict, copy_string("\x1fns", 3), &marker)) {
+                    if (table_get(&vm.globals, name, &value)) {
+                        pop();
+                        push(value);
+                        break;
+                    }
+                }
+                runtime_error("Undefined member '%s' in namespace.", name->chars);
+                return INTERPRET_RUNTIME_ERROR;
+            }
             if (!IS_OBJ(obj)) {
                 runtime_error("Only instances have properties.");
                 return INTERPRET_RUNTIME_ERROR;
@@ -1153,6 +1243,49 @@ static InterpretResult run(void) {
             ObjString* method_name = READ_STRING();
             int arg_count = READ_BYTE();
             Value receiver = peek(arg_count);
+            if (IS_DICT(receiver)) {
+                ObjDict* dict = AS_DICT(receiver);
+                Value method_val;
+                bool found = dict_get(dict, method_name, &method_val);
+                if (!found) {
+                    Value marker;
+                    if (dict_get(dict, copy_string("\x1fns", 3), &marker)) {
+                        found = table_get(&vm.globals, method_name, &method_val);
+                    }
+                }
+                if (!found) {
+                    runtime_error("Undefined member '%s' in namespace.", method_name->chars);
+                    return INTERPRET_RUNTIME_ERROR;
+                }
+                int base = (int)(vm.stack_top - vm.stack) - arg_count - 1;
+                if (IS_FUNCTION(method_val)) {
+                    vm.stack[base] = method_val;
+                    if (!call(AS_FUNCTION(method_val), arg_count)) {
+                        return INTERPRET_RUNTIME_ERROR;
+                    }
+                    frame = &vm.frames[vm.frame_count - 1];
+                } else if (IS_STRING(method_val)) {
+                    Value result;
+                    if (!call_native(AS_CSTRING(method_val), arg_count,
+                                     vm.stack_top - arg_count, &result)) {
+                        return INTERPRET_RUNTIME_ERROR;
+                    }
+                    vm.stack_top -= arg_count + 1;
+                    push(result);
+                } else if (IS_NATIVE(method_val)) {
+                    ObjNative* nat = AS_NATIVE(method_val);
+                    Value result;
+                    if (!nat->function(arg_count, &vm.stack[base + 1], &result)) {
+                        return INTERPRET_RUNTIME_ERROR;
+                    }
+                    vm.stack_top = &vm.stack[base];
+                    push(result);
+                } else {
+                    runtime_error("Namespace member '%s' is not callable.", method_name->chars);
+                    return INTERPRET_RUNTIME_ERROR;
+                }
+                break;
+            }
             if (!IS_OBJ(receiver) || AS_OBJ(receiver)->type != OBJ_INSTANCE) {
                 runtime_error("Only instances have methods.");
                 return INTERPRET_RUNTIME_ERROR;
@@ -1267,6 +1400,44 @@ InterpretResult interpret(const char* source) {
     call(function, 0);
 
     InterpretResult result = run();
+
+    free_chunk(&chunk);
+    return result;
+}
+
+InterpretResult interpret_isolated(const char* source) {
+    // Run a piece of source (e.g. a brought-in scroll) without continuing
+    // the outer VM frames. Saves and restores the full frame stack so the
+    // caller's execution resumes exactly where it left off.
+    Chunk chunk;
+    init_chunk(&chunk);
+
+    if (!compile(source, &chunk)) {
+        free_chunk(&chunk);
+        return INTERPRET_COMPILE_ERROR;
+    }
+
+    chunk_store_source(&chunk, source, (int)strlen(source));
+
+    ObjFunction* function = new_function();
+    function->chunk = chunk;
+
+    CallFrame saved_frames[FRAMES_MAX];
+    memcpy(saved_frames, vm.frames, sizeof(vm.frames));
+    int saved_frame_count = vm.frame_count;
+    Value* saved_top = vm.stack_top;
+    int saved_handler_count = vm.handler_count;
+
+    vm.frame_count = 0;
+    push(OBJ_VAL(function));
+    call(function, 0);
+
+    InterpretResult result = run();
+
+    memcpy(vm.frames, saved_frames, sizeof(vm.frames));
+    vm.frame_count = saved_frame_count;
+    vm.stack_top = saved_top;
+    vm.handler_count = saved_handler_count;
 
     free_chunk(&chunk);
     return result;

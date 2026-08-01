@@ -39,9 +39,13 @@ typedef struct {
     Value* stack_top;
     Table globals;
     Table strings;
+    Table scrolls_loaded;
     Obj* objects;
     ExceptionHandler handlers[MAX_EXCEPTION_HANDLERS];
     int handler_count;
+
+    const char* program_dir;
+    const char* install_dir;
 
     bool debug_enabled;
     DebugMode debug_mode;
@@ -62,13 +66,17 @@ typedef enum {
     INTERPRET_RUNTIME_ERROR
 } InterpretResult;
 
+extern VM vm;
+
 void init_vm(void);
 void free_vm(void);
 InterpretResult interpret(const char* source);
+InterpretResult interpret_isolated(const char* source);
 InterpretResult vm_exec(void);
 bool vm_call(ObjFunction* func, int arg_count);
 void push(Value value);
 Value pop(void);
+void vm_set_dirs(const char* program_dir, const char* install_dir);
 
 void vm_set_debug_enabled(bool enabled);
 bool vm_is_debug_paused(void);

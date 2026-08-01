@@ -1,4 +1,4 @@
-# JTS GO Language Specification v2.0.2
+# JTS GO Language Specification v2.0.3
 
 This document is the complete, formal specification of the JTS GO programming language. It covers every keyword, operator, type, function, and semantic rule. AI language models can use this document to generate correct JTS GO code.
 
@@ -26,6 +26,7 @@ This document is the complete, formal specification of the JTS GO programming la
 18. [Operator Precedence](#18-operator-precedence)
 19. [VM Limits](#19-vm-limits)
 20. [Grammar (EBNF)](#20-grammar-ebnf)
+21. [Scrolls (Packages)](#21-scrolls-packages)
 
 ---
 
@@ -47,7 +48,7 @@ All keywords are lowercase:
 
 ```
 and         break       catch       class       continue
-elif        else        end         extends     false
+bring       elif        else        end         extends     false
 for         func        if          in          import
 input       len         list        new         nil
 not         or          print       return      self
@@ -954,6 +955,7 @@ statement       = print_stmt
                 | func_def
                 | class_def
                 | import_stmt
+                | bring_stmt
                 | type_decl
                 | expr_stmt ;
 
@@ -971,6 +973,7 @@ throw_stmt      = "throw" expression NEWLINE ;
 break_stmt      = "break" NEWLINE ;
 continue_stmt   = "continue" NEWLINE ;
 import_stmt     = "import" STRING NEWLINE ;
+bring_stmt      = "bring" ( IDENTIFIER { "." IDENTIFIER } | STRING ) NEWLINE ;
 type_decl       = type_keyword IDENTIFIER [ "=" expression ] NEWLINE ;
 
 type_keyword    = "int" | "float" | "string" | "bool" | "list" | "var" ;
@@ -1017,3 +1020,62 @@ builtin_call    = ( "len" | "type" | "input" | "append" | "number" | "str"
                   "(" [ arg_list ] ")" ;
 arg_list        = expression { "," expression } ;
 ```
+
+## 21. Scrolls (Packages)
+
+Scrolls are JTS GO's package/library mechanism. A scroll is a `.jts` file that exports globals (functions, constants, dicts) for reuse. Scrolls are loaded with the `bring` keyword.
+
+### 21.1 Syntax
+
+```
+bring scroll_name            # loads <scroll_name>.jts
+bring path.to.scroll         # loads <path>/<to>/<scroll>.jts
+bring "path/to/scroll"       # loads a file at a relative path
+```
+
+`bring` accepts either a bare name, a dotted path (dots map to path separators), or a string literal path. A scroll is executed once per process; bringing the same scroll twice is a no-op.
+
+### 21.2 Resolution Order
+
+When `bring foo` runs, JTS searches (first match wins):
+
+1. The running script's directory (`<script_dir>/foo.jts`)
+2. `<script_dir>/scrolls/foo.jts`
+3. The JTS installation directory (`<install_dir>/foo.jts`)
+4. `<install_dir>/scrolls/foo.jts`
+5. The current working directory
+
+### 21.3 Access Modes
+
+All three access styles work after a scroll loads:
+
+```python
+bring math
+
+math.sin(1.0)          # namespaced: <scroll>.<member>
+sin(1.0)               # flat: scroll globals leak into the program namespace
+```
+
+Dotted sub-scrolls are also namespaced: `bring math.stats` makes `math.stats.mean([1,2,3])` and `stats.mean([1,2,3])` available.
+
+### 21.4 Exports
+
+A scroll exports every global it defines or changes at the top level. Top-level constants (e.g. `pi = 3.14159`) and `func` definitions become members of the scroll's namespace dict AND flat globals. A scroll may shadow builtins: bringing a scroll named `math` replaces the builtin `math` dispatcher with the scroll's namespace.
+
+### 21.5 Standard Library Scrolls
+
+JTS ships with scrolls in the `scrolls/` directory:
+
+| Scroll | Contents |
+|--------|----------|
+| `math` | pi/e/tau/phi/sqrt2 constants; sin, cos, tan, log, log2, log10, exp, hypot, degrees, radians, sign, clamp, lerp, is_even, is_odd, factorial, gcd, lcm, is_prime, avg, midpoint, digit_sum |
+| `strings` | reverse, is_palindrome, count_words, repeat, truncate, capitalize_words, strip_vowels, remove_spaces, words, has_letter, titleize |
+| `lists` | flatten, unique, reversed, chunk, rotate, median, first, last, sum_squares, count_occurrences |
+| `random` | random, int_between, choice, choices, sample, coin_flip |
+| `json` | parse, stringify, load, save, pretty |
+| `os` | get_env, current_dir, program_args, file_read, file_write, file_exists |
+| `time` | sleep_ms, epoch, stamp, stamp_utc, today, clock_time |
+
+Note: top-level `sin`, `cos`, `tan`, `log`, `exp`, `sqrt`, `file_exists` are also builtin natives, so `math.sin(x)` and `sin(x)` both work.
+
+

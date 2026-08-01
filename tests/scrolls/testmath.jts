@@ -1,0 +1,32 @@
+# math scroll - basic math functions
+pi = 3.141592653589793
+
+func add(a, b)
+    return a + b
+end
+
+func mul(a, b)
+    return a * b
+end
+
+func square(x)
+    return x * x
+end
+
+func cube(x)
+    return x * x * x
+end
+
+func max2(a, b)
+    if a > b
+        return a
+    end
+    return b
+end
+
+func min2(a, b)
+    if a < b
+        return a
+    end
+    return b
+end

@@ -921,10 +921,40 @@ static void declaration(Compiler* compiler) {
         advance(compiler);
         consume(compiler, TOKEN_STRING, "Expect filename string after 'import'");
         // Compile as: load and execute the imported file at runtime
-        // For now, emit the filename as a constant for runtime handling
+        // Emit the native callee first (must be on top of stack for OP_CALL)
+        emit_constant(compiler, OBJ_VAL(copy_string("import_file", 11)));
         emit_constant(compiler, OBJ_VAL(copy_string(
             compiler->previous.start, compiler->previous.length)));
-        emit_constant(compiler, OBJ_VAL(copy_string("import_file", 11)));
+        emit_bytes(compiler, OP_CALL, 1);
+        emit_byte(compiler, OP_POP);
+        return;
+    }
+    if (compiler->current.type == TOKEN_BRING) {
+        advance(compiler);
+        // Emit native callee first (must be on top of stack for OP_CALL),
+        // then the scroll name argument.
+        emit_constant(compiler, OBJ_VAL(copy_string("bring_scroll", 12)));
+        if (compiler->current.type == TOKEN_STRING) {
+            // bring "path/name" — direct path form
+            emit_constant(compiler, OBJ_VAL(copy_string(
+                compiler->current.start, compiler->current.length)));
+            advance(compiler);
+        } else {
+            // bring A.B.C — dotted scroll name
+            char buf[512];
+            int len = 0;
+            consume(compiler, TOKEN_IDENTIFIER, "Expect scroll name after 'bring'");
+            memcpy(buf, compiler->previous.start, compiler->previous.length);
+            len = compiler->previous.length;
+            while (match(compiler, TOKEN_DOT)) {
+                consume(compiler, TOKEN_IDENTIFIER, "Expect scroll name after '.'");
+                buf[len++] = '.';
+                memcpy(buf + len, compiler->previous.start, compiler->previous.length);
+                len += compiler->previous.length;
+            }
+            buf[len] = '\0';
+            emit_constant(compiler, OBJ_VAL(copy_string(buf, len)));
+        }
         emit_bytes(compiler, OP_CALL, 1);
         emit_byte(compiler, OP_POP);
         return;

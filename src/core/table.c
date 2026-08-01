@@ -44,7 +44,7 @@ bool table_get(Table* table, ObjString* key, Value* value) {
     if (table->count == 0) return false;
     Entry* entry = find_entry(table->entries, table->capacity, key);
     if (entry->key == NULL) return false;
-    *value = entry->value;
+    if (value != NULL) *value = entry->value;
     return true;
 }
 

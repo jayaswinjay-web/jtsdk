@@ -45,7 +45,7 @@ typedef enum {
     TOKEN_TRY, TOKEN_CATCH, TOKEN_THROW, TOKEN_FINALLY,
 
     // Module keywords
-    TOKEN_IMPORT,
+    TOKEN_IMPORT, TOKEN_BRING,
 
     // Web keywords
     TOKEN_HTTP, TOKEN_SERVER, TOKEN_REQUEST, TOKEN_RESPONSE,

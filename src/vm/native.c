@@ -37,6 +37,7 @@ void set_program_args(int argc, const char** argv) {
 }
 
 #include "vm/native.h"
+#include "vm/vm.h"
 #include "core/object.h"
 #include "core/memory.h"
 
@@ -729,6 +730,51 @@ static bool native_sqrt(int arg_count, Value* args, Value* result) {
     return true;
 }
 
+static bool native_sin(int arg_count, Value* args, Value* result) {
+    if (arg_count != 1 || !IS_NUMBER(args[0])) {
+        fprintf(stderr, "JTS GO: sin() expects 1 number argument\n");
+        return false;
+    }
+    *result = NUMBER_VAL(sin(AS_NUMBER(args[0])));
+    return true;
+}
+
+static bool native_cos(int arg_count, Value* args, Value* result) {
+    if (arg_count != 1 || !IS_NUMBER(args[0])) {
+        fprintf(stderr, "JTS GO: cos() expects 1 number argument\n");
+        return false;
+    }
+    *result = NUMBER_VAL(cos(AS_NUMBER(args[0])));
+    return true;
+}
+
+static bool native_tan(int arg_count, Value* args, Value* result) {
+    if (arg_count != 1 || !IS_NUMBER(args[0])) {
+        fprintf(stderr, "JTS GO: tan() expects 1 number argument\n");
+        return false;
+    }
+    *result = NUMBER_VAL(tan(AS_NUMBER(args[0])));
+    return true;
+}
+
+static bool native_log(int arg_count, Value* args, Value* result) {
+    if (arg_count != 1 || !IS_NUMBER(args[0])) {
+        fprintf(stderr, "JTS GO: log() expects 1 number argument\n");
+        return false;
+    }
+    *result = NUMBER_VAL(log(AS_NUMBER(args[0])));
+    return true;
+}
+
+static bool native_exp(int arg_count, Value* args, Value* result) {
+    if (arg_count != 1 || !IS_NUMBER(args[0])) {
+        fprintf(stderr, "JTS GO: exp() expects 1 number argument\n");
+        return false;
+    }
+    *result = NUMBER_VAL(exp(AS_NUMBER(args[0])));
+    return true;
+}
+
 static bool native_upper(int arg_count, Value* args, Value* result) {
     if (arg_count != 1 || !IS_STRING(args[0])) {
         fprintf(stderr, "JTS GO: upper() expects 1 string argument\n");
@@ -992,6 +1038,21 @@ static bool native_sort(int arg_count, Value* args, Value* result) {
     return true;
 }
 
+static bool native_file_exists(int arg_count, Value* args, Value* result) {
+    if (arg_count != 1 || !IS_STRING(args[0])) {
+        fprintf(stderr, "JTS GO: file_exists() expects 1 string argument\n");
+        return false;
+    }
+    FILE* f = fopen(AS_CSTRING(args[0]), "rb");
+    if (f != NULL) {
+        fclose(f);
+        *result = BOOL_VAL(true);
+    } else {
+        *result = BOOL_VAL(false);
+    }
+    return true;
+}
+
 static bool native_read_file(int arg_count, Value* args, Value* result) {
     if (arg_count != 1 || !IS_STRING(args[0])) {
         fprintf(stderr, "JTS GO: read_file() expects 1 string argument\n");
@@ -1050,10 +1111,238 @@ static bool native_import_file(int arg_count, Value* args, Value* result) {
     size_t bytes_read = fread(buf, 1, size, f);
     buf[bytes_read] = '\0';
     fclose(f);
-    InterpretResult res = interpret(buf);
+    InterpretResult res = interpret_isolated(buf);
     free(buf);
     *result = BOOL_VAL(res == INTERPRET_OK);
     return (res == INTERPRET_OK);
+}
+
+static void path_join(char* out, size_t outsize, const char* dir, const char* rel) {
+    if (dir == NULL || dir[0] == '\0') {
+        snprintf(out, outsize, "%s", rel);
+        return;
+    }
+    int dlen = (int)strlen(dir);
+    if (dlen > 0 && (dir[dlen - 1] == '/' || dir[dlen - 1] == '\\')) {
+        snprintf(out, outsize, "%s%s", dir, rel);
+    } else {
+        snprintf(out, outsize, "%s/%s", dir, rel);
+    }
+}
+
+static bool file_exists(const char* path) {
+    FILE* f = fopen(path, "rb");
+    if (f == NULL) return false;
+    fclose(f);
+    return true;
+}
+
+static bool resolve_scroll_path(const char* name, char* out, size_t outsize) {
+    // name: "math" or "math.stats" -> try <root>/<rel>.jts and <root>/scrolls/<rel>.jts
+    char rel[512];
+    int rlen = 0;
+    for (const char* p = name; *p; p++) {
+        if (rlen < (int)sizeof(rel) - 1) rel[rlen++] = (*p == '.') ? '/' : *p;
+    }
+    rel[rlen] = '\0';
+
+    const char* roots[3];
+    int n_roots = 0;
+    if (vm.program_dir != NULL) roots[n_roots++] = vm.program_dir;
+    if (vm.install_dir != NULL) roots[n_roots++] = vm.install_dir;
+    roots[n_roots++] = ""; // current working directory
+
+    char candidate[1024];
+    for (int i = 0; i < n_roots; i++) {
+        path_join(candidate, sizeof(candidate), roots[i], rel);
+        strncat(candidate, ".jts", sizeof(candidate) - strlen(candidate) - 1);
+        if (file_exists(candidate)) {
+            snprintf(out, outsize, "%s", candidate);
+            return true;
+        }
+        char sub[1024];
+        path_join(sub, sizeof(sub), roots[i], "scrolls");
+        path_join(candidate, sizeof(candidate), sub, rel);
+        strncat(candidate, ".jts", sizeof(candidate) - strlen(candidate) - 1);
+        if (file_exists(candidate)) {
+            snprintf(out, outsize, "%s", candidate);
+            return true;
+        }
+    }
+    return false;
+}
+
+static bool dict_get_str(ObjDict* dict, const char* key, Value* result) {
+    return dict_get(dict, copy_string(key, (int)strlen(key)), result);
+}
+
+static void collect_new_globals(Table* before, ObjDict* exports) {
+    for (int i = 0; i < vm.globals.capacity; i++) {
+        Entry* e = &vm.globals.entries[i];
+        if (e->key != NULL) {
+            Value old;
+            if (!table_get(before, e->key, &old)) {
+                dict_set(exports, e->key, e->value);
+            } else if (!values_equal(old, e->value)) {
+                dict_set(exports, e->key, e->value);
+            }
+        }
+    }
+}
+
+static void merge_exports(ObjDict* target, ObjDict* exports) {
+    for (int i = 0; i < exports->entries.capacity; i++) {
+        Entry* e = &exports->entries.entries[i];
+        if (e->key != NULL) {
+            dict_set(target, e->key, e->value);
+        }
+    }
+}
+
+static const char* NS_MARKER = "\x1fns";
+
+static void mark_namespace(ObjDict* dict) {
+    dict_set(dict, copy_string(NS_MARKER, 3), BOOL_VAL(true));
+}
+
+static bool is_namespace(ObjDict* dict) {
+    Value v;
+    return dict_get(dict, copy_string(NS_MARKER, 3), &v);
+}
+
+static bool attach_scroll_namespace(const char* name, ObjDict* exports) {
+    // Split dotted name into segments
+    char buf[512];
+    snprintf(buf, sizeof(buf), "%s", name);
+    char* segs[32];
+    int n = 0;
+    char* p = buf;
+    while (p != NULL && *p != '\0' && n < 32) {
+        segs[n++] = p;
+        char* dot = strchr(p, '.');
+        if (dot == NULL) break;
+        *dot = '\0';
+        p = dot + 1;
+    }
+    if (n == 0) return false;
+
+    ObjDict* current = NULL;
+    for (int i = 0; i < n - 1; i++) {
+        ObjString* key = copy_string(segs[i], (int)strlen(segs[i]));
+        Value holder;
+        if (i == 0) {
+            if (table_get(&vm.globals, key, &holder) && IS_DICT(holder)) {
+                current = AS_DICT(holder);
+            } else {
+                current = new_dict();
+                mark_namespace(current);
+                push(OBJ_VAL(current));
+                table_set(&vm.globals, key, OBJ_VAL(current));
+                pop();
+            }
+        } else {
+            if (current != NULL && dict_get(current, key, &holder) && IS_DICT(holder)) {
+                current = AS_DICT(holder);
+            } else {
+                ObjDict* newd = new_dict();
+                mark_namespace(newd);
+                push(OBJ_VAL(newd));
+                if (current != NULL) dict_set(current, key, OBJ_VAL(newd));
+                pop();
+                current = newd;
+            }
+        }
+    }
+
+    ObjString* last = copy_string(segs[n - 1], (int)strlen(segs[n - 1]));
+    if (current == NULL) {
+        Value holder;
+        if (table_get(&vm.globals, last, &holder) && IS_DICT(holder)) {
+            merge_exports(AS_DICT(holder), exports);
+        } else {
+            push(OBJ_VAL(exports));
+            table_set(&vm.globals, last, OBJ_VAL(exports));
+            pop();
+        }
+    } else {
+        dict_set(current, last, OBJ_VAL(exports));
+    }
+    return true;
+}
+
+static bool native_bring_scroll(int arg_count, Value* args, Value* result) {
+    if (arg_count != 1 || !IS_STRING(args[0])) {
+        fprintf(stderr, "JTS GO: bring() expects 1 string argument\n");
+        return false;
+    }
+    const char* name = AS_CSTRING(args[0]);
+    if (name[0] == '\0') {
+        fprintf(stderr, "JTS GO: bring() scroll name cannot be empty\n");
+        return false;
+    }
+
+    ObjString* key = copy_string(name, (int)strlen(name));
+    Value dummy;
+    if (table_get(&vm.scrolls_loaded, key, &dummy)) {
+        *result = BOOL_VAL(true);
+        return true; // already loaded
+    }
+
+    char path[1024];
+    if (!resolve_scroll_path(name, path, sizeof(path))) {
+        fprintf(stderr, "JTS GO: Cannot find scroll '%s'\n", name);
+        return false;
+    }
+
+    FILE* f = fopen(path, "rb");
+    if (f == NULL) {
+        fprintf(stderr, "JTS GO: Cannot open scroll '%s' at '%s'\n", name, path);
+        return false;
+    }
+    fseek(f, 0, SEEK_END);
+    long size = ftell(f);
+    fseek(f, 0, SEEK_SET);
+    char* buf = ALLOCATE(char, size + 1);
+    size_t bytes_read = fread(buf, 1, size, f);
+    buf[bytes_read] = '\0';
+    fclose(f);
+
+    Table before;
+    init_table(&before);
+    // Snapshot: copy keys set so far (cheap, capacity is small)
+    if (vm.globals.capacity > 0) {
+        before.capacity = vm.globals.capacity;
+        before.count = vm.globals.count;
+        before.entries = ALLOCATE(Entry, vm.globals.capacity);
+        for (int i = 0; i < vm.globals.capacity; i++) {
+            before.entries[i] = vm.globals.entries[i];
+        }
+    }
+
+    InterpretResult res = interpret_isolated(buf);
+    free(buf);
+
+    ObjDict* exports = new_dict();
+    mark_namespace(exports);
+    push(OBJ_VAL(exports));
+    collect_new_globals(&before, exports);
+    free_table(&before);
+
+    if (res == INTERPRET_OK) {
+        if (!attach_scroll_namespace(name, exports)) {
+            pop();
+            fprintf(stderr, "JTS GO: Failed to attach scroll '%s'\n", name);
+            return false;
+        }
+        table_set(&vm.scrolls_loaded, key, BOOL_VAL(true));
+        pop();
+        *result = BOOL_VAL(true);
+        return true;
+    } else {
+        pop();
+        *result = BOOL_VAL(false);
+        return false;
+    }
 }
 
 static bool native_range(int arg_count, Value* args, Value* result) {
@@ -2140,7 +2429,13 @@ static NativeDef native_functions[] = {
     {"http_server", -1, native_http_server},
     {"http_start",  1, native_http_start},
     {"http_request", -1, native_http_request},
-    {"sqrt",  1, native_sqrt},
+    {"sqrt",   1, native_sqrt},
+    {"file_exists", 1, native_file_exists},
+    {"sin",    1, native_sin},
+    {"cos",    1, native_cos},
+    {"tan",    1, native_tan},
+    {"log",    1, native_log},
+    {"exp",    1, native_exp},
     // String methods
     {"upper", 1, native_upper},
     {"lower", 1, native_lower},
@@ -2227,6 +2522,7 @@ static NativeDef native_functions[] = {
     {"write_file", 2, native_write_file},
     // Import
     {"import_file", 1, native_import_file},
+    {"bring_scroll", 1, native_bring_scroll},
     {NULL,     0, NULL}
 };
 

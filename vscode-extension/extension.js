@@ -87,7 +87,7 @@ function activate(context) {
             const keywords = [
                 'if', 'elif', 'else', 'while', 'for', 'in', 'to', 'break', 'continue',
                 'return', 'func', 'class', 'extends', 'new', 'self', 'super',
-                'try', 'catch', 'finally', 'throw', 'import', 'end', 'and', 'or', 'not',
+                'try', 'catch', 'finally', 'throw', 'import', 'bring', 'end', 'and', 'or', 'not',
                 'true', 'false', 'nil', 'int', 'float', 'string', 'bool', 'list', 'var'
             ];
 
@@ -98,6 +98,7 @@ function activate(context) {
 
             const builtins = [
                 'print', 'input', 'len', 'type', 'str', 'number', 'math', 'sqrt',
+                'sin', 'cos', 'tan', 'log', 'exp', 'file_exists',
                 'append', 'tensor', 'matrix', 'matmul', 'sigmoid', 'relu', 'mse',
                 'http_server', 'http_start', 'http_request', 'read_file', 'write_file'
             ];

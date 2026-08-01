@@ -115,7 +115,14 @@ static TokenType identifier_type(Scanner* scanner) {
             if (scanner->current - scanner->start > 1) {
                 switch (scanner->start[1]) {
                     case 'o': return check_keyword(scanner, 2, 2, "ol", TOKEN_BOOL_KW);
-                    case 'r': return check_keyword(scanner, 2, 3, "eak", TOKEN_BREAK);
+                    case 'r':
+                        if (scanner->current - scanner->start > 2) {
+                            if (scanner->start[2] == 'i')
+                                return check_keyword(scanner, 3, 2, "ng", TOKEN_BRING);
+                            if (scanner->start[2] == 'e')
+                                return check_keyword(scanner, 3, 2, "ak", TOKEN_BREAK);
+                        }
+                        break;
                 }
             }
             break;

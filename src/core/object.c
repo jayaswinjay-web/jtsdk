@@ -186,10 +186,12 @@ void print_obj(Value value) {
             printf("{");
             bool first = true;
             for (int i = 0; i < dict->entries.capacity; i++) {
-                if (dict->entries.entries[i].key != NULL) {
+                ObjString* key = dict->entries.entries[i].key;
+                if (key != NULL && !(key->length == 3 &&
+                    memcmp(key->chars, "\x1fns", 3) == 0)) {
                     if (!first) printf(", ");
                     first = false;
-                    print_value(OBJ_VAL(dict->entries.entries[i].key));
+                    print_value(OBJ_VAL(key));
                     printf(": ");
                     print_value(dict->entries.entries[i].value);
                 }
