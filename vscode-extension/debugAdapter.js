@@ -199,6 +199,7 @@ function handleRequest(request) {
                 supportsTerminateRequest: true,
                 supportsRestartRequest: false,
                 supportsStepBack: false,
+                supportsCancelRequest: false,
                 exceptionBreakpointFilters: [],
                 supportedChecksumAlgorithms: [],
             }, 'initialize');
@@ -258,6 +259,10 @@ function handleRequest(request) {
         case 'pause':
             sendVMCommand({ command: 'stop' });
             sendResponse(request, true, {}, 'pause');
+            break;
+
+        case 'evaluate':
+            handleEvaluate(request, args);
             break;
 
         case 'disconnect':
@@ -326,6 +331,27 @@ function handleSetBreakpoints(request, args) {
     }));
 
     sendResponse(request, true, { breakpoints: verified }, 'setBreakpoints');
+}
+
+function handleEvaluate(request, args) {
+    const expression = args.expression || '';
+    const context = args.context || '';
+    const frameId = args.frameId;
+
+    if (context === 'repl') {
+        /* Debug Console input while the program is running (e.g. for input()).
+           Forward it to the VM's stdin as program input. */
+        if (vmProcess && vmProcess.stdin.writable) {
+            vmProcess.stdin.write(expression + '\n');
+        }
+        sendResponse(request, true, { result: expression, variablesReference: 0 }, 'evaluate');
+        return;
+    }
+
+    if (vmProcess && vmProcess.stdin.writable) {
+        sendVMCommand({ command: 'scopes' });
+    }
+    sendResponse(request, true, { result: expression, variablesReference: 0 }, 'evaluate');
 }
 
 function handleScopes(request, args) {

@@ -4,3 +4,4 @@ src/**
 .gitignore
 .git
 test-dap.js
+test-input.js
