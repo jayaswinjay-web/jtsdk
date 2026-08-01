@@ -60,7 +60,7 @@
         },
         {
           "name": "keyword.control.error.jts",
-          "match": "\\b(try|catch|throw)\\b"
+          "match": "\\b(try|catch|finally|throw)\\b"
         },
         {
           "name": "keyword.control.import.jts",

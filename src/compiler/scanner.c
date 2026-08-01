@@ -144,6 +144,7 @@ static TokenType identifier_type(Scanner* scanner) {
             if (scanner->current - scanner->start > 1) {
                 switch (scanner->start[1]) {
                     case 'a': return check_keyword(scanner, 2, 3, "lse", TOKEN_FALSE);
+                    case 'i': return check_keyword(scanner, 2, 5, "nally", TOKEN_FINALLY);
                     case 'l': return check_keyword(scanner, 2, 3, "oat", TOKEN_FLOAT);
                     case 'o': return check_keyword(scanner, 2, 1, "r", TOKEN_FOR);
                     case 'u': return check_keyword(scanner, 2, 2, "nc", TOKEN_FUNC);
@@ -291,16 +292,46 @@ static Token number(Scanner* scanner) {
 
 static Token string_token(Scanner* scanner) {
     char quote = scanner->current[-1];
+    bool triple = false;
+    if ((quote == '"' && peek_char(scanner) == '"' && peek_next(scanner) == '"') ||
+        (quote == '\'' && peek_char(scanner) == '\'' && peek_next(scanner) == '\'')) {
+        triple = true;
+        advance(scanner);
+        advance(scanner);
+    }
     scanner->start = scanner->current;
-    while (peek_char(scanner) != quote && !is_at_end(scanner)) {
-        if (peek_char(scanner) == '\n') scanner->line++;
+    while (!is_at_end(scanner)) {
+        if (triple) {
+            if (peek_char(scanner) == quote && peek_next(scanner) == quote &&
+                scanner->current[2] == quote) {
+                break;
+            }
+        } else if (peek_char(scanner) == quote) {
+            break;
+        }
+        char c = peek_char(scanner);
+        if (c == '\\') {
+            advance(scanner);
+            if (!is_at_end(scanner)) {
+                if (peek_char(scanner) == '\n') scanner->line++;
+                advance(scanner);
+            }
+            continue;
+        }
+        if (c == '\n') scanner->line++;
         advance(scanner);
     }
     if (is_at_end(scanner)) {
         return error_token(scanner, "Unterminated string");
     }
     Token token = make_token(scanner, TOKEN_STRING);
-    advance(scanner); // closing quote
+    if (triple) {
+        advance(scanner);
+        advance(scanner);
+        advance(scanner);
+    } else {
+        advance(scanner);
+    }
     return token;
 }
 
@@ -549,11 +580,36 @@ Token scan_token(Scanner* scanner) {
             }
             return make_token(scanner, TOKEN_MINUS);
         case ':': { Token t = {TOKEN_COLON, scanner->start, 1, scanner->line}; return t; }
-        case '*': { Token t = {TOKEN_STAR, scanner->start, 1, scanner->line}; return t; }
-        case '/': { Token t = {TOKEN_SLASH, scanner->start, 1, scanner->line}; return t; }
-        case '%': { Token t = {TOKEN_PERCENT, scanner->start, 1, scanner->line}; return t; }
+        case '*':
+            if (match_char(scanner, '*')) {
+                if (match_char(scanner, '=')) {
+                    return make_token(scanner, TOKEN_STAR_STAR_EQUAL);
+                }
+                return make_token(scanner, TOKEN_STAR_STAR);
+            }
+            if (match_char(scanner, '=')) {
+                return make_token(scanner, TOKEN_STAR_EQUAL);
+            }
+            return make_token(scanner, TOKEN_STAR);
+        case '/':
+            if (match_char(scanner, '/')) {
+                if (match_char(scanner, '=')) {
+                    return make_token(scanner, TOKEN_SLASH_SLASH_EQUAL);
+                }
+                return make_token(scanner, TOKEN_SLASH_SLASH);
+            }
+            if (match_char(scanner, '=')) {
+                return make_token(scanner, TOKEN_SLASH_EQUAL);
+            }
+            return make_token(scanner, TOKEN_SLASH);
+        case '%':
+            if (match_char(scanner, '=')) {
+                return make_token(scanner, TOKEN_PERCENT_EQUAL);
+            }
+            return make_token(scanner, TOKEN_PERCENT);
         case ',': { Token t = {TOKEN_COMMA, scanner->start, 1, scanner->line}; return t; }
         case '.': { Token t = {TOKEN_DOT, scanner->start, 1, scanner->line}; return t; }
+        case '?': { Token t = {TOKEN_QUESTION, scanner->start, 1, scanner->line}; return t; }
         case '=':
             if (match_char(scanner, '=')) {
                 return make_token(scanner, TOKEN_EQUAL_EQUAL);

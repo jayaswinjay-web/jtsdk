@@ -25,6 +25,8 @@ Automatically activates for `.jts` files.
 - `class` - Class definition
 - `classextends` - Class with inheritance
 - `trycatch` - Try-catch block
+- `tryfinally` - Try-finally block
+- `comprehension` - List comprehension
 - `print` - Print statement
 - `input` - Input statement
 - `import` - Import statement

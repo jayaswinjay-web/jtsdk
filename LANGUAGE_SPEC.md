@@ -406,6 +406,26 @@ Accessing an index outside the list raises a runtime error.
 
 See [Section 14: List Methods](#14-list-methods).
 
+### 7.7 List Comprehensions
+
+Build a new list from an iterable (list, string, dict, or range) with an inline `for`. An optional `if` filter is supported. Nested comprehensions work too.
+
+```
+squares = [x * x for x in range(1, 6)]
+# [1, 4, 9, 16, 25]
+
+evens = [x for x in range(10) if x % 2 == 0]
+# [0, 2, 4, 6, 8]
+
+upper = [n.upper() for n in ["alice", "bob"]]
+# [ALICE, BOB]
+
+nested = [[a for a in range(b)] for b in range(1, 4)]
+# [[0], [0, 1], [0, 1, 2]]
+```
+
+A comprehension is a single-clause `for` (currently one `for` and at most one `if`).
+
 ---
 
 ## 8. Dictionaries
@@ -616,14 +636,39 @@ catch
 end
 ```
 
-### 11.4 How It Works
+### 11.4 Finally
+
+A `finally` block runs whether or not the `try` body raised an error. If there is no `catch`, an error raised in the `try` body runs the `finally` block and then propagates.
+
+```
+try
+    file = open("data.txt")
+catch e
+    print("Could not open: " + e)
+finally
+    print("Cleanup done")
+end
+```
+
+```
+try
+    throw "unhandled"
+finally
+    print("cleanup runs first")
+end
+# cleanup runs first, then the error propagates
+```
+
+### 11.5 How It Works
 
 1. Code in `try` block runs normally
 2. If `throw` is encountered, the error value is pushed onto the stack
 3. The VM unwinds the stack to the state at the `try` entry point
-4. Execution jumps to the `catch` block
+4. Execution jumps to the `catch` block (if present)
 5. The error value is stored in the catch variable (or discarded if no variable)
-6. Execution continues after the `end`
+6. The `finally` block (if present) runs on both the normal and error paths
+7. If there is no `catch`, the error propagates after `finally` runs
+8. Execution continues after the `end`
 
 If no `try` block is active when `throw` executes, the error is printed to stderr and the program terminates.
 
@@ -920,7 +965,8 @@ while_stmt      = "while" expression NEWLINE block "end" ;
 for_stmt        = "for" IDENTIFIER "in" expression "to" expression NEWLINE block "end" ;
 return_stmt     = "return" [ expression ] NEWLINE ;
 try_stmt        = "try" NEWLINE block
-                  [ "catch" [ IDENTIFIER ] NEWLINE block ] "end" ;
+                  [ "catch" [ IDENTIFIER ] NEWLINE block ]
+                  [ "finally" NEWLINE block ] "end" ;
 throw_stmt      = "throw" expression NEWLINE ;
 break_stmt      = "break" NEWLINE ;
 continue_stmt   = "continue" NEWLINE ;
@@ -959,7 +1005,8 @@ primary         = NUMBER | STRING | "true" | "false" | "nil"
                 | super_expr
                 | builtin_call ;
 
-list_literal    = "[" [ expression { "," expression } ] "]" ;
+list_literal    = "[" [ expression { "," expression } ] "]" 
+                | "[" expression "for" IDENTIFIER "in" expression [ "if" expression ] "]" ;
 dict_literal    = "{" [ ( STRING | IDENTIFIER ) ":" expression { "," ( STRING | IDENTIFIER ) ":" expression } ] "}" ;
 new_expr        = "new" IDENTIFIER "(" [ arg_list ] ")" ;
 super_expr      = "super" "." IDENTIFIER "(" [ arg_list ] ")" ;

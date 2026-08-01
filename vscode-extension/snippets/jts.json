@@ -85,6 +85,24 @@
     ],
     "description": "Try-catch block"
   },
+  "Try-Finally": {
+    "prefix": "tryfinally",
+    "body": [
+      "try",
+      "    ${1:# risky code}",
+      "finally",
+      "    ${2:# cleanup}",
+      "end"
+    ],
+    "description": "Try-finally block"
+  },
+  "List-Comprehension": {
+    "prefix": "comprehension",
+    "body": [
+      "${1:result} = [${2:expr} for ${3:item} in ${4:iterable}${5: if ${6:condition}}]"
+    ],
+    "description": "List comprehension"
+  },
   "Print": {
     "prefix": "print",
     "body": [

@@ -1,0 +1,42 @@
+# Extended try/finally tests
+func run_cleanup(ok)
+    try
+        if ok
+            throw "inner failure"
+        end
+        print("no failure")
+    catch e
+        print("caught: " + e)
+    finally
+        print("cleanup running")
+    end
+    print("function done")
+end
+
+run_cleanup(true)
+run_cleanup(false)
+
+print("--- nested try/finally ---")
+try
+    try
+        throw "deep"
+    catch e
+        print("inner caught: " + e)
+    finally
+        print("inner finally")
+    end
+finally
+    print("outer finally")
+end
+print("after nested")
+
+print("--- finally with locals ---")
+try
+    x = 10
+    y = x * 2
+    throw "local err"
+catch e
+    print("err: " + e)
+finally
+    print("x+y=" + (x + y))
+end

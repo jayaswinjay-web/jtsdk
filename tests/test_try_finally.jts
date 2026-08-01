@@ -1,0 +1,28 @@
+# Test try/catch/finally
+print("--- Finally: no error ---")
+try
+    print("try body")
+finally
+    print("finally body")
+end
+print("after")
+
+print("--- Finally: error caught ---")
+try
+    print("try body 2")
+    throw "boom"
+catch e
+    print("caught: " + e)
+finally
+    print("finally body 2")
+end
+print("after 2")
+
+print("--- Finally: error not caught ---")
+try
+    print("try body 3")
+    throw "unhandled"
+finally
+    print("finally body 3")
+end
+print("unreachable")

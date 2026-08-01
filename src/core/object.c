@@ -49,6 +49,7 @@ ObjString* copy_string(const char* chars, int length) {
 ObjFunction* new_function(void) {
     ObjFunction* function = ALLOCATE_OBJ(ObjFunction, OBJ_FUNCTION);
     function->arity = 0;
+    function->max_arity = 0;
     function->name = NULL;
     init_chunk(&function->chunk);
     return function;

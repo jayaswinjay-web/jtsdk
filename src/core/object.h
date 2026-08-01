@@ -35,6 +35,7 @@ struct ObjString {
 typedef struct ObjFunction {
     Obj obj;
     int arity;
+    int max_arity;
     Chunk chunk;
     ObjString* name;
 } ObjFunction;

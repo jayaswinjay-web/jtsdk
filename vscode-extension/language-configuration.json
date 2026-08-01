@@ -23,12 +23,12 @@
   ],
   "folding": {
     "markers": {
-      "start": "^\\s*func\\b|^\\s*class\\b|^\\s*if\\b|^\\s*while\\b|^\\s*for\\b|^\\s*try\\b",
+      "start": "^\\s*func\\b|^\\s*class\\b|^\\s*if\\b|^\\s*while\\b|^\\s*for\\b|^\\s*try\\b|^\\s*catch\\b|^\\s*finally\\b",
       "end": "^\\s*end\\b"
     }
   },
   "indentationRules": {
-    "increaseIndentPattern": "\\b(func|if|elif|else|while|for|class|try|catch|import)\\b.*$",
+    "increaseIndentPattern": "\\b(func|if|elif|else|while|for|class|try|catch|finally|import)\\b.*$",
     "decreaseIndentPattern": "^\\s*end\\b"
   }
 }

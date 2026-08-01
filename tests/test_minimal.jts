@@ -1,5 +1,6 @@
 # Minimal test
-x = 15
+print("enter your age")
+x = input()
 if x < 10
     print("small")
 elif x < 20

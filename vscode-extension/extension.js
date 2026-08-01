@@ -87,7 +87,7 @@ function activate(context) {
             const keywords = [
                 'if', 'elif', 'else', 'while', 'for', 'in', 'to', 'break', 'continue',
                 'return', 'func', 'class', 'extends', 'new', 'self', 'super',
-                'try', 'catch', 'throw', 'import', 'end', 'and', 'or', 'not',
+                'try', 'catch', 'finally', 'throw', 'import', 'end', 'and', 'or', 'not',
                 'true', 'false', 'nil', 'int', 'float', 'string', 'bool', 'list', 'var'
             ];
 

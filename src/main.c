@@ -4,6 +4,7 @@
 
 #include "common.h"
 #include "vm/vm.h"
+#include "vm/native.h"
 #include "compiler/compiler.h"
 #include "core/chunk.h"
 #include "core/memory.h"
@@ -365,6 +366,7 @@ static void debug_run_file(const char* path) {
 }
 
 int main(int argc, const char* argv[]) {
+    set_program_args(argc, argv);
     ToolType tool = detect_tool(argv[0]);
 
     if (argc == 1) {

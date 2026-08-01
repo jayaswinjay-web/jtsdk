@@ -47,6 +47,18 @@ void init_vm(void) {
         "substring", "starts_with", "ends_with", "length",
         "remove", "pop", "sort",
         "read_file", "write_file", "import_file",
+        "range", "abs", "min", "max", "sum", "pow", "round",
+        "floor", "ceil", "rand", "randint", "seed", "shuffle",
+        "int", "float", "bool",
+        "find", "count", "capitalize", "title", "swapcase",
+        "is_digit", "is_alpha", "is_alnum", "is_space", "is_upper", "is_lower",
+        "zfill", "ljust", "rjust", "center", "join", "lstrip", "rstrip", "splitlines",
+        "format",
+        "insert", "extend", "clear", "copy", "reverse", "index",
+        "keys", "values", "items", "get", "has", "update",
+        "json_parse", "json_stringify",
+        "now", "sleep", "strftime",
+        "env", "args", "exit", "cwd",
         NULL
     };
     for (int i = 0; native_names[i] != NULL; i++) {
@@ -55,6 +67,15 @@ void init_vm(void) {
         table_set(&vm.globals, name, OBJ_VAL(name));
         pop();
     }
+
+    ObjString* pi_name = copy_string("pi", 2);
+    push(OBJ_VAL(pi_name));
+    table_set(&vm.globals, pi_name, NUMBER_VAL(3.14159265358979323846));
+    pop();
+    ObjString* e_name = copy_string("e", 1);
+    push(OBJ_VAL(e_name));
+    table_set(&vm.globals, e_name, NUMBER_VAL(2.71828182845904523536));
+    pop();
 }
 
 void free_vm(void) {
@@ -105,9 +126,17 @@ static void runtime_error(const char* format, ...) {
 }
 
 static bool call(ObjFunction* function, int arg_count) {
-    if (arg_count != function->arity) {
-        runtime_error("Expected %d arguments but got %d.",
-                      function->arity, arg_count);
+    int min_arity = function->arity;
+    int max_arity = function->max_arity;
+    if (max_arity < min_arity) max_arity = min_arity;
+    if (arg_count < min_arity || arg_count > max_arity) {
+        if (min_arity == max_arity) {
+            runtime_error("Expected %d arguments but got %d.",
+                          min_arity, arg_count);
+        } else {
+            runtime_error("Expected %d to %d arguments but got %d.",
+                          min_arity, max_arity, arg_count);
+        }
         return false;
     }
 
@@ -116,10 +145,19 @@ static bool call(ObjFunction* function, int arg_count) {
         return false;
     }
 
+    int padded = arg_count;
+    if (max_arity > arg_count) {
+        for (int i = arg_count; i < max_arity; i++) {
+            push(NIL_VAL);
+        }
+        padded = max_arity;
+    }
+
     CallFrame* frame = &vm.frames[vm.frame_count++];
     frame->function = function;
     frame->ip = function->chunk.code;
-    frame->slots = vm.stack_top - arg_count - 1;
+    frame->arg_count = arg_count;
+    frame->slots = vm.stack_top - padded - 1;
     return true;
 }
 
@@ -462,7 +500,45 @@ static InterpretResult run(void) {
         }
 
         case OP_SUBTRACT: BINARY_OP(NUMBER_VAL, -); break;
-        case OP_MULTIPLY: BINARY_OP(NUMBER_VAL, *); break;
+        case OP_MULTIPLY: {
+            if (IS_STRING(peek(0)) && IS_NUMBER(peek(1))) {
+                ObjString* str = AS_STRING(pop());
+                Value num = pop();
+                int n = (int)AS_NUMBER(num);
+                if (n < 0) n = 0;
+                int total = str->length * n;
+                if (total == 0 || n == 0) {
+                    push(OBJ_VAL(copy_string("", 0)));
+                } else {
+                    char* chars = ALLOCATE(char, total + 1);
+                    for (int i = 0; i < n; i++) {
+                        memcpy(chars + i * str->length, str->chars, str->length);
+                    }
+                    chars[total] = '\0';
+                    push(OBJ_VAL(take_string(chars, total)));
+                }
+                break;
+            } else if (IS_NUMBER(peek(0)) && IS_STRING(peek(1))) {
+                Value num = pop();
+                ObjString* str = AS_STRING(pop());
+                int n = (int)AS_NUMBER(num);
+                if (n < 0) n = 0;
+                int total = str->length * n;
+                if (total == 0 || n == 0) {
+                    push(OBJ_VAL(copy_string("", 0)));
+                } else {
+                    char* chars = ALLOCATE(char, total + 1);
+                    for (int i = 0; i < n; i++) {
+                        memcpy(chars + i * str->length, str->chars, str->length);
+                    }
+                    chars[total] = '\0';
+                    push(OBJ_VAL(take_string(chars, total)));
+                }
+                break;
+            }
+            BINARY_OP(NUMBER_VAL, *);
+            break;
+        }
         case OP_DIVIDE: {
             if (!IS_NUMBER(peek(0)) || !IS_NUMBER(peek(1))) {
                 runtime_error("Operands must be numbers.");
@@ -490,6 +566,32 @@ static InterpretResult run(void) {
                 return INTERPRET_RUNTIME_ERROR;
             }
             push(NUMBER_VAL(fmod(a, b)));
+            break;
+        }
+
+        case OP_POWER: {
+            if (!IS_NUMBER(peek(0)) || !IS_NUMBER(peek(1))) {
+                runtime_error("Operands must be numbers.");
+                return INTERPRET_RUNTIME_ERROR;
+            }
+            double b = AS_NUMBER(pop());
+            double a = AS_NUMBER(pop());
+            push(NUMBER_VAL(pow(a, b)));
+            break;
+        }
+
+        case OP_FLOOR_DIV: {
+            if (!IS_NUMBER(peek(0)) || !IS_NUMBER(peek(1))) {
+                runtime_error("Operands must be numbers.");
+                return INTERPRET_RUNTIME_ERROR;
+            }
+            double b = AS_NUMBER(pop());
+            double a = AS_NUMBER(pop());
+            if (b == 0) {
+                runtime_error("Division by zero.");
+                return INTERPRET_RUNTIME_ERROR;
+            }
+            push(NUMBER_VAL(floor(a / b)));
             break;
         }
 
@@ -525,10 +627,84 @@ static InterpretResult run(void) {
             break;
         }
 
-        case OP_GREATER:      BINARY_OP(BOOL_VAL, >); break;
-        case OP_LESS:         BINARY_OP(BOOL_VAL, <); break;
-        case OP_GREATER_EQUAL: BINARY_OP(BOOL_VAL, >=); break;
-        case OP_LESS_EQUAL:    BINARY_OP(BOOL_VAL, <=); break;
+        case OP_GREATER:
+        case OP_LESS:
+        case OP_GREATER_EQUAL:
+        case OP_LESS_EQUAL: {
+            if (IS_STRING(peek(0)) && IS_STRING(peek(1))) {
+                ObjString* b = AS_STRING(pop());
+                ObjString* a = AS_STRING(pop());
+                int minlen = a->length < b->length ? a->length : b->length;
+                int cmp = memcmp(a->chars, b->chars, (size_t)minlen);
+                if (cmp == 0) {
+                    cmp = (a->length > b->length) - (a->length < b->length);
+                }
+                bool result;
+                switch (instruction) {
+                    case OP_GREATER:      result = cmp > 0; break;
+                    case OP_LESS:         result = cmp < 0; break;
+                    case OP_GREATER_EQUAL: result = cmp >= 0; break;
+                    default:              result = cmp <= 0; break;
+                }
+                push(BOOL_VAL(result));
+                break;
+            }
+            if (!IS_NUMBER(peek(0)) || !IS_NUMBER(peek(1))) {
+                runtime_error("Operands must be numbers or strings.");
+                return INTERPRET_RUNTIME_ERROR;
+            }
+            double b = AS_NUMBER(pop());
+            double a = AS_NUMBER(pop());
+            bool result;
+            switch (instruction) {
+                case OP_GREATER:      result = a > b; break;
+                case OP_LESS:         result = a < b; break;
+                case OP_GREATER_EQUAL: result = a >= b; break;
+                default:              result = a <= b; break;
+            }
+            push(BOOL_VAL(result));
+            break;
+        }
+
+        case OP_IN: {
+            Value container = pop();
+            Value item = pop();
+            bool found = false;
+            if (IS_LIST(container)) {
+                ObjList* list = AS_LIST(container);
+                for (int i = 0; i < list->count; i++) {
+                    if (values_equal(item, list->values[i])) {
+                        found = true;
+                        break;
+                    }
+                }
+            } else if (IS_STRING(container)) {
+                if (IS_STRING(item)) {
+                    ObjString* str = AS_STRING(container);
+                    ObjString* sub = AS_STRING(item);
+                    if (sub->length == 0) {
+                        found = true;
+                    } else if (sub->length <= str->length) {
+                        for (int i = 0; i <= str->length - sub->length; i++) {
+                            if (memcmp(&str->chars[i], sub->chars, sub->length) == 0) {
+                                found = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+            } else if (IS_DICT(container)) {
+                if (IS_STRING(item)) {
+                    Value result;
+                    found = dict_get(AS_DICT(container), AS_STRING(item), &result);
+                }
+            } else {
+                runtime_error("Right operand of 'in' must be a list, string, or dict.");
+                return INTERPRET_RUNTIME_ERROR;
+            }
+            push(BOOL_VAL(found));
+            break;
+        }
 
         case OP_PRINT: {
             Value value = pop();
@@ -649,6 +825,7 @@ static InterpretResult run(void) {
             }
             int i = (int)AS_NUMBER(index);
             ObjList* list = AS_LIST(obj);
+            if (i < 0) i += list->count;
             if (i < 0 || i >= list->count) {
                 runtime_error("List index out of bounds.");
                 return INTERPRET_RUNTIME_ERROR;
@@ -671,11 +848,170 @@ static InterpretResult run(void) {
             }
             int i = (int)AS_NUMBER(index);
             ObjList* list = AS_LIST(obj);
+            if (i < 0) i += list->count;
             if (!list_set(list, i, value)) {
                 runtime_error("List index out of bounds.");
                 return INTERPRET_RUNTIME_ERROR;
             }
             push(value);
+            break;
+        }
+
+        case OP_SLICE: {
+            Value step_v = pop();
+            Value end_v = pop();
+            Value start_v = pop();
+            Value obj = pop();
+            int len = 0;
+            if (IS_STRING(obj)) {
+                len = AS_STRING(obj)->length;
+            } else if (IS_LIST(obj)) {
+                len = AS_LIST(obj)->count;
+            } else {
+                runtime_error("Can only slice strings and lists.");
+                return INTERPRET_RUNTIME_ERROR;
+            }
+            int step = IS_NUMBER(step_v) ? (int)AS_NUMBER(step_v) : 1;
+            if (step == 0) {
+                runtime_error("Slice step cannot be zero.");
+                return INTERPRET_RUNTIME_ERROR;
+            }
+            int start, end;
+            if (step > 0) {
+                start = IS_NUMBER(start_v) ? (int)AS_NUMBER(start_v) : 0;
+                end = IS_NUMBER(end_v) ? (int)AS_NUMBER(end_v) : len;
+                if (start < 0) start += len;
+                if (end < 0) end += len;
+                if (start < 0) start = 0;
+                if (end > len) end = len;
+            } else {
+                start = IS_NUMBER(start_v) ? (int)AS_NUMBER(start_v) : len - 1;
+                end = IS_NUMBER(end_v) ? (int)AS_NUMBER(end_v) : -len - 1;
+                if (start < 0) start += len;
+                if (end < 0) end += len;
+                if (start >= len) start = len - 1;
+                if (end < -1) end = -1;
+            }
+            if (IS_STRING(obj)) {
+                ObjString* str = AS_STRING(obj);
+                int cap = len + 1;
+                char* chars = ALLOCATE(char, cap);
+                int count = 0;
+                for (int i = start; step > 0 ? i < end : i > end; i += step) {
+                    if (i < 0 || i >= len) break;
+                    chars[count++] = str->chars[i];
+                }
+                chars[count] = '\0';
+                push(OBJ_VAL(take_string(chars, count)));
+            } else {
+                ObjList* list = AS_LIST(obj);
+                ObjList* result = new_list();
+                for (int i = start; step > 0 ? i < end : i > end; i += step) {
+                    if (i < 0 || i >= len) break;
+                    list_append(result, list->values[i]);
+                }
+                push(OBJ_VAL(result));
+            }
+            break;
+        }
+
+        case OP_LEN: {
+            Value obj = pop();
+            if (IS_STRING(obj)) {
+                push(NUMBER_VAL((double)AS_STRING(obj)->length));
+            } else if (IS_LIST(obj)) {
+                push(NUMBER_VAL((double)AS_LIST(obj)->count));
+            } else if (IS_DICT(obj)) {
+                push(NUMBER_VAL((double)AS_DICT(obj)->entries.count));
+            } else if (IS_TENSOR(obj)) {
+                push(NUMBER_VAL((double)AS_TENSOR(obj)->size));
+            } else if (IS_MATRIX(obj)) {
+                push(NUMBER_VAL((double)(AS_MATRIX(obj)->rows * AS_MATRIX(obj)->cols)));
+            } else {
+                runtime_error("Cannot get length of this value.");
+                return INTERPRET_RUNTIME_ERROR;
+            }
+            break;
+        }
+
+        case OP_ITER_VALUE: {
+            Value index = pop();
+            Value iterable = pop();
+            if (!IS_NUMBER(index)) {
+                runtime_error("Iterator index must be a number.");
+                return INTERPRET_RUNTIME_ERROR;
+            }
+            int i = (int)AS_NUMBER(index);
+            if (IS_LIST(iterable)) {
+                ObjList* list = AS_LIST(iterable);
+                if (i < 0 || i >= list->count) {
+                    runtime_error("List index out of bounds.");
+                    return INTERPRET_RUNTIME_ERROR;
+                }
+                push(list->values[i]);
+            } else if (IS_STRING(iterable)) {
+                ObjString* str = AS_STRING(iterable);
+                if (i < 0 || i >= str->length) {
+                    runtime_error("String index out of bounds.");
+                    return INTERPRET_RUNTIME_ERROR;
+                }
+                push(OBJ_VAL(copy_string(&str->chars[i], 1)));
+            } else if (IS_DICT(iterable)) {
+                ObjDict* dict = AS_DICT(iterable);
+                int found = -1;
+                int idx = 0;
+                for (int j = 0; j < dict->entries.capacity; j++) {
+                    if (dict->entries.entries[j].key != NULL) {
+                        if (idx == i) {
+                            found = j;
+                            break;
+                        }
+                        idx++;
+                    }
+                }
+                if (found == -1) {
+                    runtime_error("Dict index out of bounds.");
+                    return INTERPRET_RUNTIME_ERROR;
+                }
+                push(OBJ_VAL(dict->entries.entries[found].key));
+            } else {
+                runtime_error("Cannot iterate over this value.");
+                return INTERPRET_RUNTIME_ERROR;
+            }
+            break;
+        }
+
+        case OP_UNPACK: {
+            int count = READ_BYTE();
+            Value list_v = pop();
+            if (!IS_LIST(list_v)) {
+                runtime_error("Cannot unpack a non-list value.");
+                return INTERPRET_RUNTIME_ERROR;
+            }
+            ObjList* list = AS_LIST(list_v);
+            if (list->count != count) {
+                runtime_error("Cannot unpack %d values into %d targets.", list->count, count);
+                return INTERPRET_RUNTIME_ERROR;
+            }
+            for (int i = 0; i < count; i++) {
+                push(list->values[i]);
+            }
+            break;
+        }
+
+        case OP_APPEND_LIST: {
+            Value element = pop();
+            Value list_v = peek(0);
+            if (!IS_LIST(list_v)) {
+                runtime_error("Cannot append to a non-list value.");
+                return INTERPRET_RUNTIME_ERROR;
+            }
+            list_append(AS_LIST(list_v), element);
+            break;
+        }
+
+        case OP_GET_ARGCOUNT: {
+            push(NUMBER_VAL((double)frame->arg_count));
             break;
         }
 

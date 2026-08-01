@@ -7,5 +7,6 @@
 
 void register_native_functions(void);
 bool call_native(const char* name, int arg_count, Value* args, Value* result);
+void set_program_args(int argc, const char** argv);
 
 #endif

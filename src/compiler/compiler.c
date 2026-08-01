@@ -261,6 +261,7 @@ static void block(Compiler* compiler) {
     while (compiler->current.type != TOKEN_DEDENT &&
            compiler->current.type != TOKEN_END &&
            compiler->current.type != TOKEN_CATCH &&
+           compiler->current.type != TOKEN_FINALLY &&
            compiler->current.type != TOKEN_ELIF &&
            compiler->current.type != TOKEN_ELSE &&
            compiler->current.type != TOKEN_EOF) {
@@ -390,23 +391,98 @@ static void for_statement(Compiler* compiler) {
     consume(compiler, TOKEN_IN, "Expect 'in' after variable name");
     expression(compiler);
 
-    emit_bytes(compiler, OP_DEFINE_GLOBAL, var_constant);
+    if (match(compiler, TOKEN_TO)) {
+        emit_bytes(compiler, OP_DEFINE_GLOBAL, var_constant);
 
-    consume(compiler, TOKEN_TO, "Expect 'to' after start value");
-    expression(compiler);
+        expression(compiler);
 
-    uint8_t end_name = make_constant(compiler,
-        OBJ_VAL(copy_string("_jts_for_end", 11)));
-    emit_bytes(compiler, OP_DEFINE_GLOBAL, end_name);
+        uint8_t end_name = make_constant(compiler,
+            OBJ_VAL(copy_string("_jts_for_end", 11)));
+        emit_bytes(compiler, OP_DEFINE_GLOBAL, end_name);
+
+        int loop_start = current_chunk(compiler)->count;
+
+        emit_bytes(compiler, OP_GET_GLOBAL, var_constant);
+        emit_bytes(compiler, OP_GET_GLOBAL, end_name);
+        emit_byte(compiler, OP_LESS);
+
+        int exit_jump = emit_jump(compiler, OP_JUMP_IF_FALSE);
+        emit_byte(compiler, OP_POP);
+
+        if (compiler->current.type == TOKEN_NEWLINE) {
+            advance(compiler);
+        }
+
+        loop_depth++;
+        int saved_break_count = break_count;
+        int saved_continue_count = continue_count;
+
+        begin_scope(compiler);
+        block(compiler);
+        end_scope(compiler);
+        match(compiler, TOKEN_END);
+
+        // Patch continue jumps to increment
+        int increment_start = current_chunk(compiler)->count;
+
+        emit_bytes(compiler, OP_GET_GLOBAL, var_constant);
+        emit_constant(compiler, NUMBER_VAL(1));
+        emit_byte(compiler, OP_ADD);
+        emit_bytes(compiler, OP_SET_GLOBAL, var_constant);
+        emit_byte(compiler, OP_POP);
+
+        for (int i = saved_continue_count; i < continue_count; i++) {
+            int offset = current_chunk(compiler)->count - continue_jumps[i] - 2;
+            current_chunk(compiler)->code[continue_jumps[i]] = (offset >> 8) & 0xff;
+            current_chunk(compiler)->code[continue_jumps[i] + 1] = offset & 0xff;
+        }
+        continue_count = saved_continue_count;
+
+        emit_loop(compiler, loop_start);
+
+        // Patch break jumps
+        for (int i = saved_break_count; i < break_count; i++) {
+            patch_jump(compiler, break_jumps[i]);
+        }
+        break_count = saved_break_count;
+        loop_depth--;
+
+        patch_jump(compiler, exit_jump);
+        emit_byte(compiler, OP_POP);
+
+        end_scope(compiler);
+        return;
+    }
+
+    /* Foreach: for var in iterable — iterate lists, strings, dicts, ranges */
+    Token iter_name = (Token){TOKEN_IDENTIFIER, "_jts_iter", 9, var_name.line};
+    Token idx_name = (Token){TOKEN_IDENTIFIER, "_jts_idx", 8, var_name.line};
+
+    add_local(compiler, iter_name);
+    mark_initialized(compiler);
+    int iter_slot = compiler->local_count - 1;
+    emit_bytes(compiler, OP_SET_LOCAL, (uint8_t)iter_slot);
+
+    add_local(compiler, idx_name);
+    mark_initialized(compiler);
+    int idx_slot = compiler->local_count - 1;
+    emit_constant(compiler, NUMBER_VAL(0));
+    emit_bytes(compiler, OP_SET_LOCAL, (uint8_t)idx_slot);
 
     int loop_start = current_chunk(compiler)->count;
 
-    emit_bytes(compiler, OP_GET_GLOBAL, var_constant);
-    emit_bytes(compiler, OP_GET_GLOBAL, end_name);
+    emit_bytes(compiler, OP_GET_LOCAL, (uint8_t)idx_slot);
+    emit_bytes(compiler, OP_GET_LOCAL, (uint8_t)iter_slot);
+    emit_byte(compiler, OP_LEN);
     emit_byte(compiler, OP_LESS);
 
     int exit_jump = emit_jump(compiler, OP_JUMP_IF_FALSE);
     emit_byte(compiler, OP_POP);
+
+    emit_bytes(compiler, OP_GET_LOCAL, (uint8_t)iter_slot);
+    emit_bytes(compiler, OP_GET_LOCAL, (uint8_t)idx_slot);
+    emit_byte(compiler, OP_ITER_VALUE);
+    emit_bytes(compiler, OP_DEFINE_GLOBAL, var_constant);
 
     if (compiler->current.type == TOKEN_NEWLINE) {
         advance(compiler);
@@ -424,10 +500,10 @@ static void for_statement(Compiler* compiler) {
     // Patch continue jumps to increment
     int increment_start = current_chunk(compiler)->count;
 
-    emit_bytes(compiler, OP_GET_GLOBAL, var_constant);
+    emit_bytes(compiler, OP_GET_LOCAL, (uint8_t)idx_slot);
     emit_constant(compiler, NUMBER_VAL(1));
     emit_byte(compiler, OP_ADD);
-    emit_bytes(compiler, OP_SET_GLOBAL, var_constant);
+    emit_bytes(compiler, OP_SET_LOCAL, (uint8_t)idx_slot);
     emit_byte(compiler, OP_POP);
 
     for (int i = saved_continue_count; i < continue_count; i++) {
@@ -472,6 +548,50 @@ static void call_expr(Compiler* compiler, bool can_assign) {
     emit_bytes(compiler, OP_CALL, (uint8_t)arg_count);
 }
 
+static void parse_parameters(Compiler* compiler) {
+    int total = 0;
+    int required = 0;
+    bool seen_default = false;
+    if (!match(compiler, TOKEN_RIGHT_PAREN)) {
+        do {
+            if (compiler->current.type == TOKEN_IDENTIFIER ||
+                compiler->current.type == TOKEN_SELF) {
+                advance(compiler);
+            } else {
+                consume(compiler, TOKEN_IDENTIFIER, "Expect parameter name");
+            }
+            declare_variable(compiler);
+            mark_initialized(compiler);
+            compiler->locals[compiler->local_count - 1].depth = 1;
+            int slot = compiler->local_count - 1;
+            total++;
+            if (match(compiler, TOKEN_EQUAL)) {
+                seen_default = true;
+                emit_byte(compiler, OP_GET_ARGCOUNT);
+                emit_constant(compiler, NUMBER_VAL((double)slot));
+                emit_byte(compiler, OP_LESS);
+                int skip = emit_jump(compiler, OP_JUMP_IF_FALSE);
+                emit_byte(compiler, OP_POP);
+                expression(compiler);
+                emit_bytes(compiler, OP_SET_LOCAL, (uint8_t)slot);
+                emit_byte(compiler, OP_POP);
+                int done = emit_jump(compiler, OP_JUMP);
+                patch_jump(compiler, skip);
+                emit_byte(compiler, OP_POP);
+                patch_jump(compiler, done);
+            } else {
+                if (seen_default) {
+                    error(compiler, "Non-default parameter after default parameter");
+                }
+                required++;
+            }
+        } while (match(compiler, TOKEN_COMMA));
+        consume(compiler, TOKEN_RIGHT_PAREN, "Expect ')' after parameters");
+    }
+    compiler->function->arity = required;
+    compiler->function->max_arity = total;
+}
+
 static void func_definition(Compiler* compiler) {
     consume(compiler, TOKEN_IDENTIFIER, "Expect function name");
     Token name = compiler->previous;
@@ -501,26 +621,10 @@ static void func_definition(Compiler* compiler) {
 
     consume(&fn_compiler, TOKEN_LEFT_PAREN, "Expect '(' after function name");
 
-        int param_count = 0;
-        if (!match(&fn_compiler, TOKEN_RIGHT_PAREN)) {
-            do {
-                if (fn_compiler.current.type == TOKEN_IDENTIFIER ||
-                    fn_compiler.current.type == TOKEN_SELF) {
-                    advance(&fn_compiler);
-                } else {
-                    consume(&fn_compiler, TOKEN_IDENTIFIER, "Expect parameter name");
-                }
-                declare_variable(&fn_compiler);
-                mark_initialized(&fn_compiler);
-                fn_compiler.locals[fn_compiler.local_count - 1].depth = 1;
-                param_count++;
-            } while (match(&fn_compiler, TOKEN_COMMA));
-            consume(&fn_compiler, TOKEN_RIGHT_PAREN, "Expect ')' after parameters");
-        }
-        fn_compiler.function->arity = param_count;
-        if (fn_compiler.debug_func) {
-            fn_compiler.debug_func->arity = param_count;
-        }
+    parse_parameters(&fn_compiler);
+    if (fn_compiler.debug_func) {
+        fn_compiler.debug_func->arity = fn_compiler.function->arity;
+    }
 
     if (fn_compiler.current.type == TOKEN_NEWLINE) {
         advance(&fn_compiler);
@@ -597,6 +701,9 @@ static void class_declaration(Compiler* compiler) {
             fn_compiler.function = new_function();
             fn_compiler.function->name = copy_string(method_name.start, method_name.length);
 
+            Chunk* method_chunk = current_chunk(&fn_compiler);
+            fn_compiler.debug_func = chunk_add_debug_func(method_chunk, method_name.start, method_name.length, 0);
+
             Local* local = &fn_compiler.locals[fn_compiler.local_count++];
             local->depth = 0;
             local->name.start = "";
@@ -606,23 +713,10 @@ static void class_declaration(Compiler* compiler) {
 
             consume(&fn_compiler, TOKEN_LEFT_PAREN, "Expect '(' after method name");
 
-            int param_count = 0;
-            if (!match(&fn_compiler, TOKEN_RIGHT_PAREN)) {
-                do {
-                    if (fn_compiler.current.type == TOKEN_IDENTIFIER ||
-                        fn_compiler.current.type == TOKEN_SELF) {
-                        advance(&fn_compiler);
-                    } else {
-                        consume(&fn_compiler, TOKEN_IDENTIFIER, "Expect parameter name");
-                    }
-                    declare_variable(&fn_compiler);
-                    mark_initialized(&fn_compiler);
-                    fn_compiler.locals[fn_compiler.local_count - 1].depth = 1;
-                    param_count++;
-                } while (match(&fn_compiler, TOKEN_COMMA));
-                consume(&fn_compiler, TOKEN_RIGHT_PAREN, "Expect ')' after parameters");
+            parse_parameters(&fn_compiler);
+            if (fn_compiler.debug_func) {
+                fn_compiler.debug_func->arity = fn_compiler.function->arity;
             }
-            fn_compiler.function->arity = param_count;
 
             if (fn_compiler.current.type == TOKEN_NEWLINE) {
                 advance(&fn_compiler);
@@ -673,6 +767,17 @@ static void return_statement(Compiler* compiler) {
         compiler->current.type != TOKEN_DEDENT &&
         compiler->current.type != TOKEN_EOF) {
         expression(compiler);
+        int count = 1;
+        while (match(compiler, TOKEN_COMMA)) {
+            expression(compiler);
+            count++;
+            if (count > 255) {
+                error_at_current(compiler, "Too many return values");
+            }
+        }
+        if (count > 1) {
+            emit_bytes(compiler, OP_LIST, (uint8_t)count);
+        }
     } else {
         emit_byte(compiler, OP_NIL);
     }
@@ -719,13 +824,14 @@ static void statement(Compiler* compiler) {
 
         // Normal path: pop exception handler, then skip catch block
         emit_byte(compiler, OP_POP_TRY);
-        int skip_catch = emit_jump(compiler, OP_JUMP);
+        int skip_finally = emit_jump(compiler, OP_JUMP);
 
         // Catch handler start — OP_TRY_SET_IP jumps here on exception
         // (error value is on TOS)
         patch_jump(compiler, handler_offset);
 
-        if (match(compiler, TOKEN_CATCH)) {
+        if (compiler->current.type == TOKEN_CATCH) {
+            advance(compiler);
             begin_scope(compiler);
             if (compiler->current.type == TOKEN_IDENTIFIER) {
                 Token err_var = compiler->current;
@@ -740,10 +846,52 @@ static void statement(Compiler* compiler) {
             }
             block(compiler);
             end_scope(compiler);
+        } else if (compiler->current.type == TOKEN_FINALLY) {
+            // No catch, but finally present: on the exception path we must
+            // run the finally block then re-throw the original error.
+            Scanner saved_scanner = *compiler->scanner;
+            Token saved_token = compiler->current;
+
+            static int err_count = 0;
+            char err_buf[32];
+            snprintf(err_buf, sizeof(err_buf), "_jts_err%d", err_count++);
+            uint8_t c_err = make_constant(compiler,
+                OBJ_VAL(copy_string(err_buf, (int)strlen(err_buf))));
+            emit_bytes(compiler, OP_DEFINE_GLOBAL, c_err);
+
+            *compiler->scanner = saved_scanner;
+            compiler->current = saved_token;
+            advance(compiler);
+            if (compiler->current.type == TOKEN_NEWLINE) {
+                advance(compiler);
+            }
+            begin_scope(compiler);
+            block(compiler);
+            end_scope(compiler);
+
+            emit_bytes(compiler, OP_GET_GLOBAL, c_err);
+            emit_byte(compiler, OP_THROW);
+
+            *compiler->scanner = saved_scanner;
+            compiler->current = saved_token;
+        } else {
+            // No catch and no finally: re-throw so the exception propagates.
+            emit_byte(compiler, OP_THROW);
+        }
+
+        // Normal path lands here (skipping catch); finally runs on both paths
+        patch_jump(compiler, skip_finally);
+
+        if (match(compiler, TOKEN_FINALLY)) {
+            if (compiler->current.type == TOKEN_NEWLINE) {
+                advance(compiler);
+            }
+            begin_scope(compiler);
+            block(compiler);
+            end_scope(compiler);
         }
 
         match(compiler, TOKEN_END);
-        patch_jump(compiler, skip_catch);
     } else if (match(compiler, TOKEN_THROW)) {
         expression(compiler);
         emit_byte(compiler, OP_THROW);
@@ -788,21 +936,26 @@ static void declaration(Compiler* compiler) {
         compiler->current.type == TOKEN_BOOL_KW ||
         compiler->current.type == TOKEN_LIST_KW ||
         compiler->current.type == TOKEN_VAR) {
-        advance(compiler); // consume the type keyword
-        Token name = compiler->current;
-        consume(compiler, TOKEN_IDENTIFIER, "Expect variable name after type");
-        
-        if (match(compiler, TOKEN_EQUAL)) {
-            // Type-annotated with value: int x = 10
-            expression(compiler);
-        } else {
-            // Unassigned: int x (default to nil)
-            emit_byte(compiler, OP_NIL);
+        Scanner saved = *compiler->scanner;
+        Token peek = scan_token(compiler->scanner);
+        *compiler->scanner = saved;
+        if (peek.type != TOKEN_LEFT_PAREN) {
+            advance(compiler); // consume the type keyword
+            Token name = compiler->current;
+            consume(compiler, TOKEN_IDENTIFIER, "Expect variable name after type");
+
+            if (match(compiler, TOKEN_EQUAL)) {
+                // Type-annotated with value: int x = 10
+                expression(compiler);
+            } else {
+                // Unassigned: int x (default to nil)
+                emit_byte(compiler, OP_NIL);
+            }
+
+            uint8_t arg = identifier_constant(compiler, &name);
+            emit_bytes(compiler, OP_DEFINE_GLOBAL, arg);
+            return;
         }
-        
-        uint8_t arg = identifier_constant(compiler, &name);
-        emit_bytes(compiler, OP_DEFINE_GLOBAL, arg);
-        return;
     }
     statement(compiler);
 }
@@ -831,6 +984,24 @@ static void synchronize(Compiler* compiler) {
 static void binary(Compiler* compiler, bool can_assign) {
     TokenType operator_type = compiler->previous.type;
     ParseRule* rule = get_rule(operator_type);
+
+    if (operator_type == TOKEN_AND) {
+        int right_jump = emit_jump(compiler, OP_JUMP_IF_FALSE);
+        emit_byte(compiler, OP_POP);
+        parse_precedence(compiler, PREC_AND);
+        patch_jump(compiler, right_jump);
+        return;
+    }
+    if (operator_type == TOKEN_OR) {
+        int else_jump = emit_jump(compiler, OP_JUMP_IF_FALSE);
+        int end_jump = emit_jump(compiler, OP_JUMP);
+        patch_jump(compiler, else_jump);
+        emit_byte(compiler, OP_POP);
+        parse_precedence(compiler, PREC_OR);
+        patch_jump(compiler, end_jump);
+        return;
+    }
+
     parse_precedence(compiler, (Precedence)(rule->precedence + 1));
 
     switch (operator_type) {
@@ -839,28 +1010,29 @@ static void binary(Compiler* compiler, bool can_assign) {
         case TOKEN_STAR:          emit_byte(compiler, OP_MULTIPLY); break;
         case TOKEN_SLASH:         emit_byte(compiler, OP_DIVIDE); break;
         case TOKEN_PERCENT:       emit_byte(compiler, OP_MODULO); break;
+        case TOKEN_STAR_STAR:     emit_byte(compiler, OP_POWER); break;
+        case TOKEN_SLASH_SLASH:   emit_byte(compiler, OP_FLOOR_DIV); break;
         case TOKEN_EQUAL_EQUAL:   emit_byte(compiler, OP_EQUAL); break;
         case TOKEN_BANG_EQUAL:    emit_byte(compiler, OP_NOT_EQUAL); break;
         case TOKEN_GREATER:       emit_byte(compiler, OP_GREATER); break;
         case TOKEN_LESS:          emit_byte(compiler, OP_LESS); break;
         case TOKEN_GREATER_EQUAL: emit_byte(compiler, OP_GREATER_EQUAL); break;
         case TOKEN_LESS_EQUAL:    emit_byte(compiler, OP_LESS_EQUAL); break;
-        case TOKEN_AND: {
-            int right_jump = emit_jump(compiler, OP_JUMP_IF_FALSE);
-            emit_byte(compiler, OP_POP);
-            parse_precedence(compiler, PREC_AND);
-            patch_jump(compiler, right_jump);
-            break;
-        }
-        case TOKEN_OR: {
-            int right_jump = emit_jump(compiler, OP_JUMP);
-            emit_byte(compiler, OP_POP);
-            parse_precedence(compiler, PREC_OR);
-            patch_jump(compiler, right_jump);
-            break;
-        }
+        case TOKEN_IN:            emit_byte(compiler, OP_IN); break;
         default: return;
     }
+}
+
+static void ternary_expr(Compiler* compiler, bool can_assign) {
+    int then_jump = emit_jump(compiler, OP_JUMP_IF_FALSE);
+    emit_byte(compiler, OP_POP);
+    expression(compiler);
+    consume(compiler, TOKEN_COLON, "Expect ':' in ternary expression");
+    int else_jump = emit_jump(compiler, OP_JUMP);
+    patch_jump(compiler, then_jump);
+    emit_byte(compiler, OP_POP);
+    expression(compiler);
+    patch_jump(compiler, else_jump);
 }
 
 static void literal(Compiler* compiler, bool can_assign) {
@@ -874,6 +1046,20 @@ static void literal(Compiler* compiler, bool can_assign) {
 
 static void grouping(Compiler* compiler, bool can_assign) {
     expression(compiler);
+    if (match(compiler, TOKEN_COMMA)) {
+        int count = 2;
+        expression(compiler);
+        while (match(compiler, TOKEN_COMMA)) {
+            expression(compiler);
+            count++;
+            if (count > 255) {
+                error_at_current(compiler, "Too many tuple elements");
+            }
+        }
+        consume(compiler, TOKEN_RIGHT_PAREN, "Expect ')' after tuple");
+        emit_bytes(compiler, OP_LIST, (uint8_t)count);
+        return;
+    }
     consume(compiler, TOKEN_RIGHT_PAREN, "Expect ')' after expression");
 }
 
@@ -882,9 +1068,40 @@ static void number_literal(Compiler* compiler, bool can_assign) {
     emit_constant(compiler, NUMBER_VAL(value));
 }
 
+static ObjString* unescape_string(const char* src, int length) {
+    char* buf = ALLOCATE(char, length + 1);
+    int pos = 0;
+    for (int i = 0; i < length; i++) {
+        char c = src[i];
+        if (c == '\\' && i + 1 < length) {
+            char e = src[++i];
+            switch (e) {
+                case 'n': buf[pos++] = '\n'; break;
+                case 't': buf[pos++] = '\t'; break;
+                case 'r': buf[pos++] = '\r'; break;
+                case '0': buf[pos++] = '\0'; break;
+                case 'a': buf[pos++] = '\a'; break;
+                case 'b': buf[pos++] = '\b'; break;
+                case 'f': buf[pos++] = '\f'; break;
+                case 'v': buf[pos++] = '\v'; break;
+                case '\\': buf[pos++] = '\\'; break;
+                case '"': buf[pos++] = '"'; break;
+                case '\'': buf[pos++] = '\''; break;
+                case '\n': break;
+                default: buf[pos++] = '\\'; buf[pos++] = e; break;
+            }
+        } else {
+            buf[pos++] = c;
+        }
+    }
+    buf[pos] = '\0';
+    ObjString* string = take_string(buf, pos);
+    return string;
+}
+
 static void string_literal(Compiler* compiler, bool can_assign) {
-    ObjString* string = copy_string(compiler->previous.start,
-                                     compiler->previous.length);
+    ObjString* string = unescape_string(compiler->previous.start,
+                                        compiler->previous.length);
     emit_constant(compiler, OBJ_VAL(string));
 }
 
@@ -914,23 +1131,101 @@ static void named_variable(Compiler* compiler, Token name, bool can_assign) {
     if (can_assign && match(compiler, TOKEN_EQUAL)) {
         expression(compiler);
         emit_bytes(compiler, set_op, (uint8_t)arg);
-    } else if (can_assign && match(compiler, TOKEN_PLUS_EQUAL)) {
+    } else if (can_assign && (compiler->current.type == TOKEN_PLUS_EQUAL ||
+                              compiler->current.type == TOKEN_MINUS_EQUAL ||
+                              compiler->current.type == TOKEN_STAR_EQUAL ||
+                              compiler->current.type == TOKEN_SLASH_EQUAL ||
+                              compiler->current.type == TOKEN_PERCENT_EQUAL ||
+                              compiler->current.type == TOKEN_STAR_STAR_EQUAL ||
+                              compiler->current.type == TOKEN_SLASH_SLASH_EQUAL)) {
+        TokenType op = compiler->current.type;
+        advance(compiler);
         emit_bytes(compiler, get_op, (uint8_t)arg);
         expression(compiler);
-        emit_byte(compiler, OP_ADD);
-        emit_bytes(compiler, set_op, (uint8_t)arg);
-    } else if (can_assign && match(compiler, TOKEN_MINUS_EQUAL)) {
-        emit_bytes(compiler, get_op, (uint8_t)arg);
-        expression(compiler);
-        emit_byte(compiler, OP_SUBTRACT);
+        switch (op) {
+            case TOKEN_PLUS_EQUAL:      emit_byte(compiler, OP_ADD); break;
+            case TOKEN_MINUS_EQUAL:     emit_byte(compiler, OP_SUBTRACT); break;
+            case TOKEN_STAR_EQUAL:      emit_byte(compiler, OP_MULTIPLY); break;
+            case TOKEN_SLASH_EQUAL:     emit_byte(compiler, OP_DIVIDE); break;
+            case TOKEN_PERCENT_EQUAL:   emit_byte(compiler, OP_MODULO); break;
+            case TOKEN_STAR_STAR_EQUAL: emit_byte(compiler, OP_POWER); break;
+            case TOKEN_SLASH_SLASH_EQUAL: emit_byte(compiler, OP_FLOOR_DIV); break;
+            default: break;
+        }
         emit_bytes(compiler, set_op, (uint8_t)arg);
     } else {
         emit_bytes(compiler, get_op, (uint8_t)arg);
     }
 }
 
-static void variable(Compiler* compiler, bool can_assign) {
+static bool lookahead_is_multi_assign(Compiler* compiler) {
+    if (compiler->current.type != TOKEN_COMMA) return false;
+    Scanner saved = *compiler->scanner;
+    Token t = scan_token(compiler->scanner);
+    if (t.type != TOKEN_IDENTIFIER && t.type != TOKEN_SELF) {
+        *compiler->scanner = saved;
+        return false;
+    }
+    t = scan_token(compiler->scanner);
+    while (t.type == TOKEN_COMMA) {
+        t = scan_token(compiler->scanner);
+        if (t.type != TOKEN_IDENTIFIER && t.type != TOKEN_SELF) {
+            *compiler->scanner = saved;
+            return false;
+        }
+        t = scan_token(compiler->scanner);
+    }
+    bool is_assign = (t.type == TOKEN_EQUAL);
+    *compiler->scanner = saved;
+    return is_assign;
+}
+
+static void variable(Compiler* compiler, bool can_assign) {    if (can_assign && lookahead_is_multi_assign(compiler)) {
+        Token targets[256];
+        int n = 0;
+        targets[n++] = compiler->previous;
+        while (match(compiler, TOKEN_COMMA)) {
+            if (compiler->current.type == TOKEN_IDENTIFIER ||
+                compiler->current.type == TOKEN_SELF) {
+                advance(compiler);
+            } else {
+                consume(compiler, TOKEN_IDENTIFIER, "Expect variable name");
+            }
+            targets[n++] = compiler->previous;
+        }
+        consume(compiler, TOKEN_EQUAL, "Expect '=' after assignment targets");
+        expression(compiler);
+        int rcount = 1;
+        while (match(compiler, TOKEN_COMMA)) {
+            expression(compiler);
+            rcount++;
+        }
+        if (rcount > 1) {
+            emit_bytes(compiler, OP_LIST, (uint8_t)rcount);
+        }
+        emit_bytes(compiler, OP_UNPACK, (uint8_t)n);
+        for (int i = n - 1; i >= 0; i--) {
+            uint8_t set_op;
+            int arg = resolve_local(compiler, &targets[i]);
+            if (arg != -1) {
+                set_op = OP_SET_LOCAL;
+            } else {
+                arg = identifier_constant(compiler, &targets[i]);
+                set_op = OP_SET_GLOBAL;
+            }
+            emit_bytes(compiler, set_op, (uint8_t)arg);
+            emit_byte(compiler, OP_POP);
+        }
+        emit_byte(compiler, OP_NIL);
+        return;
+    }
     named_variable(compiler, compiler->previous, can_assign);
+}
+
+static void keyword_variable(Compiler* compiler, bool can_assign) {
+    Token name = compiler->previous;
+    name.type = TOKEN_IDENTIFIER;
+    named_variable(compiler, name, can_assign);
 }
 
 static void len_expr(Compiler* compiler, bool can_assign) {
@@ -971,7 +1266,196 @@ static void type_expr(Compiler* compiler, bool can_assign) {
     emit_bytes(compiler, OP_CALL, 1);
 }
 
+typedef struct {
+    Token var;
+    Scanner iter_start;
+    Scanner cond_start;
+    Scanner end_pos;
+    bool has_if;
+} CompInfo;
+
+static bool scan_comprehension(Compiler* compiler, CompInfo* info) {
+    Scanner scan = *compiler->scanner;
+    scan.current = compiler->current.start;
+    scan.start = compiler->current.start;
+    scan.has_pending = false;
+    int depth = 0;
+
+    for (;;) {
+        Token t = scan_token(&scan);
+        if (t.type == TOKEN_EOF) return false;
+        if (t.type == TOKEN_LEFT_PAREN || t.type == TOKEN_LEFT_BRACKET ||
+            t.type == TOKEN_LEFT_BRACE) { depth++; continue; }
+        if (t.type == TOKEN_RIGHT_PAREN || t.type == TOKEN_RIGHT_BRACE) {
+            if (depth > 0) depth--;
+            continue;
+        }
+        if (t.type == TOKEN_RIGHT_BRACKET) {
+            if (depth == 0) return false;
+            depth--;
+            continue;
+        }
+        if (t.type == TOKEN_FOR && depth == 0) break;
+    }
+
+    Token var = scan_token(&scan);
+    if (var.type != TOKEN_IDENTIFIER) return false;
+    Token in = scan_token(&scan);
+    if (in.type != TOKEN_IN) return false;
+    info->var = var;
+    info->iter_start = scan;
+
+    for (;;) {
+        Scanner before = scan;
+        Token u = scan_token(&scan);
+        if (u.type == TOKEN_EOF) return false;
+        if (u.type == TOKEN_LEFT_PAREN || u.type == TOKEN_LEFT_BRACKET ||
+            u.type == TOKEN_LEFT_BRACE) { depth++; continue; }
+        if (u.type == TOKEN_RIGHT_PAREN || u.type == TOKEN_RIGHT_BRACE) {
+            if (depth > 0) depth--;
+            continue;
+        }
+        if (u.type == TOKEN_RIGHT_BRACKET) {
+            if (depth == 0) {
+                info->has_if = false;
+                info->end_pos = before;
+                return true;
+            }
+            depth--;
+            continue;
+        }
+        if (u.type == TOKEN_IF && depth == 0) {
+            info->has_if = true;
+            info->cond_start = scan;
+            break;
+        }
+    }
+
+    for (;;) {
+        Scanner before = scan;
+        Token u = scan_token(&scan);
+        if (u.type == TOKEN_EOF) return false;
+        if (u.type == TOKEN_LEFT_PAREN || u.type == TOKEN_LEFT_BRACKET ||
+            u.type == TOKEN_LEFT_BRACE) { depth++; continue; }
+        if (u.type == TOKEN_RIGHT_PAREN || u.type == TOKEN_RIGHT_BRACE) {
+            if (depth > 0) depth--;
+            continue;
+        }
+        if (u.type == TOKEN_RIGHT_BRACKET) {
+            if (depth == 0) {
+                info->end_pos = before;
+                return true;
+            }
+            depth--;
+            continue;
+        }
+    }
+}
+
+static bool scan_comprehension_probe(Compiler* compiler) {
+    CompInfo info;
+    return scan_comprehension(compiler, &info);
+}
+
+static void list_comprehension(Compiler* compiler) {
+    CompInfo info;
+
+    if (!scan_comprehension(compiler, &info)) {
+        error_at_current(compiler, "Invalid list comprehension");
+        return;
+    }
+
+    Scanner expr_scanner = *compiler->scanner;
+    expr_scanner.current = compiler->current.start;
+    expr_scanner.start = compiler->current.start;
+    expr_scanner.has_pending = false;
+
+    static int comp_count = 0;
+    int my_comp = comp_count++;
+    char comp_buf[32], iter_buf[32], idx_buf[32];
+    snprintf(comp_buf, sizeof(comp_buf), "_jts_comp%d", my_comp);
+    snprintf(iter_buf, sizeof(iter_buf), "_jts_iter%d", my_comp);
+    snprintf(idx_buf, sizeof(idx_buf), "_jts_idx%d", my_comp);
+
+    uint8_t c_comp = make_constant(compiler, OBJ_VAL(copy_string(comp_buf, (int)strlen(comp_buf))));
+    uint8_t c_iter = make_constant(compiler, OBJ_VAL(copy_string(iter_buf, (int)strlen(iter_buf))));
+    uint8_t c_idx = make_constant(compiler, OBJ_VAL(copy_string(idx_buf, (int)strlen(idx_buf))));
+    uint8_t c_var = make_constant(compiler, OBJ_VAL(copy_string(info.var.start, info.var.length)));
+
+    emit_bytes(compiler, OP_LIST, 0);
+    emit_bytes(compiler, OP_DEFINE_GLOBAL, c_comp);
+
+    *compiler->scanner = info.iter_start;
+    compiler->current = scan_token(compiler->scanner);
+    expression(compiler);
+    emit_bytes(compiler, OP_DEFINE_GLOBAL, c_iter);
+
+    emit_constant(compiler, NUMBER_VAL(0));
+    emit_bytes(compiler, OP_DEFINE_GLOBAL, c_idx);
+
+    int loop_start = current_chunk(compiler)->count;
+
+    emit_bytes(compiler, OP_GET_GLOBAL, c_idx);
+    emit_bytes(compiler, OP_GET_GLOBAL, c_iter);
+    emit_byte(compiler, OP_LEN);
+    emit_byte(compiler, OP_LESS);
+    int exit_jump = emit_jump(compiler, OP_JUMP_IF_FALSE);
+    emit_byte(compiler, OP_POP);
+
+    emit_bytes(compiler, OP_GET_GLOBAL, c_iter);
+    emit_bytes(compiler, OP_GET_GLOBAL, c_idx);
+    emit_byte(compiler, OP_ITER_VALUE);
+    emit_bytes(compiler, OP_DEFINE_GLOBAL, c_var);
+
+    int skip_append = -1;
+    int skip_incr = -1;
+    if (info.has_if) {
+        *compiler->scanner = info.cond_start;
+        compiler->current = scan_token(compiler->scanner);
+        expression(compiler);
+        skip_append = emit_jump(compiler, OP_JUMP_IF_FALSE);
+        emit_byte(compiler, OP_POP);
+    }
+
+    *compiler->scanner = expr_scanner;
+    compiler->current = scan_token(compiler->scanner);
+    expression(compiler);
+
+    emit_bytes(compiler, OP_GET_GLOBAL, c_comp);
+    emit_byte(compiler, OP_SWAP);
+    emit_byte(compiler, OP_APPEND_LIST);
+    emit_byte(compiler, OP_POP);
+
+    if (skip_append != -1) {
+        skip_incr = emit_jump(compiler, OP_JUMP);
+        patch_jump(compiler, skip_append);
+        emit_byte(compiler, OP_POP);
+        patch_jump(compiler, skip_incr);
+    }
+
+    emit_bytes(compiler, OP_GET_GLOBAL, c_idx);
+    emit_constant(compiler, NUMBER_VAL(1));
+    emit_byte(compiler, OP_ADD);
+    emit_bytes(compiler, OP_DEFINE_GLOBAL, c_idx);
+
+    emit_loop(compiler, loop_start);
+
+    patch_jump(compiler, exit_jump);
+    emit_byte(compiler, OP_POP);
+
+    emit_bytes(compiler, OP_GET_GLOBAL, c_comp);
+
+    *compiler->scanner = info.end_pos;
+    compiler->current = scan_token(compiler->scanner);
+    consume(compiler, TOKEN_RIGHT_BRACKET, "Expect ']' after list comprehension");
+}
+
 static void list_literal(Compiler* compiler, bool can_assign) {
+    if (compiler->current.type != TOKEN_RIGHT_BRACKET &&
+        scan_comprehension_probe(compiler)) {
+        list_comprehension(compiler);
+        return;
+    }
     int count = 0;
     if (compiler->current.type != TOKEN_RIGHT_BRACKET) {
         do {
@@ -992,7 +1476,7 @@ static void dict_literal(Compiler* compiler, bool can_assign) {
         do {
             if (compiler->current.type == TOKEN_STRING) {
                 advance(compiler);
-                ObjString* key = copy_string(compiler->previous.start, compiler->previous.length);
+                ObjString* key = unescape_string(compiler->previous.start, compiler->previous.length);
                 emit_constant(compiler, OBJ_VAL(key));
             } else if (compiler->current.type == TOKEN_IDENTIFIER) {
                 advance(compiler);
@@ -1013,7 +1497,50 @@ static void dict_literal(Compiler* compiler, bool can_assign) {
 }
 
 static void index_expr(Compiler* compiler, bool can_assign) {
+    if (compiler->current.type == TOKEN_COLON) {
+        advance(compiler);
+        emit_byte(compiler, OP_NIL);
+        if (compiler->current.type == TOKEN_COLON || compiler->current.type == TOKEN_RIGHT_BRACKET) {
+            emit_byte(compiler, OP_NIL);
+        } else {
+            expression(compiler);
+        }
+        if (match(compiler, TOKEN_COLON)) {
+            if (compiler->current.type == TOKEN_RIGHT_BRACKET) {
+                emit_byte(compiler, OP_NIL);
+            } else {
+                expression(compiler);
+            }
+        } else {
+            emit_byte(compiler, OP_NIL);
+        }
+        consume(compiler, TOKEN_RIGHT_BRACKET, "Expect ']' after slice");
+        emit_byte(compiler, OP_SLICE);
+        return;
+    }
+
     expression(compiler);
+
+    if (match(compiler, TOKEN_COLON)) {
+        if (compiler->current.type == TOKEN_COLON || compiler->current.type == TOKEN_RIGHT_BRACKET) {
+            emit_byte(compiler, OP_NIL);
+        } else {
+            expression(compiler);
+        }
+        if (match(compiler, TOKEN_COLON)) {
+            if (compiler->current.type == TOKEN_RIGHT_BRACKET) {
+                emit_byte(compiler, OP_NIL);
+            } else {
+                expression(compiler);
+            }
+        } else {
+            emit_byte(compiler, OP_NIL);
+        }
+        consume(compiler, TOKEN_RIGHT_BRACKET, "Expect ']' after slice");
+        emit_byte(compiler, OP_SLICE);
+        return;
+    }
+
     consume(compiler, TOKEN_RIGHT_BRACKET, "Expect ']' after index");
 
     if (can_assign && match(compiler, TOKEN_EQUAL)) {
@@ -1025,55 +1552,34 @@ static void index_expr(Compiler* compiler, bool can_assign) {
 }
 
 static void dot_expr(Compiler* compiler, bool can_assign) {
-    consume(compiler, TOKEN_IDENTIFIER, "Expect property name after '.'");
-    Token prop_name = compiler->previous;
-
-    // String method dispatch: transform s.method(args) into method_native(s, args)
-    static const char* string_methods[] = {
-        "upper", "lower", "trim", "split", "contains", "replace", "substring", "starts_with", "ends_with", NULL
-    };
-    bool is_string_method = false;
-    for (int i = 0; string_methods[i] != NULL; i++) {
-        if (prop_name.length == (int)strlen(string_methods[i]) &&
-            memcmp(prop_name.start, string_methods[i], prop_name.length) == 0) {
-            is_string_method = true;
-            break;
-        }
-    }
-
-    if (is_string_method) {
-        emit_constant(compiler, OBJ_VAL(copy_string(prop_name.start, prop_name.length)));
-        emit_byte(compiler, OP_SWAP);
-
-        if (match(compiler, TOKEN_LEFT_PAREN)) {
-            int arg_count = 1;
-            if (compiler->current.type != TOKEN_RIGHT_PAREN) {
-                do {
-                    expression(compiler);
-                    arg_count++;
-                } while (match(compiler, TOKEN_COMMA));
-            }
-            consume(compiler, TOKEN_RIGHT_PAREN, "Expect ')' after method arguments");
-            emit_bytes(compiler, OP_CALL, (uint8_t)arg_count);
-        } else {
-            emit_bytes(compiler, OP_CALL, 1);
-        }
+    if (compiler->current.type != TOKEN_IDENTIFIER &&
+        compiler->current.type != TOKEN_APPEND) {
+        error(compiler, "Expect property name after '.'");
         return;
     }
+    advance(compiler);
+    Token prop_name = compiler->previous;
 
-    static const char* list_methods[] = {
-        "sort", "remove", "pop", "append", NULL
+    // Built-in method dispatch (strings, lists, dicts): s.method(args) -> method(s, args)
+    static const char* method_names[] = {
+        "upper", "lower", "trim", "split", "contains", "replace", "substring", "starts_with", "ends_with",
+        "find", "count", "capitalize", "title", "swapcase",
+        "is_digit", "is_alpha", "is_alnum", "is_space", "is_upper", "is_lower",
+        "zfill", "ljust", "rjust", "center", "join", "lstrip", "rstrip", "splitlines", "format",
+        "sort", "remove", "pop", "append", "insert", "extend", "clear", "copy", "reverse", "index",
+        "keys", "values", "items", "get", "has", "update",
+        NULL
     };
-    bool is_list_method = false;
-    for (int i = 0; list_methods[i] != NULL; i++) {
-        if (prop_name.length == (int)strlen(list_methods[i]) &&
-            memcmp(prop_name.start, list_methods[i], prop_name.length) == 0) {
-            is_list_method = true;
+    bool is_builtin_method = false;
+    for (int i = 0; method_names[i] != NULL; i++) {
+        if (prop_name.length == (int)strlen(method_names[i]) &&
+            memcmp(prop_name.start, method_names[i], prop_name.length) == 0) {
+            is_builtin_method = true;
             break;
         }
     }
 
-    if (is_list_method) {
+    if (is_builtin_method) {
         emit_constant(compiler, OBJ_VAL(copy_string(prop_name.start, prop_name.length)));
         emit_byte(compiler, OP_SWAP);
 
@@ -1214,8 +1720,18 @@ ParseRule rules[] = {
     [TOKEN_STAR]          = {NULL,     binary,      PREC_FACTOR},
     [TOKEN_SLASH]         = {NULL,     binary,      PREC_FACTOR},
     [TOKEN_PERCENT]       = {NULL,     binary,      PREC_FACTOR},
+    [TOKEN_STAR_STAR]     = {NULL,     binary,      PREC_FACTOR},
+    [TOKEN_SLASH_SLASH]   = {NULL,     binary,      PREC_FACTOR},
+    [TOKEN_QUESTION]      = {NULL,     ternary_expr, PREC_OR},
     [TOKEN_COMMA]         = {NULL,     NULL,        PREC_NONE},
     [TOKEN_EQUAL]         = {NULL,     NULL,        PREC_NONE},
+    [TOKEN_PLUS_EQUAL]    = {NULL,     NULL,        PREC_NONE},
+    [TOKEN_MINUS_EQUAL]   = {NULL,     NULL,        PREC_NONE},
+    [TOKEN_STAR_EQUAL]    = {NULL,     NULL,        PREC_NONE},
+    [TOKEN_SLASH_EQUAL]   = {NULL,     NULL,        PREC_NONE},
+    [TOKEN_PERCENT_EQUAL] = {NULL,     NULL,        PREC_NONE},
+    [TOKEN_STAR_STAR_EQUAL] = {NULL,   NULL,        PREC_NONE},
+    [TOKEN_SLASH_SLASH_EQUAL] = {NULL, NULL,        PREC_NONE},
     [TOKEN_EQUAL_EQUAL]   = {NULL,     binary,      PREC_EQUALITY},
     [TOKEN_BANG]          = {unary,    NULL,        PREC_NONE},
     [TOKEN_BANG_EQUAL]    = {NULL,     binary,      PREC_EQUALITY},
@@ -1223,10 +1739,14 @@ ParseRule rules[] = {
     [TOKEN_LESS_EQUAL]    = {NULL,     binary,      PREC_COMPARISON},
     [TOKEN_GREATER]       = {NULL,     binary,      PREC_COMPARISON},
     [TOKEN_GREATER_EQUAL] = {NULL,     binary,      PREC_COMPARISON},
+    [TOKEN_IN]            = {NULL,     binary,      PREC_COMPARISON},
     [TOKEN_DOT]           = {NULL,     dot_expr,    PREC_CALL},
     [TOKEN_IDENTIFIER]    = {variable, NULL,        PREC_NONE},
     [TOKEN_STRING]        = {string_literal, NULL,  PREC_NONE},
     [TOKEN_NUMBER]        = {number_literal, NULL,  PREC_NONE},
+    [TOKEN_INT]           = {keyword_variable, NULL, PREC_NONE},
+    [TOKEN_FLOAT]         = {keyword_variable, NULL, PREC_NONE},
+    [TOKEN_BOOL_KW]       = {keyword_variable, NULL, PREC_NONE},
     [TOKEN_AND]           = {NULL,     binary,      PREC_AND},
     [TOKEN_OR]            = {NULL,     binary,      PREC_OR},
     [TOKEN_FALSE]         = {literal,  NULL,        PREC_NONE},

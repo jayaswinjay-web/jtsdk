@@ -1,0 +1,111 @@
+# --- Math ---
+print(abs(-5))
+print(min(3, 1, 2))
+print(max(3, 1, 2))
+print(min([4, 2, 9]))
+print(max([4, 2, 9]))
+print(sum([1, 2, 3, 4]))
+print(pow(2, 10))
+print(round(3.14159, 2))
+print(round(2.5))
+print(floor(3.7))
+print(ceil(3.2))
+print(pi)
+print(e)
+
+# --- Conversions ---
+print(int("42"))
+print(int(3.9))
+print(int(true))
+print(float("2.5"))
+print(bool(0))
+print(bool(1))
+print(bool(""))
+
+# --- String methods ---
+s = "Hello World"
+print(s.find("World"))
+print(s.find("xyz"))
+print(s.count("l"))
+print("hello".capitalize())
+print("hello world".title())
+print("Hello".swapcase())
+print("123".is_digit())
+print("abc".is_alpha())
+print("abc123".is_alnum())
+print("   ".is_space())
+print("ABC".is_upper())
+print("abc".is_lower())
+print("42".zfill(5))
+print("hi".ljust(5, "*"))
+print("hi".rjust(5, "*"))
+print("hi".center(5, "*"))
+print("-".join(["a", "b", "c"]))
+print("  hi  ".lstrip())
+print("  hi  ".rstrip())
+print("a\nb\nc".splitlines())
+print("Hello {}, you are {}!".format("Bob", 30))
+print("Hello {1} and {0}".format("A", "B"))
+
+# --- List methods ---
+lst = [1, 2, 3]
+lst.insert(1, 99)
+print(lst)
+lst2 = [4, 5]
+lst.extend(lst2)
+print(lst)
+print(lst.count(99))
+print(lst.index(5))
+print(lst.index(999))
+lst.reverse()
+print(lst)
+cop = lst.copy()
+cop.append(100)
+print(lst)
+print(cop)
+lst.clear()
+print(lst)
+
+# --- Dict methods ---
+d = {"a": 1, "b": 2, "c": 3}
+print(d.keys())
+print(d.values())
+print(d.items())
+print(d.get("a"))
+print(d.get("zzz"))
+print(d.get("zzz", -1))
+print(d.has("b"))
+print(d.has("zzz"))
+d2 = {"d": 4}
+d.update(d2)
+print(d)
+print(d.pop("b"))
+print(d)
+d.clear()
+print(d)
+
+# --- JSON ---
+data = json_parse('{"name": "Bob", "age": 30, "tags": ["x", "y"], "ok": true}')
+print(data["name"])
+print(data["age"])
+print(data["tags"])
+print(data["ok"])
+s = json_stringify({"a": 1, "b": "hi", "c": [1, 2], "d": nil})
+print(s)
+
+# --- Time ---
+t = now()
+print(t > 1700000000)
+print(strftime("%Y"))
+
+# --- OS ---
+print(cwd() != nil)
+print(env("PATH") != nil)
+print(args())
+
+# --- Random ---
+seed(42)
+r = rand()
+print(r >= 0 and r < 1)
+ri = randint(1, 6)
+print(ri >= 1 and ri <= 6)

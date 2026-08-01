@@ -2,26 +2,56 @@
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
+#include <time.h>
+#include <float.h>
 
 #ifdef _WIN32
 #include <winsock2.h>
 #include <ws2tcpip.h>
+#include <windows.h>
+#include <direct.h>
 #pragma comment(lib, "ws2_32.lib")
 typedef int socklen_t;
+#define GET_CWD _getcwd
 #else
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <unistd.h>
 #include <arpa/inet.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <dirent.h>
 typedef int SOCKET;
 #define INVALID_SOCKET -1
 #define SOCKET_ERROR -1
 #define closesocket close
+#define GET_CWD getcwd
 #endif
+
+static int jts_argc = 0;
+static const char** jts_argv = NULL;
+
+void set_program_args(int argc, const char** argv) {
+    jts_argc = argc;
+    jts_argv = argv;
+}
 
 #include "vm/native.h"
 #include "core/object.h"
 #include "core/memory.h"
+
+static bool native_dict_pop(int arg_count, Value* args, Value* result);
+
+static ObjString* value_to_display_string(Value value) {
+    if (IS_STRING(value)) return AS_STRING(value);
+    if (IS_NUMBER(value)) return AS_STRING(number_to_string(AS_NUMBER(value)));
+    if (IS_BOOL(value)) {
+        return copy_string(AS_BOOL(value) ? "true" : "false",
+                           AS_BOOL(value) ? 4 : 5);
+    }
+    if (IS_NIL(value)) return copy_string("nil", 3);
+    return copy_string("<?>", 4);
+}
 
 static bool native_print(int arg_count, Value* args, Value* result) {
     for (int i = 0; i < arg_count; i++) {
@@ -907,8 +937,15 @@ static bool native_remove(int arg_count, Value* args, Value* result) {
 }
 
 static bool native_pop(int arg_count, Value* args, Value* result) {
-    if (arg_count < 1 || !IS_LIST(args[0])) {
-        fprintf(stderr, "JTS GO: pop() expects (list[, index])\n");
+    if (arg_count < 1) {
+        fprintf(stderr, "JTS GO: pop() expects (list_or_dict[, key])\n");
+        return false;
+    }
+    if (IS_DICT(args[0])) {
+        return native_dict_pop(arg_count, args, result);
+    }
+    if (!IS_LIST(args[0])) {
+        fprintf(stderr, "JTS GO: pop() first argument must be a list or dict\n");
         return false;
     }
     ObjList* list = AS_LIST(args[0]);
@@ -919,6 +956,7 @@ static bool native_pop(int arg_count, Value* args, Value* result) {
     int index = list->count - 1;
     if (arg_count == 2 && IS_NUMBER(args[1])) {
         index = (int)AS_NUMBER(args[1]);
+        if (index < 0) index = list->count + index;
         if (index < 0 || index >= list->count) {
             fprintf(stderr, "JTS GO: pop() index out of bounds\n");
             return false;
@@ -1018,6 +1056,1066 @@ static bool native_import_file(int arg_count, Value* args, Value* result) {
     return (res == INTERPRET_OK);
 }
 
+static bool native_range(int arg_count, Value* args, Value* result) {
+    int start = 0, end = 0, step = 1;
+    if (arg_count == 1) {
+        if (!IS_NUMBER(args[0])) { fprintf(stderr, "JTS GO: range() expects number arguments\n"); return false; }
+        end = (int)AS_NUMBER(args[0]);
+    } else if (arg_count == 2) {
+        if (!IS_NUMBER(args[0]) || !IS_NUMBER(args[1])) { fprintf(stderr, "JTS GO: range() expects number arguments\n"); return false; }
+        start = (int)AS_NUMBER(args[0]);
+        end = (int)AS_NUMBER(args[1]);
+    } else if (arg_count == 3) {
+        if (!IS_NUMBER(args[0]) || !IS_NUMBER(args[1]) || !IS_NUMBER(args[2])) { fprintf(stderr, "JTS GO: range() expects number arguments\n"); return false; }
+        start = (int)AS_NUMBER(args[0]);
+        end = (int)AS_NUMBER(args[1]);
+        step = (int)AS_NUMBER(args[2]);
+        if (step == 0) { fprintf(stderr, "JTS GO: range() step cannot be zero\n"); return false; }
+    } else {
+        fprintf(stderr, "JTS GO: range() expects 1 to 3 arguments\n");
+        return false;
+    }
+    ObjList* list = new_list();
+    if (step > 0) {
+        for (int i = start; i < end; i += step) list_append(list, NUMBER_VAL((double)i));
+    } else {
+        for (int i = start; i > end; i += step) list_append(list, NUMBER_VAL((double)i));
+    }
+    *result = OBJ_VAL(list);
+    return true;
+}
+
+static bool native_abs(int arg_count, Value* args, Value* result) {
+    if (arg_count != 1 || !IS_NUMBER(args[0])) {
+        fprintf(stderr, "JTS GO: abs() expects 1 number argument\n");
+        return false;
+    }
+    *result = NUMBER_VAL(fabs(AS_NUMBER(args[0])));
+    return true;
+}
+
+static bool native_min(int arg_count, Value* args, Value* result) {
+    ObjList* list = NULL;
+    if (arg_count == 1 && IS_LIST(args[0])) {
+        list = AS_LIST(args[0]);
+        if (list->count == 0) { fprintf(stderr, "JTS GO: min() of empty list\n"); return false; }
+        args = list->values;
+        arg_count = list->count;
+    }
+    if (arg_count < 1) { fprintf(stderr, "JTS GO: min() expects at least 1 argument\n"); return false; }
+    Value best = args[0];
+    for (int i = 1; i < arg_count; i++) {
+        bool less = false;
+        if (IS_NUMBER(best) && IS_NUMBER(args[i])) {
+            less = AS_NUMBER(args[i]) < AS_NUMBER(best);
+        } else if (IS_STRING(best) && IS_STRING(args[i])) {
+            less = AS_STRING(args[i])->length < AS_STRING(best)->length ||
+                   (AS_STRING(args[i])->length == AS_STRING(best)->length &&
+                    memcmp(AS_CSTRING(args[i]), AS_CSTRING(best), AS_STRING(best)->length) < 0);
+        }
+        if (less) best = args[i];
+    }
+    *result = best;
+    return true;
+}
+
+static bool native_max(int arg_count, Value* args, Value* result) {
+    ObjList* list = NULL;
+    if (arg_count == 1 && IS_LIST(args[0])) {
+        list = AS_LIST(args[0]);
+        if (list->count == 0) { fprintf(stderr, "JTS GO: max() of empty list\n"); return false; }
+        args = list->values;
+        arg_count = list->count;
+    }
+    if (arg_count < 1) { fprintf(stderr, "JTS GO: max() expects at least 1 argument\n"); return false; }
+    Value best = args[0];
+    for (int i = 1; i < arg_count; i++) {
+        bool greater = false;
+        if (IS_NUMBER(best) && IS_NUMBER(args[i])) {
+            greater = AS_NUMBER(args[i]) > AS_NUMBER(best);
+        } else if (IS_STRING(best) && IS_STRING(args[i])) {
+            greater = AS_STRING(args[i])->length > AS_STRING(best)->length ||
+                      (AS_STRING(args[i])->length == AS_STRING(best)->length &&
+                       memcmp(AS_CSTRING(args[i]), AS_CSTRING(best), AS_STRING(best)->length) > 0);
+        }
+        if (greater) best = args[i];
+    }
+    *result = best;
+    return true;
+}
+
+static bool native_sum(int arg_count, Value* args, Value* result) {
+    if (arg_count != 1 || !IS_LIST(args[0])) {
+        fprintf(stderr, "JTS GO: sum() expects 1 list argument\n");
+        return false;
+    }
+    ObjList* list = AS_LIST(args[0]);
+    double total = 0.0;
+    for (int i = 0; i < list->count; i++) {
+        if (IS_NUMBER(list->values[i])) total += AS_NUMBER(list->values[i]);
+    }
+    *result = NUMBER_VAL(total);
+    return true;
+}
+
+static bool native_pow(int arg_count, Value* args, Value* result) {
+    if (arg_count != 2 || !IS_NUMBER(args[0]) || !IS_NUMBER(args[1])) {
+        fprintf(stderr, "JTS GO: pow() expects 2 number arguments\n");
+        return false;
+    }
+    *result = NUMBER_VAL(pow(AS_NUMBER(args[0]), AS_NUMBER(args[1])));
+    return true;
+}
+
+static bool native_round(int arg_count, Value* args, Value* result) {
+    if (arg_count < 1 || arg_count > 2 || !IS_NUMBER(args[0])) {
+        fprintf(stderr, "JTS GO: round() expects (number[, ndigits])\n");
+        return false;
+    }
+    double x = AS_NUMBER(args[0]);
+    if (arg_count == 2) {
+        if (!IS_NUMBER(args[1])) { fprintf(stderr, "JTS GO: round() ndigits must be a number\n"); return false; }
+        int digits = (int)AS_NUMBER(args[1]);
+        double factor = pow(10.0, digits);
+        *result = NUMBER_VAL(round(x * factor) / factor);
+    } else {
+        *result = NUMBER_VAL(round(x));
+    }
+    return true;
+}
+
+static bool native_floor(int arg_count, Value* args, Value* result) {
+    if (arg_count != 1 || !IS_NUMBER(args[0])) { fprintf(stderr, "JTS GO: floor() expects 1 number argument\n"); return false; }
+    *result = NUMBER_VAL(floor(AS_NUMBER(args[0])));
+    return true;
+}
+
+static bool native_ceil(int arg_count, Value* args, Value* result) {
+    if (arg_count != 1 || !IS_NUMBER(args[0])) { fprintf(stderr, "JTS GO: ceil() expects 1 number argument\n"); return false; }
+    *result = NUMBER_VAL(ceil(AS_NUMBER(args[0])));
+    return true;
+}
+
+static bool native_rand(int arg_count, Value* args, Value* result) {
+    if (arg_count != 0) { fprintf(stderr, "JTS GO: rand() expects 0 arguments\n"); return false; }
+    *result = NUMBER_VAL((double)rand() / (double)RAND_MAX);
+    return true;
+}
+
+static bool native_randint(int arg_count, Value* args, Value* result) {
+    if (arg_count != 2 || !IS_NUMBER(args[0]) || !IS_NUMBER(args[1])) {
+        fprintf(stderr, "JTS GO: randint() expects 2 number arguments\n");
+        return false;
+    }
+    int low = (int)AS_NUMBER(args[0]);
+    int high = (int)AS_NUMBER(args[1]);
+    if (high < low) { fprintf(stderr, "JTS GO: randint() max must be >= min\n"); return false; }
+    *result = NUMBER_VAL((double)(low + rand() % (high - low + 1)));
+    return true;
+}
+
+static bool native_seed(int arg_count, Value* args, Value* result) {
+    if (arg_count != 1 || !IS_NUMBER(args[0])) { fprintf(stderr, "JTS GO: seed() expects 1 number argument\n"); return false; }
+    srand((unsigned)AS_NUMBER(args[0]));
+    *result = NIL_VAL;
+    return true;
+}
+
+static bool native_shuffle(int arg_count, Value* args, Value* result) {
+    if (arg_count != 1 || !IS_LIST(args[0])) { fprintf(stderr, "JTS GO: shuffle() expects 1 list argument\n"); return false; }
+    ObjList* list = AS_LIST(args[0]);
+    for (int i = list->count - 1; i > 0; i--) {
+        int j = rand() % (i + 1);
+        Value temp = list->values[i];
+        list->values[i] = list->values[j];
+        list->values[j] = temp;
+    }
+    *result = args[0];
+    return true;
+}
+
+static bool native_int(int arg_count, Value* args, Value* result) {
+    if (arg_count != 1) { fprintf(stderr, "JTS GO: int() expects 1 argument\n"); return false; }
+    if (IS_NUMBER(args[0])) {
+        *result = NUMBER_VAL((double)(long long)AS_NUMBER(args[0]));
+        return true;
+    }
+    if (IS_STRING(args[0])) {
+        char* end;
+        double v = strtod(AS_CSTRING(args[0]), &end);
+        if (*end != '\0') { fprintf(stderr, "JTS GO: int() invalid conversion from '%s'\n", AS_CSTRING(args[0])); return false; }
+        *result = NUMBER_VAL((double)(long long)v);
+        return true;
+    }
+    if (IS_BOOL(args[0])) {
+        *result = NUMBER_VAL(AS_BOOL(args[0]) ? 1.0 : 0.0);
+        return true;
+    }
+    fprintf(stderr, "JTS GO: int() argument must be a number, string, or boolean\n");
+    return false;
+}
+
+static bool native_float(int arg_count, Value* args, Value* result) {
+    if (arg_count != 1) { fprintf(stderr, "JTS GO: float() expects 1 argument\n"); return false; }
+    if (IS_NUMBER(args[0])) { *result = args[0]; return true; }
+    if (IS_STRING(args[0])) {
+        char* end;
+        double v = strtod(AS_CSTRING(args[0]), &end);
+        if (*end != '\0') { fprintf(stderr, "JTS GO: float() invalid conversion from '%s'\n", AS_CSTRING(args[0])); return false; }
+        *result = NUMBER_VAL(v);
+        return true;
+    }
+    if (IS_BOOL(args[0])) {
+        *result = NUMBER_VAL(AS_BOOL(args[0]) ? 1.0 : 0.0);
+        return true;
+    }
+    fprintf(stderr, "JTS GO: float() argument must be a number, string, or boolean\n");
+    return false;
+}
+
+static bool native_bool(int arg_count, Value* args, Value* result) {
+    if (arg_count != 1) { fprintf(stderr, "JTS GO: bool() expects 1 argument\n"); return false; }
+    if (IS_NIL(args[0])) { *result = BOOL_VAL(false); return true; }
+    if (IS_BOOL(args[0])) { *result = args[0]; return true; }
+    if (IS_NUMBER(args[0])) { *result = BOOL_VAL(AS_NUMBER(args[0]) != 0.0); return true; }
+    if (IS_STRING(args[0])) { *result = BOOL_VAL(AS_STRING(args[0])->length > 0); return true; }
+    *result = BOOL_VAL(true);
+    return true;
+}
+
+static bool native_find(int arg_count, Value* args, Value* result) {
+    if (arg_count != 2 || !IS_STRING(args[0]) || !IS_STRING(args[1])) {
+        fprintf(stderr, "JTS GO: find() expects (string, substring)\n");
+        return false;
+    }
+    ObjString* str = AS_STRING(args[0]);
+    ObjString* sub = AS_STRING(args[1]);
+    if (sub->length == 0) { *result = NUMBER_VAL(0); return true; }
+    for (int i = 0; i <= str->length - sub->length; i++) {
+        if (memcmp(&str->chars[i], sub->chars, sub->length) == 0) {
+            *result = NUMBER_VAL((double)i);
+            return true;
+        }
+    }
+    *result = NUMBER_VAL(-1);
+    return true;
+}
+
+static bool native_count(int arg_count, Value* args, Value* result) {
+    if (arg_count != 2) {
+        fprintf(stderr, "JTS GO: count() expects (string_or_list, substring_or_value)\n");
+        return false;
+    }
+    if (IS_STRING(args[0]) && IS_STRING(args[1])) {
+        ObjString* str = AS_STRING(args[0]);
+        ObjString* sub = AS_STRING(args[1]);
+        int count = 0;
+        if (sub->length == 0) {
+            *result = NUMBER_VAL((double)(str->length + 1));
+            return true;
+        }
+        for (int i = 0; i <= str->length - sub->length; i++) {
+            if (memcmp(&str->chars[i], sub->chars, sub->length) == 0) {
+                count++;
+                i += sub->length - 1;
+            }
+        }
+        *result = NUMBER_VAL((double)count);
+        return true;
+    }
+    if (IS_LIST(args[0])) {
+        ObjList* list = AS_LIST(args[0]);
+        int count = 0;
+        for (int i = 0; i < list->count; i++) {
+            if (values_equal(list->values[i], args[1])) count++;
+        }
+        *result = NUMBER_VAL((double)count);
+        return true;
+    }
+    fprintf(stderr, "JTS GO: count() expects a string or list\n");
+    return false;
+}
+
+static bool native_capitalize(int arg_count, Value* args, Value* result) {
+    if (arg_count != 1 || !IS_STRING(args[0])) { fprintf(stderr, "JTS GO: capitalize() expects 1 string argument\n"); return false; }
+    ObjString* str = AS_STRING(args[0]);
+    char* buf = ALLOCATE(char, str->length + 1);
+    for (int i = 0; i < str->length; i++) {
+        if (i == 0 && str->chars[i] >= 'a' && str->chars[i] <= 'z') {
+            buf[i] = str->chars[i] - 32;
+        } else if (i > 0 && str->chars[i] >= 'A' && str->chars[i] <= 'Z') {
+            buf[i] = str->chars[i] + 32;
+        } else {
+            buf[i] = str->chars[i];
+        }
+    }
+    buf[str->length] = '\0';
+    *result = OBJ_VAL(take_string(buf, str->length));
+    return true;
+}
+
+static bool native_title(int arg_count, Value* args, Value* result) {
+    if (arg_count != 1 || !IS_STRING(args[0])) { fprintf(stderr, "JTS GO: title() expects 1 string argument\n"); return false; }
+    ObjString* str = AS_STRING(args[0]);
+    char* buf = ALLOCATE(char, str->length + 1);
+    bool new_word = true;
+    for (int i = 0; i < str->length; i++) {
+        char c = str->chars[i];
+        if (c == ' ' || c == '\t' || c == '\n') {
+            buf[i] = c;
+            new_word = true;
+        } else {
+            if (new_word && c >= 'a' && c <= 'z') c -= 32;
+            else if (!new_word && c >= 'A' && c <= 'Z') c += 32;
+            buf[i] = c;
+            new_word = false;
+        }
+    }
+    buf[str->length] = '\0';
+    *result = OBJ_VAL(take_string(buf, str->length));
+    return true;
+}
+
+static bool native_swapcase(int arg_count, Value* args, Value* result) {
+    if (arg_count != 1 || !IS_STRING(args[0])) { fprintf(stderr, "JTS GO: swapcase() expects 1 string argument\n"); return false; }
+    ObjString* str = AS_STRING(args[0]);
+    char* buf = ALLOCATE(char, str->length + 1);
+    for (int i = 0; i < str->length; i++) {
+        char c = str->chars[i];
+        if (c >= 'a' && c <= 'z') buf[i] = c - 32;
+        else if (c >= 'A' && c <= 'Z') buf[i] = c + 32;
+        else buf[i] = c;
+    }
+    buf[str->length] = '\0';
+    *result = OBJ_VAL(take_string(buf, str->length));
+    return true;
+}
+
+static bool native_is_digit(int arg_count, Value* args, Value* result) {
+    if (arg_count != 1 || !IS_STRING(args[0])) { fprintf(stderr, "JTS GO: is_digit() expects 1 string argument\n"); return false; }
+    ObjString* str = AS_STRING(args[0]);
+    if (str->length == 0) { *result = BOOL_VAL(false); return true; }
+    for (int i = 0; i < str->length; i++) {
+        if (str->chars[i] < '0' || str->chars[i] > '9') { *result = BOOL_VAL(false); return true; }
+    }
+    *result = BOOL_VAL(true);
+    return true;
+}
+
+static bool native_is_alpha(int arg_count, Value* args, Value* result) {
+    if (arg_count != 1 || !IS_STRING(args[0])) { fprintf(stderr, "JTS GO: is_alpha() expects 1 string argument\n"); return false; }
+    ObjString* str = AS_STRING(args[0]);
+    if (str->length == 0) { *result = BOOL_VAL(false); return true; }
+    for (int i = 0; i < str->length; i++) {
+        char c = str->chars[i];
+        if (!((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'))) { *result = BOOL_VAL(false); return true; }
+    }
+    *result = BOOL_VAL(true);
+    return true;
+}
+
+static bool native_is_alnum(int arg_count, Value* args, Value* result) {
+    if (arg_count != 1 || !IS_STRING(args[0])) { fprintf(stderr, "JTS GO: is_alnum() expects 1 string argument\n"); return false; }
+    ObjString* str = AS_STRING(args[0]);
+    if (str->length == 0) { *result = BOOL_VAL(false); return true; }
+    for (int i = 0; i < str->length; i++) {
+        char c = str->chars[i];
+        if (!((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9'))) { *result = BOOL_VAL(false); return true; }
+    }
+    *result = BOOL_VAL(true);
+    return true;
+}
+
+static bool native_is_space(int arg_count, Value* args, Value* result) {
+    if (arg_count != 1 || !IS_STRING(args[0])) { fprintf(stderr, "JTS GO: is_space() expects 1 string argument\n"); return false; }
+    ObjString* str = AS_STRING(args[0]);
+    if (str->length == 0) { *result = BOOL_VAL(false); return true; }
+    for (int i = 0; i < str->length; i++) {
+        char c = str->chars[i];
+        if (c != ' ' && c != '\t' && c != '\n' && c != '\r') { *result = BOOL_VAL(false); return true; }
+    }
+    *result = BOOL_VAL(true);
+    return true;
+}
+
+static bool native_is_upper(int arg_count, Value* args, Value* result) {
+    if (arg_count != 1 || !IS_STRING(args[0])) { fprintf(stderr, "JTS GO: is_upper() expects 1 string argument\n"); return false; }
+    ObjString* str = AS_STRING(args[0]);
+    bool has_cased = false;
+    for (int i = 0; i < str->length; i++) {
+        char c = str->chars[i];
+        if (c >= 'a' && c <= 'z') { *result = BOOL_VAL(false); return true; }
+        if (c >= 'A' && c <= 'Z') has_cased = true;
+    }
+    *result = BOOL_VAL(has_cased);
+    return true;
+}
+
+static bool native_is_lower(int arg_count, Value* args, Value* result) {
+    if (arg_count != 1 || !IS_STRING(args[0])) { fprintf(stderr, "JTS GO: is_lower() expects 1 string argument\n"); return false; }
+    ObjString* str = AS_STRING(args[0]);
+    bool has_cased = false;
+    for (int i = 0; i < str->length; i++) {
+        char c = str->chars[i];
+        if (c >= 'A' && c <= 'Z') { *result = BOOL_VAL(false); return true; }
+        if (c >= 'a' && c <= 'z') has_cased = true;
+    }
+    *result = BOOL_VAL(has_cased);
+    return true;
+}
+
+static bool native_zfill(int arg_count, Value* args, Value* result) {
+    if (arg_count != 2 || !IS_STRING(args[0]) || !IS_NUMBER(args[1])) {
+        fprintf(stderr, "JTS GO: zfill() expects (string, width)\n");
+        return false;
+    }
+    ObjString* str = AS_STRING(args[0]);
+    int width = (int)AS_NUMBER(args[1]);
+    if (width <= str->length) { *result = args[0]; return true; }
+    char* buf = ALLOCATE(char, width + 1);
+    memset(buf, '0', width);
+    memcpy(buf + (width - str->length), str->chars, str->length);
+    buf[width] = '\0';
+    *result = OBJ_VAL(take_string(buf, width));
+    return true;
+}
+
+static bool native_ljust(int arg_count, Value* args, Value* result) {
+    if (arg_count < 2 || arg_count > 3 || !IS_STRING(args[0]) || !IS_NUMBER(args[1])) {
+        fprintf(stderr, "JTS GO: ljust() expects (string, width[, fill])\n");
+        return false;
+    }
+    ObjString* str = AS_STRING(args[0]);
+    int width = (int)AS_NUMBER(args[1]);
+    char fill = ' ';
+    if (arg_count == 3) {
+        if (!IS_STRING(args[2]) || AS_STRING(args[2])->length == 0) { fprintf(stderr, "JTS GO: ljust() fill must be a non-empty string\n"); return false; }
+        fill = AS_STRING(args[2])->chars[0];
+    }
+    if (width <= str->length) { *result = args[0]; return true; }
+    char* buf = ALLOCATE(char, width + 1);
+    memcpy(buf, str->chars, str->length);
+    memset(buf + str->length, fill, width - str->length);
+    buf[width] = '\0';
+    *result = OBJ_VAL(take_string(buf, width));
+    return true;
+}
+
+static bool native_rjust(int arg_count, Value* args, Value* result) {
+    if (arg_count < 2 || arg_count > 3 || !IS_STRING(args[0]) || !IS_NUMBER(args[1])) {
+        fprintf(stderr, "JTS GO: rjust() expects (string, width[, fill])\n");
+        return false;
+    }
+    ObjString* str = AS_STRING(args[0]);
+    int width = (int)AS_NUMBER(args[1]);
+    char fill = ' ';
+    if (arg_count == 3) {
+        if (!IS_STRING(args[2]) || AS_STRING(args[2])->length == 0) { fprintf(stderr, "JTS GO: rjust() fill must be a non-empty string\n"); return false; }
+        fill = AS_STRING(args[2])->chars[0];
+    }
+    if (width <= str->length) { *result = args[0]; return true; }
+    char* buf = ALLOCATE(char, width + 1);
+    memset(buf, fill, width - str->length);
+    memcpy(buf + (width - str->length), str->chars, str->length);
+    buf[width] = '\0';
+    *result = OBJ_VAL(take_string(buf, width));
+    return true;
+}
+
+static bool native_center(int arg_count, Value* args, Value* result) {
+    if (arg_count < 2 || arg_count > 3 || !IS_STRING(args[0]) || !IS_NUMBER(args[1])) {
+        fprintf(stderr, "JTS GO: center() expects (string, width[, fill])\n");
+        return false;
+    }
+    ObjString* str = AS_STRING(args[0]);
+    int width = (int)AS_NUMBER(args[1]);
+    char fill = ' ';
+    if (arg_count == 3) {
+        if (!IS_STRING(args[2]) || AS_STRING(args[2])->length == 0) { fprintf(stderr, "JTS GO: center() fill must be a non-empty string\n"); return false; }
+        fill = AS_STRING(args[2])->chars[0];
+    }
+    if (width <= str->length) { *result = args[0]; return true; }
+    int total_pad = width - str->length;
+    int left = total_pad / 2;
+    int right = total_pad - left;
+    char* buf = ALLOCATE(char, width + 1);
+    memset(buf, fill, width);
+    memcpy(buf + left, str->chars, str->length);
+    buf[width] = '\0';
+    *result = OBJ_VAL(take_string(buf, width));
+    return true;
+}
+
+static bool native_join(int arg_count, Value* args, Value* result) {
+    if (arg_count != 2 || !IS_STRING(args[0]) || !IS_LIST(args[1])) {
+        fprintf(stderr, "JTS GO: join() expects (separator, list)\n");
+        return false;
+    }
+    ObjString* sep = AS_STRING(args[0]);
+    ObjList* list = AS_LIST(args[1]);
+    int total = 0;
+    for (int i = 0; i < list->count; i++) {
+        if (!IS_STRING(list->values[i])) {
+            fprintf(stderr, "JTS GO: join() list elements must be strings\n");
+            return false;
+        }
+        total += AS_STRING(list->values[i])->length;
+        if (i > 0) total += sep->length;
+    }
+    char* buf = ALLOCATE(char, total + 1);
+    int pos = 0;
+    for (int i = 0; i < list->count; i++) {
+        if (i > 0) {
+            memcpy(buf + pos, sep->chars, sep->length);
+            pos += sep->length;
+        }
+        ObjString* item = AS_STRING(list->values[i]);
+        memcpy(buf + pos, item->chars, item->length);
+        pos += item->length;
+    }
+    buf[pos] = '\0';
+    *result = OBJ_VAL(take_string(buf, pos));
+    return true;
+}
+
+static bool native_lstrip(int arg_count, Value* args, Value* result) {
+    if (arg_count != 1 || !IS_STRING(args[0])) { fprintf(stderr, "JTS GO: lstrip() expects 1 string argument\n"); return false; }
+    ObjString* str = AS_STRING(args[0]);
+    int start = 0;
+    while (start < str->length && (str->chars[start] == ' ' || str->chars[start] == '\t' || str->chars[start] == '\n' || str->chars[start] == '\r')) start++;
+    *result = OBJ_VAL(copy_string(&str->chars[start], str->length - start));
+    return true;
+}
+
+static bool native_rstrip(int arg_count, Value* args, Value* result) {
+    if (arg_count != 1 || !IS_STRING(args[0])) { fprintf(stderr, "JTS GO: rstrip() expects 1 string argument\n"); return false; }
+    ObjString* str = AS_STRING(args[0]);
+    int end = str->length;
+    while (end > 0 && (str->chars[end - 1] == ' ' || str->chars[end - 1] == '\t' || str->chars[end - 1] == '\n' || str->chars[end - 1] == '\r')) end--;
+    *result = OBJ_VAL(copy_string(str->chars, end));
+    return true;
+}
+
+static bool native_splitlines(int arg_count, Value* args, Value* result) {
+    if (arg_count != 1 || !IS_STRING(args[0])) { fprintf(stderr, "JTS GO: splitlines() expects 1 string argument\n"); return false; }
+    ObjString* str = AS_STRING(args[0]);
+    ObjList* list = new_list();
+    int start = 0;
+    for (int i = 0; i < str->length; i++) {
+        if (str->chars[i] == '\n') {
+            int len = i - start;
+            if (len > 0 && str->chars[i - 1] == '\r') len--;
+            list_append(list, OBJ_VAL(copy_string(&str->chars[start], len)));
+            start = i + 1;
+        }
+    }
+    list_append(list, OBJ_VAL(copy_string(&str->chars[start], str->length - start)));
+    *result = OBJ_VAL(list);
+    return true;
+}
+
+static bool native_format(int arg_count, Value* args, Value* result) {
+    if (arg_count < 1 || !IS_STRING(args[0])) {
+        fprintf(stderr, "JTS GO: format() expects (format_string, ...)\n");
+        return false;
+    }
+    ObjString* fmt = AS_STRING(args[0]);
+    char* buf = ALLOCATE(char, fmt->length * 8 + 1);
+    int pos = 0;
+    int arg_idx = 1;
+    for (int i = 0; i < fmt->length; i++) {
+        if (fmt->chars[i] == '{' && i + 1 < fmt->length && fmt->chars[i + 1] == '}') {
+            if (arg_idx < arg_count) {
+                ObjString* s = value_to_display_string(args[arg_idx++]);
+                memcpy(buf + pos, s->chars, s->length);
+                pos += s->length;
+            }
+            i++;
+        } else if (fmt->chars[i] == '{') {
+            int j = i + 1;
+            while (j < fmt->length && fmt->chars[j] >= '0' && fmt->chars[j] <= '9') j++;
+            if (j < fmt->length && fmt->chars[j] == '}') {
+                int idx = atoi(&fmt->chars[i + 1]);
+                if (idx + 1 < arg_count) {
+                    ObjString* s = value_to_display_string(args[idx + 1]);
+                    memcpy(buf + pos, s->chars, s->length);
+                    pos += s->length;
+                }
+                i = j;
+            } else {
+                buf[pos++] = fmt->chars[i];
+            }
+        } else {
+            buf[pos++] = fmt->chars[i];
+        }
+    }
+    buf[pos] = '\0';
+    *result = OBJ_VAL(take_string(buf, pos));
+    return true;
+}
+
+static bool native_list_insert(int arg_count, Value* args, Value* result) {
+    if (arg_count != 3 || !IS_LIST(args[0]) || !IS_NUMBER(args[1])) {
+        fprintf(stderr, "JTS GO: insert() expects (list, index, value)\n");
+        return false;
+    }
+    ObjList* list = AS_LIST(args[0]);
+    int index = (int)AS_NUMBER(args[1]);
+    if (index < 0) index = list->count + index;
+    if (index < 0) index = 0;
+    if (index > list->count) index = list->count;
+    list_append(list, NIL_VAL);
+    for (int i = list->count - 1; i > index; i--) {
+        list->values[i] = list->values[i - 1];
+    }
+    list->values[index] = args[2];
+    *result = args[0];
+    return true;
+}
+
+static bool native_list_extend(int arg_count, Value* args, Value* result) {
+    if (arg_count != 2 || !IS_LIST(args[0]) || !IS_LIST(args[1])) {
+        fprintf(stderr, "JTS GO: extend() expects (list, other_list)\n");
+        return false;
+    }
+    ObjList* list = AS_LIST(args[0]);
+    ObjList* other = AS_LIST(args[1]);
+    for (int i = 0; i < other->count; i++) list_append(list, other->values[i]);
+    *result = args[0];
+    return true;
+}
+
+static bool native_list_clear(int arg_count, Value* args, Value* result) {
+    if (arg_count != 1) { fprintf(stderr, "JTS GO: clear() expects 1 list or dict argument\n"); return false; }
+    if (IS_LIST(args[0])) {
+        AS_LIST(args[0])->count = 0;
+    } else if (IS_DICT(args[0])) {
+        for (int i = 0; i < AS_DICT(args[0])->entries.capacity; i++) {
+            AS_DICT(args[0])->entries.entries[i].key = NULL;
+        }
+        AS_DICT(args[0])->entries.count = 0;
+    } else {
+        fprintf(stderr, "JTS GO: clear() argument must be a list or dict\n");
+        return false;
+    }
+    *result = args[0];
+    return true;
+}
+
+static bool native_list_index(int arg_count, Value* args, Value* result) {
+    if (arg_count != 2) { fprintf(stderr, "JTS GO: index() expects (string_or_list, value)\n"); return false; }
+    if (IS_STRING(args[0]) && IS_STRING(args[1])) {
+        ObjString* str = AS_STRING(args[0]);
+        ObjString* sub = AS_STRING(args[1]);
+        if (sub->length == 0) { *result = NUMBER_VAL(0); return true; }
+        for (int i = 0; i <= str->length - sub->length; i++) {
+            if (memcmp(&str->chars[i], sub->chars, sub->length) == 0) {
+                *result = NUMBER_VAL((double)i);
+                return true;
+            }
+        }
+        *result = NUMBER_VAL(-1);
+        return true;
+    }
+    if (IS_LIST(args[0])) {
+        ObjList* list = AS_LIST(args[0]);
+        for (int i = 0; i < list->count; i++) {
+            if (values_equal(list->values[i], args[1])) {
+                *result = NUMBER_VAL((double)i);
+                return true;
+            }
+        }
+        *result = NUMBER_VAL(-1);
+        return true;
+    }
+    fprintf(stderr, "JTS GO: index() expects a string or list\n");
+    return false;
+}
+
+static bool native_list_reverse(int arg_count, Value* args, Value* result) {
+    if (arg_count != 1 || !IS_LIST(args[0])) { fprintf(stderr, "JTS GO: reverse() expects 1 list argument\n"); return false; }
+    ObjList* list = AS_LIST(args[0]);
+    for (int i = 0, j = list->count - 1; i < j; i++, j--) {
+        Value temp = list->values[i];
+        list->values[i] = list->values[j];
+        list->values[j] = temp;
+    }
+    *result = args[0];
+    return true;
+}
+
+static bool native_list_copy(int arg_count, Value* args, Value* result) {
+    if (arg_count != 1 || !IS_LIST(args[0])) { fprintf(stderr, "JTS GO: copy() expects 1 list argument\n"); return false; }
+    ObjList* src = AS_LIST(args[0]);
+    ObjList* copy = new_list();
+    for (int i = 0; i < src->count; i++) list_append(copy, src->values[i]);
+    *result = OBJ_VAL(copy);
+    return true;
+}
+
+static bool native_dict_keys(int arg_count, Value* args, Value* result) {
+    if (arg_count != 1 || !IS_DICT(args[0])) { fprintf(stderr, "JTS GO: keys() expects 1 dict argument\n"); return false; }
+    ObjDict* dict = AS_DICT(args[0]);
+    ObjList* list = new_list();
+    for (int i = 0; i < dict->entries.capacity; i++) {
+        if (dict->entries.entries[i].key != NULL) list_append(list, OBJ_VAL(dict->entries.entries[i].key));
+    }
+    *result = OBJ_VAL(list);
+    return true;
+}
+
+static bool native_dict_values(int arg_count, Value* args, Value* result) {
+    if (arg_count != 1 || !IS_DICT(args[0])) { fprintf(stderr, "JTS GO: values() expects 1 dict argument\n"); return false; }
+    ObjDict* dict = AS_DICT(args[0]);
+    ObjList* list = new_list();
+    for (int i = 0; i < dict->entries.capacity; i++) {
+        if (dict->entries.entries[i].key != NULL) list_append(list, dict->entries.entries[i].value);
+    }
+    *result = OBJ_VAL(list);
+    return true;
+}
+
+static bool native_dict_items(int arg_count, Value* args, Value* result) {
+    if (arg_count != 1 || !IS_DICT(args[0])) { fprintf(stderr, "JTS GO: items() expects 1 dict argument\n"); return false; }
+    ObjDict* dict = AS_DICT(args[0]);
+    ObjList* list = new_list();
+    for (int i = 0; i < dict->entries.capacity; i++) {
+        if (dict->entries.entries[i].key != NULL) {
+            ObjList* pair = new_list();
+            list_append(pair, OBJ_VAL(dict->entries.entries[i].key));
+            list_append(pair, dict->entries.entries[i].value);
+            list_append(list, OBJ_VAL(pair));
+        }
+    }
+    *result = OBJ_VAL(list);
+    return true;
+}
+
+static bool native_dict_get(int arg_count, Value* args, Value* result) {
+    if (arg_count < 2 || arg_count > 3 || !IS_DICT(args[0])) {
+        fprintf(stderr, "JTS GO: get() expects (dict, key[, default])\n");
+        return false;
+    }
+    ObjDict* dict = AS_DICT(args[0]);
+    if (IS_STRING(args[1])) {
+        ObjString* key = AS_STRING(args[1]);
+        Value value;
+        if (dict_get(dict, key, &value)) {
+            *result = value;
+            return true;
+        }
+    }
+    if (arg_count == 3) { *result = args[2]; return true; }
+    *result = NIL_VAL;
+    return true;
+}
+
+static bool native_dict_pop(int arg_count, Value* args, Value* result) {
+    if (arg_count < 2 || arg_count > 3 || !IS_DICT(args[0])) {
+        fprintf(stderr, "JTS GO: pop() expects (dict, key[, default])\n");
+        return false;
+    }
+    ObjDict* dict = AS_DICT(args[0]);
+    if (IS_STRING(args[1])) {
+        ObjString* key = AS_STRING(args[1]);
+        Value value;
+        if (dict_get(dict, key, &value)) {
+            table_delete(&dict->entries, key);
+            *result = value;
+            return true;
+        }
+    }
+    if (arg_count == 3) { *result = args[2]; return true; }
+    *result = NIL_VAL;
+    return true;
+}
+
+static bool native_dict_has(int arg_count, Value* args, Value* result) {
+    if (arg_count != 2 || !IS_DICT(args[0])) { fprintf(stderr, "JTS GO: has() expects (dict, key)\n"); return false; }
+    ObjDict* dict = AS_DICT(args[0]);
+    if (IS_STRING(args[1])) {
+        Value value;
+        *result = BOOL_VAL(dict_get(dict, AS_STRING(args[1]), &value));
+    } else {
+        *result = BOOL_VAL(false);
+    }
+    return true;
+}
+
+static bool native_dict_update(int arg_count, Value* args, Value* result) {
+    if (arg_count != 2 || !IS_DICT(args[0]) || !IS_DICT(args[1])) {
+        fprintf(stderr, "JTS GO: update() expects (dict, other_dict)\n");
+        return false;
+    }
+    ObjDict* dest = AS_DICT(args[0]);
+    ObjDict* src = AS_DICT(args[1]);
+    for (int i = 0; i < src->entries.capacity; i++) {
+        if (src->entries.entries[i].key != NULL) {
+            dict_set(dest, src->entries.entries[i].key, src->entries.entries[i].value);
+        }
+    }
+    *result = args[0];
+    return true;
+}
+
+static bool native_dict_clear(int arg_count, Value* args, Value* result) {
+    if (arg_count != 1 || !IS_DICT(args[0])) { fprintf(stderr, "JTS GO: clear() expects 1 dict argument\n"); return false; }
+    for (int i = 0; i < AS_DICT(args[0])->entries.capacity; i++) {
+        AS_DICT(args[0])->entries.entries[i].key = NULL;
+    }
+    AS_DICT(args[0])->entries.count = 0;
+    *result = args[0];
+    return true;
+}
+
+static Value json_parse_value(const char** p);
+
+static bool json_skip_ws(const char** p) {
+    while (**p == ' ' || **p == '\t' || **p == '\n' || **p == '\r') (*p)++;
+    return **p != '\0';
+}
+
+static Value json_parse_string(const char** p) {
+    (*p)++;
+    char buf[4096];
+    int pos = 0;
+    while (**p && **p != '"') {
+        if (**p == '\\') {
+            (*p)++;
+            char c = **p;
+            switch (c) {
+                case 'n': buf[pos++] = '\n'; break;
+                case 't': buf[pos++] = '\t'; break;
+                case 'r': buf[pos++] = '\r'; break;
+                case '\\': buf[pos++] = '\\'; break;
+                case '"': buf[pos++] = '"'; break;
+                case '/': buf[pos++] = '/'; break;
+                case 'b': buf[pos++] = '\b'; break;
+                case 'f': buf[pos++] = '\f'; break;
+                default: buf[pos++] = c; break;
+            }
+            (*p)++;
+        } else {
+            buf[pos++] = **p;
+            (*p)++;
+        }
+    }
+    if (**p) (*p)++;
+    return OBJ_VAL(copy_string(buf, pos));
+}
+
+static Value json_parse_value(const char** p) {
+    json_skip_ws(p);
+    if (**p == '{') {
+        (*p)++;
+        ObjDict* dict = new_dict();
+        json_skip_ws(p);
+        if (**p == '}') { (*p)++; return OBJ_VAL(dict); }
+        while (**p) {
+            json_skip_ws(p);
+            if (**p != '"') { (*p)++; break; }
+            Value key = json_parse_string(p);
+            json_skip_ws(p);
+            if (**p == ':') (*p)++;
+            Value val = json_parse_value(p);
+            dict_set(dict, AS_STRING(key), val);
+            json_skip_ws(p);
+            if (**p == ',') { (*p)++; continue; }
+            if (**p == '}') { (*p)++; break; }
+            (*p)++;
+        }
+        return OBJ_VAL(dict);
+    }
+    if (**p == '[') {
+        (*p)++;
+        ObjList* list = new_list();
+        json_skip_ws(p);
+        if (**p == ']') { (*p)++; return OBJ_VAL(list); }
+        while (**p) {
+            list_append(list, json_parse_value(p));
+            json_skip_ws(p);
+            if (**p == ',') { (*p)++; continue; }
+            if (**p == ']') { (*p)++; break; }
+            (*p)++;
+        }
+        return OBJ_VAL(list);
+    }
+    if (**p == '"') return json_parse_string(p);
+    if (**p == 't' && strncmp(*p, "true", 4) == 0) { *p += 4; return BOOL_VAL(true); }
+    if (**p == 'f' && strncmp(*p, "false", 5) == 0) { *p += 5; return BOOL_VAL(false); }
+    if (**p == 'n' && strncmp(*p, "null", 4) == 0) { *p += 4; return NIL_VAL; }
+    if (**p == '-' || (**p >= '0' && **p <= '9')) {
+        char* end;
+        double v = strtod(*p, &end);
+        if (end == *p) { (*p)++; return NIL_VAL; }
+        *p = end;
+        return NUMBER_VAL(v);
+    }
+    (*p)++;
+    return NIL_VAL;
+}
+
+static bool native_json_parse(int arg_count, Value* args, Value* result) {
+    if (arg_count != 1 || !IS_STRING(args[0])) {
+        fprintf(stderr, "JTS GO: json_parse() expects 1 string argument\n");
+        return false;
+    }
+    const char* p = AS_CSTRING(args[0]);
+    *result = json_parse_value(&p);
+    return true;
+}
+
+static void json_stringify_value(Value v, char* buf, int* pos, int depth) {
+    if (depth > 64) return;
+    if (IS_NUMBER(v)) {
+        ObjString* s = AS_STRING(number_to_string(AS_NUMBER(v)));
+        memcpy(buf + *pos, s->chars, s->length);
+        *pos += s->length;
+    } else if (IS_BOOL(v)) {
+        if (AS_BOOL(v)) { memcpy(buf + *pos, "true", 4); *pos += 4; }
+        else { memcpy(buf + *pos, "false", 5); *pos += 5; }
+    } else if (IS_NIL(v)) {
+        memcpy(buf + *pos, "null", 4);
+        *pos += 4;
+    } else if (IS_STRING(v)) {
+        ObjString* s = AS_STRING(v);
+        buf[(*pos)++] = '"';
+        for (int i = 0; i < s->length; i++) {
+            char c = s->chars[i];
+            switch (c) {
+                case '"': memcpy(buf + *pos, "\\\"", 2); *pos += 2; break;
+                case '\\': memcpy(buf + *pos, "\\\\", 2); *pos += 2; break;
+                case '\n': memcpy(buf + *pos, "\\n", 2); *pos += 2; break;
+                case '\t': memcpy(buf + *pos, "\\t", 2); *pos += 2; break;
+                case '\r': memcpy(buf + *pos, "\\r", 2); *pos += 2; break;
+                default: buf[(*pos)++] = c; break;
+            }
+        }
+        buf[(*pos)++] = '"';
+    } else if (IS_LIST(v)) {
+        ObjList* list = AS_LIST(v);
+        buf[(*pos)++] = '[';
+        for (int i = 0; i < list->count; i++) {
+            if (i > 0) buf[(*pos)++] = ',';
+            json_stringify_value(list->values[i], buf, pos, depth + 1);
+        }
+        buf[(*pos)++] = ']';
+    } else if (IS_DICT(v)) {
+        ObjDict* dict = AS_DICT(v);
+        buf[(*pos)++] = '{';
+        int written = 0;
+        for (int i = 0; i < dict->entries.capacity; i++) {
+            if (dict->entries.entries[i].key != NULL) {
+                if (written > 0) buf[(*pos)++] = ',';
+                json_stringify_value(OBJ_VAL(dict->entries.entries[i].key), buf, pos, depth + 1);
+                buf[(*pos)++] = ':';
+                json_stringify_value(dict->entries.entries[i].value, buf, pos, depth + 1);
+                written++;
+            }
+        }
+        buf[(*pos)++] = '}';
+    } else {
+        memcpy(buf + *pos, "null", 4);
+        *pos += 4;
+    }
+}
+
+static bool native_json_stringify(int arg_count, Value* args, Value* result) {
+    if (arg_count != 1) {
+        fprintf(stderr, "JTS GO: json_stringify() expects 1 argument\n");
+        return false;
+    }
+    char buf[65536];
+    int pos = 0;
+    json_stringify_value(args[0], buf, &pos, 0);
+    buf[pos] = '\0';
+    *result = OBJ_VAL(copy_string(buf, pos));
+    return true;
+}
+
+static bool native_now(int arg_count, Value* args, Value* result) {
+    if (arg_count != 0) { fprintf(stderr, "JTS GO: now() expects 0 arguments\n"); return false; }
+    *result = NUMBER_VAL((double)time(NULL));
+    return true;
+}
+
+static bool native_sleep(int arg_count, Value* args, Value* result) {
+    if (arg_count != 1 || !IS_NUMBER(args[0])) { fprintf(stderr, "JTS GO: sleep() expects 1 number argument\n"); return false; }
+    double secs = AS_NUMBER(args[0]);
+#ifdef _WIN32
+    Sleep((DWORD)(secs * 1000));
+#else
+    struct timespec ts;
+    ts.tv_sec = (time_t)secs;
+    ts.tv_nsec = (long)((secs - (double)ts.tv_sec) * 1000000000);
+    nanosleep(&ts, NULL);
+#endif
+    *result = NIL_VAL;
+    return true;
+}
+
+static bool native_strftime(int arg_count, Value* args, Value* result) {
+    if (arg_count < 1 || arg_count > 2 || !IS_STRING(args[0])) {
+        fprintf(stderr, "JTS GO: strftime() expects (format[, timestamp])\n");
+        return false;
+    }
+    time_t t = time(NULL);
+    if (arg_count == 2) {
+        if (!IS_NUMBER(args[1])) { fprintf(stderr, "JTS GO: strftime() timestamp must be a number\n"); return false; }
+        t = (time_t)AS_NUMBER(args[1]);
+    }
+    struct tm tmv;
+#ifdef _WIN32
+    localtime_s(&tmv, &t);
+#else
+    localtime_r(&t, &tmv);
+#endif
+    char buf[256];
+    strftime(buf, sizeof(buf), AS_CSTRING(args[0]), &tmv);
+    *result = OBJ_VAL(copy_string(buf, (int)strlen(buf)));
+    return true;
+}
+
+static bool native_env(int arg_count, Value* args, Value* result) {
+    if (arg_count != 1 || !IS_STRING(args[0])) { fprintf(stderr, "JTS GO: env() expects 1 string argument\n"); return false; }
+    const char* val = getenv(AS_CSTRING(args[0]));
+    if (val == NULL) { *result = NIL_VAL; return true; }
+    *result = OBJ_VAL(copy_string(val, (int)strlen(val)));
+    return true;
+}
+
+static bool native_args(int arg_count, Value* args, Value* result) {
+    if (arg_count != 0) { fprintf(stderr, "JTS GO: args() expects 0 arguments\n"); return false; }
+    ObjList* list = new_list();
+    for (int i = 1; i < jts_argc; i++) {
+        list_append(list, OBJ_VAL(copy_string(jts_argv[i], (int)strlen(jts_argv[i]))));
+    }
+    *result = OBJ_VAL(list);
+    return true;
+}
+
+static bool native_exit(int arg_count, Value* args, Value* result) {
+    int code = 0;
+    if (arg_count > 1 || (arg_count == 1 && !IS_NUMBER(args[0]))) {
+        fprintf(stderr, "JTS GO: exit() expects 0 or 1 number argument\n");
+        return false;
+    }
+    if (arg_count == 1) code = (int)AS_NUMBER(args[0]);
+    exit(code);
+    return true;
+}
+
+static bool native_cwd(int arg_count, Value* args, Value* result) {
+    if (arg_count != 0) { fprintf(stderr, "JTS GO: cwd() expects 0 arguments\n"); return false; }
+    char buf[4096];
+    if (GET_CWD(buf, sizeof(buf)) == NULL) {
+        fprintf(stderr, "JTS GO: cwd() failed\n");
+        return false;
+    }
+    *result = OBJ_VAL(copy_string(buf, (int)strlen(buf)));
+    return true;
+}
+
 typedef struct {
     const char* name;
     int arity;
@@ -1057,7 +2155,73 @@ static NativeDef native_functions[] = {
     // List ops
     {"remove", 2, native_remove},
     {"pop", -1, native_pop},
-    {"sort", 1, native_sort},
+    {"sort", -1, native_sort},
+    // Range
+    {"range", -1, native_range},
+    // Math
+    {"abs", 1, native_abs},
+    {"min", -1, native_min},
+    {"max", -1, native_max},
+    {"sum", 1, native_sum},
+    {"pow", 2, native_pow},
+    {"round", -1, native_round},
+    {"floor", 1, native_floor},
+    {"ceil", 1, native_ceil},
+    {"rand", 0, native_rand},
+    {"randint", 2, native_randint},
+    {"seed", 1, native_seed},
+    {"shuffle", 1, native_shuffle},
+    // Conversions
+    {"int", 1, native_int},
+    {"float", 1, native_float},
+    {"bool", 1, native_bool},
+    // String methods
+    {"find", 2, native_find},
+    {"count", 2, native_count},
+    {"capitalize", 1, native_capitalize},
+    {"title", 1, native_title},
+    {"swapcase", 1, native_swapcase},
+    {"is_digit", 1, native_is_digit},
+    {"is_alpha", 1, native_is_alpha},
+    {"is_alnum", 1, native_is_alnum},
+    {"is_space", 1, native_is_space},
+    {"is_upper", 1, native_is_upper},
+    {"is_lower", 1, native_is_lower},
+    {"zfill", 2, native_zfill},
+    {"ljust", -1, native_ljust},
+    {"rjust", -1, native_rjust},
+    {"center", -1, native_center},
+    {"join", 2, native_join},
+    {"lstrip", 1, native_lstrip},
+    {"rstrip", 1, native_rstrip},
+    {"splitlines", 1, native_splitlines},
+    {"format", -1, native_format},
+    // List methods
+    {"insert", 3, native_list_insert},
+    {"extend", 2, native_list_extend},
+    {"clear", 1, native_list_clear},
+    {"copy", 1, native_list_copy},
+    {"reverse", 1, native_list_reverse},
+    {"index", 2, native_list_index},
+    // Dict methods
+    {"keys", 1, native_dict_keys},
+    {"values", 1, native_dict_values},
+    {"items", 1, native_dict_items},
+    {"get", -1, native_dict_get},
+    {"has", 2, native_dict_has},
+    {"update", 2, native_dict_update},
+    // JSON
+    {"json_parse", 1, native_json_parse},
+    {"json_stringify", 1, native_json_stringify},
+    // Time
+    {"now", 0, native_now},
+    {"sleep", 1, native_sleep},
+    {"strftime", -1, native_strftime},
+    // OS
+    {"env", 1, native_env},
+    {"args", 0, native_args},
+    {"exit", -1, native_exit},
+    {"cwd", 0, native_cwd},
     // File I/O
     {"read_file", 1, native_read_file},
     {"write_file", 2, native_write_file},
