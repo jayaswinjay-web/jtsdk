@@ -36,13 +36,40 @@ $tmp = Join-Path $env:TEMP ("native_installer_" + [guid]::NewGuid().ToString("N"
 New-Item -ItemType Directory -Force -Path $tmp | Out-Null
 
 try {
-    # Generate the .rc that embeds the payload zip. Use the numeric id 101
-    # directly (matches IDR_PAYLOAD in installer.cpp); an undefined name would
-    # be embedded as a string and never found at runtime.
+    # Generate the .rc that embeds the payload zip and version info. Use the
+    # numeric id 101 for the payload directly (matches IDR_PAYLOAD in
+    # installer.cpp); an undefined name would be embedded as a string and
+    # never found at runtime. We do NOT add an RT_MANIFEST here: MinGW's GCC
+    # always links its own default-manifest.o (asInvoker + common controls),
+    # and a second manifest would conflict at link time.
     $escaped = $Payload.Replace("\", "\\")
+
     $rc = @"
 #include <windows.h>
 101 RCDATA "$escaped"
+1 VERSIONINFO
+FILEVERSION 2,1,0,0
+PRODUCTVERSION 2,1,0,0
+BEGIN
+  BLOCK "StringFileInfo"
+  BEGIN
+    BLOCK "040904b0"
+    BEGIN
+      VALUE "CompanyName", "JayTech Solutions"
+      VALUE "FileDescription", "JTS GO installer"
+      VALUE "FileVersion", "2.1.0"
+      VALUE "InternalName", "JTS-IDE-Setup"
+      VALUE "LegalCopyright", "Copyright (c) JayTech Solutions"
+      VALUE "OriginalFilename", "JTS-IDE-Setup.exe"
+      VALUE "ProductName", "JTS GO"
+      VALUE "ProductVersion", "2.1.0"
+    END
+  END
+  BLOCK "VarFileInfo"
+  BEGIN
+    VALUE "Translation", 0x409, 1200
+  END
+END
 "@
     $rcPath = Join-Path $tmp "payload.rc"
     Set-Content -Path $rcPath -Value $rc -Encoding ASCII
