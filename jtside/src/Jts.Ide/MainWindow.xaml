@@ -4,7 +4,8 @@
         Title="JTS IDE"
         Width="1200" Height="780"
         WindowStartupLocation="CenterScreen"
-        Background="{StaticResource Bg.Window}">
+        Background="{StaticResource Bg.Window}"
+        Icon="pack://application:,,,/installer.ico">
   <DockPanel>
 
     <!-- Menu -->
