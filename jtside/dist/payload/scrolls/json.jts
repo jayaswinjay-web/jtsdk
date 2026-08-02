@@ -1,0 +1,20 @@
+# json scroll - JSON helpers (wraps builtin json_parse/json_stringify)
+func parse(text)
+    return json_parse(text)
+end
+
+func stringify(value)
+    return json_stringify(value)
+end
+
+func load(path)
+    return json_parse(read_file(path))
+end
+
+func save(path, value)
+    return write_file(path, json_stringify(value))
+end
+
+func pretty(value)
+    return json_stringify(value)
+end

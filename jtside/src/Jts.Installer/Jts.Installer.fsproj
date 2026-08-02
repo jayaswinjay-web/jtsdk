@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <AssemblyName>JTS-IDE-Setup</AssemblyName>
+    <RootNamespace>Jts.Installer</RootNamespace>
+    <InvariantGlobalization>true</InvariantGlobalization>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="Program.fs" />
+    <Compile Include="Main.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Payload (language + IDE) is zipped by build.ps1. The zip embeds into the single-file setup.exe. -->
+    <EmbeddedResource Include="..\..\dist\payload.zip"
+                      LogicalName="Jts.Installer.payload.zip"
+                      Condition="Exists('..\..\dist\payload.zip')" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Jts.Core\Jts.Core.fsproj" />
+  </ItemGroup>
+
+</Project>

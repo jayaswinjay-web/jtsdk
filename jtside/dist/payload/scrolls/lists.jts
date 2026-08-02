@@ -1,0 +1,115 @@
+# lists scroll - list utilities
+func flatten(lst)
+    out = []
+    for item in lst
+        if type(item) == "list"
+            out.extend(flatten(item))
+        else
+            out.append(item)
+        end
+    end
+    return out
+end
+
+func unique(lst)
+    out = []
+    for item in lst
+        has = false
+        for existing in out
+            if existing == item
+                has = true
+            end
+        end
+        if not has
+            out.append(item)
+        end
+    end
+    return out
+end
+
+func reversed(lst)
+    out = []
+    i = len(lst) - 1
+    while i >= 0
+        out.append(lst[i])
+        i = i - 1
+    end
+    return out
+end
+
+func chunk(lst, size)
+    out = []
+    i = 0
+    while i < len(lst)
+        sub = []
+        j = 0
+        while j < size and i + j < len(lst)
+            sub.append(lst[i + j])
+            j = j + 1
+        end
+        out.append(sub)
+        i = i + size
+    end
+    return out
+end
+
+func rotate(lst, k)
+    n = len(lst)
+    if n == 0
+        return []
+    end
+    k = k % n
+    if k < 0
+        k = k + n
+    end
+    out = []
+    i = n - k
+    while i < n
+        out.append(lst[i])
+        i = i + 1
+    end
+    i = 0
+    while i < n - k
+        out.append(lst[i])
+        i = i + 1
+    end
+    return out
+end
+
+func median(sorted_list)
+    n = len(sorted_list)
+    if n == 0
+        return 0
+    end
+    mid = n // 2
+    if n % 2 == 0
+        return (sorted_list[mid - 1] + sorted_list[mid]) / 2.0
+    end
+    return sorted_list[mid]
+end
+
+func first(lst)
+    return lst[0]
+end
+
+func last(lst)
+    return lst[len(lst) - 1]
+end
+
+func sum_squares(lst)
+    total = 0
+    for x in lst
+        total = total + x * x
+    end
+    return total
+end
+
+func count_occurrences(lst, target)
+    total = 0
+    for x in lst
+        if x == target
+            total = total + 1
+        end
+    end
+    return total
+end

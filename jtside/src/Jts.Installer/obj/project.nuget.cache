@@ -1,0 +1,13 @@
+{
+  "version": 2,
+  "dgSpecHash": "AqinANJ6w5Q=",
+  "success": true,
+  "projectFilePath": "D:\\jts programing language\\jtside\\src\\Jts.Installer\\Jts.Installer.fsproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\jayas\\.nuget\\packages\\fsharp.core\\8.0.403\\fsharp.core.8.0.403.nupkg.sha512",
+    "C:\\Users\\jayas\\.nuget\\packages\\microsoft.netcore.app.runtime.win-x64\\8.0.29\\microsoft.netcore.app.runtime.win-x64.8.0.29.nupkg.sha512",
+    "C:\\Users\\jayas\\.nuget\\packages\\microsoft.windowsdesktop.app.runtime.win-x64\\8.0.29\\microsoft.windowsdesktop.app.runtime.win-x64.8.0.29.nupkg.sha512",
+    "C:\\Users\\jayas\\.nuget\\packages\\microsoft.aspnetcore.app.runtime.win-x64\\8.0.29\\microsoft.aspnetcore.app.runtime.win-x64.8.0.29.nupkg.sha512"
+  ],
+  "logs": []
+}

@@ -1,0 +1,14 @@
+# Comprehensive program - Factorial calculator
+
+func factorial(n)
+    if n <= 1
+        return 1
+    else
+        return n * factorial(n - 1)
+    end
+end
+
+print("Factorials:")
+for i in 0 to 11
+    print(i + "! = " + factorial(i))
+end

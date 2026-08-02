@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <AssemblyName>Jts.Core</AssemblyName>
+    <RootNamespace>Jts.Core</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="LanguageInfo.fs" />
+    <Compile Include="Tokenizer.fs" />
+    <Compile Include="Errors.fs" />
+  </ItemGroup>
+
+</Project>

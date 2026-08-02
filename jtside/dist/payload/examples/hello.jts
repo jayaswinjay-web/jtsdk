@@ -1,0 +1,3 @@
+# Hello World - The simplest JTS GO program
+print("Hello, World!")
+print("Welcome to JTS GO!")

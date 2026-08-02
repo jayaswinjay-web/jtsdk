@@ -72,12 +72,14 @@ static int run_update(void) {
 static void repl(void) {
     print_version();
     printf("Type 'exit' or 'quit' to leave.\n\n");
+    fflush(stdout);
 
     init_vm();
 
     char line[2048];
     for (;;) {
         printf("jts> ");
+        fflush(stdout);
         if (fgets(line, sizeof(line), stdin) == NULL) {
             printf("\n");
             break;
@@ -98,6 +100,7 @@ static void repl(void) {
         } else if (result == INTERPRET_RUNTIME_ERROR) {
             printf("Runtime error.\n");
         }
+        fflush(stdout);
     }
 
     free_vm();
