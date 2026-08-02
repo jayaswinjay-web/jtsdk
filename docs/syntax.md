@@ -1,6 +1,6 @@
 # Syntax Overview
 
-JTS GO uses clean, Python-inspired syntax with indentation-based blocks. This page covers the fundamental syntax rules.
+JTS GO uses clean, indentation-based blocks that close with `end`. This page covers the fundamental syntax rules.
 
 ## Comments
 

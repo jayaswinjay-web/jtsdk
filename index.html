@@ -3,31 +3,24 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>JTS GO | The Easiest Programming Language to Learn</title>
-  <meta name="description" content="JTS GO is a modern programming language with Python-like syntax and a bytecode virtual machine. Sets, closures, OOP, ML/AI, and web development — built by JayTech Solutions.">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <title>JTS GO | Programming Language by JayTech Solutions</title>
+  <meta name="description" content="JTS GO is a modern programming language with a bytecode virtual machine. Sets, closures, OOP, ML/AI, and web development — built by JayTech Solutions.">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #0b0d12;
-      --bg-soft: #11141c;
-      --bg-card: #161a24;
-      --bg-hover: #1b2030;
-      --border: #242a3a;
-      --border-soft: #1c2230;
-      --text: #e6e9f2;
-      --text-dim: #9aa3b8;
-      --text-faint: #6b7489;
-      --accent: #7c6cff;
-      --accent-2: #22d3ee;
-      --accent-3: #f472b6;
-      --green: #34d399;
-      --amber: #fbbf24;
-      --red: #f87171;
-      --radius: 14px;
-      --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      --mono: 'JetBrains Mono', 'SF Mono', 'Cascadia Code', Consolas, monospace;
+      --white: #ffffff;
+      --bg: #f5f7fa;
+      --line: #e1e6ee;
+      --navy: #0b2545;
+      --blue: #155ee8;
+      --blue-dark: #0f4cc0;
+      --text: #1c2430;
+      --muted: #5c6b7e;
+      --code-bg: #1e2632;
+      --code-text: #d7e0ec;
+      --green: #1a9e5c;
+      --font: 'Inter', -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+      --mono: 'JetBrains Mono', Consolas, 'Courier New', monospace;
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -36,48 +29,32 @@
 
     body {
       font-family: var(--font);
-      background: var(--bg);
+      background: var(--white);
       color: var(--text);
       line-height: 1.6;
       -webkit-font-smoothing: antialiased;
-      overflow-x: hidden;
     }
 
-    a { color: var(--accent); text-decoration: none; }
+    a { color: var(--blue); text-decoration: none; }
     a:hover { text-decoration: underline; }
     code, pre { font-family: var(--mono); }
 
     .container {
-      max-width: 1150px;
+      max-width: 1100px;
       margin: 0 auto;
       padding: 0 24px;
     }
 
-    /* ===== ANIMATED BACKGROUND ===== */
-    .glow {
-      position: fixed;
-      border-radius: 50%;
-      filter: blur(120px);
-      opacity: 0.18;
-      pointer-events: none;
-      z-index: 0;
-    }
-    .glow-1 { width: 500px; height: 500px; background: var(--accent); top: -150px; left: -100px; }
-    .glow-2 { width: 420px; height: 420px; background: var(--accent-2); top: 30%; right: -140px; }
-    .glow-3 { width: 380px; height: 380px; background: var(--accent-3); bottom: -100px; left: 30%; opacity: 0.10; }
-
     /* ===== HEADER ===== */
     .site-header {
+      background: var(--white);
+      border-bottom: 1px solid var(--line);
       position: sticky;
       top: 0;
-      z-index: 200;
-      background: rgba(11, 13, 18, 0.82);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-      border-bottom: 1px solid var(--border-soft);
+      z-index: 100;
     }
     .header-inner {
-      max-width: 1150px;
+      max-width: 1100px;
       margin: 0 auto;
       padding: 0 24px;
       height: 64px;
@@ -89,46 +66,45 @@
       display: flex;
       align-items: center;
       gap: 10px;
-      font-weight: 800;
-      font-size: 1.25rem;
-      color: var(--text);
-      letter-spacing: -0.5px;
+      font-weight: 700;
+      font-size: 1.15rem;
+      color: var(--navy);
     }
     .logo-mark {
-      width: 30px; height: 30px;
-      border-radius: 8px;
-      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      width: 28px; height: 28px;
+      background: var(--navy);
+      color: var(--white);
+      border-radius: 6px;
       display: flex; align-items: center; justify-content: center;
       font-family: var(--mono);
-      font-size: 0.7rem;
+      font-size: 0.62rem;
       font-weight: 700;
-      color: #fff;
     }
-    .logo span { color: var(--accent-2); }
-    nav { display: flex; gap: 30px; align-items: center; }
+    .logo span { color: var(--blue); }
+    nav { display: flex; gap: 28px; align-items: center; }
     nav a {
-      color: var(--text-dim);
+      color: var(--muted);
       font-size: 0.9rem;
       font-weight: 500;
       transition: color 0.15s;
     }
-    nav a:hover { color: var(--text); text-decoration: none; }
+    nav a:hover { color: var(--navy); text-decoration: none; }
     .nav-cta {
-      background: linear-gradient(135deg, var(--accent), #5a48e8);
+      background: var(--blue);
       color: #fff !important;
-      padding: 8px 18px;
-      border-radius: 8px;
+      padding: 9px 18px;
+      border-radius: 6px;
       font-weight: 600;
-      transition: filter 0.15s;
+      transition: background 0.15s;
     }
-    .nav-cta:hover { filter: brightness(1.15); text-decoration: none; }
+    .nav-cta:hover { background: var(--blue-dark); text-decoration: none; }
 
     .hamburger {
       display: none;
       background: none;
-      border: 1px solid var(--border);
+      border: 1px solid var(--line);
       color: var(--text);
-      border-radius: 8px;
+      border-radius: 6px;
       padding: 6px 10px;
       cursor: pointer;
       font-size: 1rem;
@@ -136,59 +112,44 @@
 
     /* ===== HERO ===== */
     .hero {
-      position: relative;
-      padding: 90px 24px 80px;
+      background: var(--bg);
+      border-bottom: 1px solid var(--line);
+      padding: 76px 24px 72px;
       text-align: center;
-      z-index: 1;
     }
-    .hero-inner { max-width: 920px; margin: 0 auto; }
+    .hero-inner { max-width: 800px; margin: 0 auto; }
 
     .hero-badge {
       display: inline-flex;
       align-items: center;
-      gap: 10px;
-      padding: 7px 16px;
+      gap: 8px;
+      padding: 6px 14px;
+      background: var(--white);
+      border: 1px solid var(--line);
       border-radius: 999px;
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      font-size: 0.82rem;
+      font-size: 0.8rem;
       font-weight: 600;
-      color: var(--text-dim);
-      margin-bottom: 28px;
+      color: var(--muted);
+      margin-bottom: 24px;
     }
     .hero-badge .dot {
       width: 8px; height: 8px; border-radius: 50%;
       background: var(--green);
-      box-shadow: 0 0 10px var(--green);
-      animation: pulse 2s infinite;
-    }
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.4; }
     }
 
     .hero h1 {
-      font-size: 4.2rem;
+      font-size: 3.2rem;
       font-weight: 800;
-      line-height: 1.05;
-      letter-spacing: -2.5px;
-      background: linear-gradient(180deg, #fff 0%, #b9c0d8 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      margin-bottom: 20px;
-    }
-    .hero h1 .accent {
-      background: linear-gradient(120deg, var(--accent), var(--accent-2), var(--accent-3));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+      line-height: 1.15;
+      letter-spacing: -1px;
+      color: var(--navy);
+      margin-bottom: 18px;
     }
     .hero p.lead {
-      font-size: 1.2rem;
-      color: var(--text-dim);
-      max-width: 620px;
-      margin: 0 auto 38px;
+      font-size: 1.15rem;
+      color: var(--muted);
+      max-width: 640px;
+      margin: 0 auto 32px;
       line-height: 1.7;
     }
     .hero-actions {
@@ -197,317 +158,259 @@
       justify-content: center;
       align-items: center;
       flex-wrap: wrap;
-      margin-bottom: 30px;
+      margin-bottom: 28px;
     }
     .btn {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      padding: 14px 28px;
-      border-radius: 10px;
+      padding: 13px 26px;
+      border-radius: 6px;
       font-size: 1rem;
       font-weight: 600;
       border: none;
       cursor: pointer;
-      transition: all 0.15s;
+      transition: background 0.15s;
     }
     .btn-primary {
-      background: linear-gradient(135deg, var(--accent), #5a48e8);
+      background: var(--blue);
       color: #fff;
-      box-shadow: 0 8px 30px rgba(124, 108, 255, 0.35);
     }
-    .btn-primary:hover { filter: brightness(1.15); text-decoration: none; transform: translateY(-1px); }
+    .btn-primary:hover { background: var(--blue-dark); text-decoration: none; }
     .btn-ghost {
-      background: var(--bg-card);
-      color: var(--text);
-      border: 1px solid var(--border);
+      background: var(--white);
+      color: var(--navy);
+      border: 1px solid var(--line);
     }
-    .btn-ghost:hover { background: var(--bg-hover); text-decoration: none; transform: translateY(-1px); }
-    .btn-copy {
-      background: transparent;
-      border: 1px solid var(--border);
-      color: var(--text-dim);
-      font-family: var(--mono);
-      font-size: 0.85rem;
-      padding: 12px 18px;
-    }
-    .btn-copy:hover { background: var(--bg-hover); color: var(--text); }
+    .btn-ghost:hover { background: var(--bg); text-decoration: none; }
 
     .hero-meta {
       display: flex;
-      gap: 28px;
+      gap: 24px;
       justify-content: center;
       flex-wrap: wrap;
       font-size: 0.85rem;
-      color: var(--text-faint);
-      font-weight: 500;
+      color: var(--muted);
     }
-    .hero-meta span b { color: var(--text-dim); font-weight: 600; }
+    .hero-meta span b { color: var(--navy); font-weight: 600; }
 
-    /* Hero code editor */
     .code-window {
-      max-width: 680px;
-      margin: 56px auto 0;
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
+      max-width: 660px;
+      margin: 44px auto 0;
+      background: var(--code-bg);
+      border-radius: 8px;
       overflow: hidden;
       text-align: left;
-      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
     }
     .code-header {
       display: flex;
       align-items: center;
       gap: 8px;
-      padding: 14px 18px;
-      background: var(--bg-soft);
-      border-bottom: 1px solid var(--border-soft);
+      padding: 12px 16px;
+      background: #242f3d;
     }
-    .code-dot { width: 12px; height: 12px; border-radius: 50%; }
-    .code-dot.r { background: #ff5f57; }
-    .code-dot.y { background: #febc2e; }
-    .code-dot.g { background: #28c840; }
+    .code-dot { width: 11px; height: 11px; border-radius: 50%; }
+    .code-dot.r { background: #e05252; }
+    .code-dot.y { background: #e0b352; }
+    .code-dot.g { background: #52c41a; }
     .code-title {
       margin-left: 10px;
-      font-size: 0.8rem;
-      color: var(--text-faint);
+      font-size: 0.78rem;
+      color: #8b99ab;
       font-family: var(--mono);
-    }
-    .code-title .live {
-      color: var(--green);
-      margin-left: auto;
     }
     .code-body {
-      padding: 22px 24px;
+      padding: 20px 22px;
       font-family: var(--mono);
-      font-size: 0.86rem;
-      line-height: 1.9;
-      color: #c6cbe0;
-      min-height: 330px;
-    }
-    .code-body .kw { color: var(--accent-3); }
-    .code-body .fn { color: #82c9ff; }
-    .code-body .str { color: #a3e083; }
-    .code-body .num { color: var(--accent-2); }
-    .code-body .cmt { color: var(--text-faint); font-style: italic; }
-    .code-body .op { color: var(--amber); }
-    .code-body .out { color: var(--text-faint); }
-    .code-body .cursor {
-      display: inline-block;
-      width: 8px; height: 16px;
-      background: var(--accent-2);
-      vertical-align: text-bottom;
-      animation: blink 1s step-start infinite;
-    }
-    @keyframes blink { 50% { opacity: 0; } }
-
-    /* ===== STATS ===== */
-    .stats {
-      border-top: 1px solid var(--border-soft);
-      border-bottom: 1px solid var(--border-soft);
-      background: var(--bg-soft);
-      z-index: 1;
-      position: relative;
-    }
-    .stats-grid {
-      max-width: 1150px;
-      margin: 0 auto;
-      padding: 40px 24px;
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 24px;
-      text-align: center;
-    }
-    .stat b {
-      display: block;
-      font-size: 2.2rem;
-      font-weight: 800;
-      letter-spacing: -1px;
-      background: linear-gradient(120deg, var(--accent), var(--accent-2));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-    .stat span {
       font-size: 0.85rem;
-      color: var(--text-faint);
-      font-weight: 500;
+      line-height: 1.85;
+      color: var(--code-text);
+      min-height: 300px;
+      white-space: pre-wrap;
+      word-break: break-word;
     }
+    .code-body .kw { color: #c792ea; }
+    .code-body .fn { color: #82aaff; }
+    .code-body .str { color: #c3e88d; }
+    .code-body .num { color: #f78c6c; }
+    .code-body .cmt { color: #697a8f; font-style: italic; }
+    .code-body .op { color: #89ddff; }
+    .code-body .out { color: #697a8f; }
 
     /* ===== SECTIONS ===== */
-    section { position: relative; z-index: 1; }
-
-    .section-head { text-align: center; max-width: 640px; margin: 0 auto 60px; }
+    .section-head { max-width: 700px; margin: 0 auto 48px; }
     .section-kicker {
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       font-weight: 700;
-      letter-spacing: 2px;
+      letter-spacing: 1.5px;
       text-transform: uppercase;
-      color: var(--accent);
-      margin-bottom: 14px;
+      color: var(--blue);
+      margin-bottom: 12px;
     }
     .section-title {
-      font-size: 2.6rem;
-      font-weight: 800;
-      letter-spacing: -1.5px;
-      line-height: 1.15;
-      margin-bottom: 16px;
+      font-size: 2.1rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      color: var(--navy);
+      margin-bottom: 14px;
+      line-height: 1.2;
     }
     .section-subtitle {
-      font-size: 1.05rem;
-      color: var(--text-dim);
+      font-size: 1.02rem;
+      color: var(--muted);
       line-height: 1.7;
     }
 
-    .features { padding: 96px 24px; }
+    .section-block { padding: 68px 24px; }
+
+    /* ===== FEATURES ===== */
     .features-grid {
-      max-width: 1150px;
+      max-width: 1100px;
       margin: 0 auto;
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 20px;
+      gap: 1px;
+      background: var(--line);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
     }
-    .feature-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border-soft);
-      border-radius: var(--radius);
-      padding: 30px;
-      transition: all 0.18s;
+    .feature-cell {
+      background: var(--white);
+      padding: 28px;
     }
-    .feature-card:hover {
-      border-color: var(--border);
-      transform: translateY(-3px);
-      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
-    }
-    .feature-icon {
-      width: 46px; height: 46px;
-      border-radius: 11px;
-      display: flex; align-items: center; justify-content: center;
-      font-family: var(--mono);
-      font-size: 0.95rem;
+    .feature-cell h3 {
+      font-size: 1rem;
       font-weight: 700;
-      margin-bottom: 18px;
-      color: #fff;
-      background: linear-gradient(135deg, rgba(124,108,255,0.25), rgba(34,211,238,0.25));
-      border: 1px solid var(--border);
+      color: var(--navy);
+      margin-bottom: 8px;
     }
-    .feature-card h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: 8px; }
-    .feature-card p { font-size: 0.9rem; color: var(--text-dim); line-height: 1.65; }
-    .feature-card code {
-      background: var(--bg-soft);
-      padding: 1px 6px;
-      border-radius: 5px;
-      font-size: 0.82rem;
-      color: #c6cbe0;
+    .feature-cell p {
+      font-size: 0.88rem;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+    .feature-cell code {
+      background: var(--bg);
+      border: 1px solid var(--line);
+      padding: 1px 5px;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      color: var(--text);
+    }
+    .feature-label {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--blue);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: block;
+      margin-bottom: 8px;
     }
 
     /* ===== SHOWCASE ===== */
     .showcase {
-      padding: 96px 24px;
-      background: var(--bg-soft);
-      border-top: 1px solid var(--border-soft);
-      border-bottom: 1px solid var(--border-soft);
+      background: var(--bg);
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
     }
     .showcase-inner {
-      max-width: 1150px;
+      max-width: 1100px;
       margin: 0 auto;
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 60px;
-      align-items: center;
+      gap: 48px;
+      align-items: start;
     }
-    .showcase-copy h2 { text-align: left; margin-bottom: 20px; }
-    .showcase-copy p { color: var(--text-dim); margin-bottom: 32px; line-height: 1.7; }
+    .showcase-copy h2 { margin-bottom: 14px; }
+    .showcase-copy > p { color: var(--muted); margin-bottom: 24px; line-height: 1.7; }
 
     .tab-list {
       display: flex;
       gap: 6px;
-      margin-bottom: 20px;
+      margin-bottom: 16px;
       flex-wrap: wrap;
     }
     .tab-btn {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      color: var(--text-dim);
+      background: var(--white);
+      border: 1px solid var(--line);
+      color: var(--muted);
       font-size: 0.82rem;
       font-weight: 600;
       font-family: var(--mono);
-      padding: 8px 14px;
-      border-radius: 8px;
+      padding: 7px 13px;
+      border-radius: 6px;
       cursor: pointer;
       transition: all 0.15s;
     }
-    .tab-btn:hover { color: var(--text); }
+    .tab-btn:hover { color: var(--navy); }
     .tab-btn.active {
-      background: linear-gradient(135deg, var(--accent), #5a48e8);
+      background: var(--blue);
       color: #fff;
-      border-color: transparent;
+      border-color: var(--blue);
     }
+    .code-window.small { margin: 0; max-width: none; }
+    .code-window.small .code-body { min-height: 0; padding: 18px 20px; font-size: 0.79rem; line-height: 1.8; }
 
-    .code-window.small { margin: 0; }
-    .code-window.small .code-body { min-height: 0; padding: 20px 22px; font-size: 0.8rem; line-height: 1.8; }
-
-    .showcase-features {
-      list-style: none;
-      margin-top: 36px;
-    }
+    .showcase-features { list-style: none; }
     .showcase-features li {
       display: flex;
-      gap: 14px;
+      gap: 12px;
       align-items: flex-start;
-      padding: 14px 0;
-      border-bottom: 1px solid var(--border-soft);
-      font-size: 0.95rem;
-      color: var(--text-dim);
+      padding: 13px 0;
+      border-bottom: 1px solid var(--line);
+      font-size: 0.92rem;
+      color: var(--muted);
     }
     .showcase-features li:last-child { border-bottom: none; }
     .showcase-features .check {
       color: var(--green);
       font-weight: 700;
-      font-size: 1.05rem;
-      line-height: 1;
-      margin-top: 2px;
+      font-size: 1rem;
+      line-height: 1.2;
+      margin-top: 1px;
     }
     .showcase-features code {
-      background: var(--bg-card);
-      padding: 1px 6px;
-      border-radius: 5px;
-      font-size: 0.82rem;
-      color: #c6cbe0;
+      background: var(--white);
+      border: 1px solid var(--line);
+      padding: 1px 5px;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      color: var(--text);
     }
 
     /* ===== INSTALL ===== */
-    .install { padding: 96px 24px; }
     .install-grid {
-      max-width: 1150px;
+      max-width: 1100px;
       margin: 0 auto;
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 20px;
     }
     .install-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border-soft);
-      border-radius: var(--radius);
-      padding: 32px;
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 28px;
     }
     .step-num {
-      width: 30px; height: 30px;
+      width: 28px; height: 28px;
       border-radius: 50%;
-      background: linear-gradient(135deg, var(--accent), #5a48e8);
+      background: var(--blue);
       color: #fff;
       display: flex; align-items: center; justify-content: center;
-      font-size: 0.85rem;
+      font-size: 0.82rem;
       font-weight: 700;
-      margin-bottom: 16px;
+      margin-bottom: 14px;
     }
-    .install-card h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: 8px; }
-    .install-card p { font-size: 0.88rem; color: var(--text-dim); margin-bottom: 16px; }
+    .install-card h3 { font-size: 1rem; font-weight: 700; color: var(--navy); margin-bottom: 8px; }
+    .install-card p { font-size: 0.87rem; color: var(--muted); margin-bottom: 14px; }
     .install-box {
-      background: var(--bg-soft);
-      border: 1px solid var(--border);
-      border-radius: 9px;
-      padding: 12px 14px;
+      background: var(--bg);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 11px 14px;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -515,158 +418,130 @@
       cursor: pointer;
       transition: background 0.15s;
     }
-    .install-box:hover { background: var(--bg-hover); }
+    .install-box:hover { background: #eef1f6; }
     .install-box code {
       font-family: var(--mono);
-      font-size: 0.82rem;
-      color: #c6cbe0;
+      font-size: 0.8rem;
+      color: var(--text);
       word-break: break-all;
     }
     .install-box .copy-hint {
       font-size: 0.72rem;
-      color: var(--text-faint);
+      color: var(--muted);
       white-space: nowrap;
-      transition: color 0.15s;
     }
-    .install-box:hover .copy-hint { color: var(--text-dim); }
-    .install-card .btn-ghost {
-      font-size: 0.85rem;
-      padding: 10px 18px;
-    }
+    .install-card .btn-ghost { font-size: 0.85rem; padding: 9px 16px; }
 
     /* ===== TOOLCHAIN ===== */
     .toolchain {
-      padding: 96px 24px;
-      background: var(--bg-soft);
-      border-top: 1px solid var(--border-soft);
-      border-bottom: 1px solid var(--border-soft);
+      background: var(--bg);
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
     }
     .toolchain-grid {
-      max-width: 1150px;
+      max-width: 1100px;
       margin: 0 auto;
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       gap: 20px;
     }
     .tool-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border-soft);
-      border-radius: var(--radius);
-      padding: 28px;
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 24px;
       text-align: center;
-      transition: all 0.18s;
     }
-    .tool-card:hover { border-color: var(--border); transform: translateY(-3px); }
     .tool-card code {
       display: inline-block;
       font-family: var(--mono);
-      font-size: 1.15rem;
-      font-weight: 700;
-      color: var(--accent-2);
-      margin-bottom: 10px;
-      background: rgba(34, 211, 238, 0.08);
-      padding: 6px 14px;
-      border-radius: 8px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--navy);
+      margin-bottom: 8px;
     }
-    .tool-card p { font-size: 0.85rem; color: var(--text-dim); line-height: 1.6; }
+    .tool-card p { font-size: 0.84rem; color: var(--muted); line-height: 1.6; }
 
     /* ===== CTA ===== */
-    .cta {
-      padding: 96px 24px;
-      text-align: center;
-    }
+    .cta { padding: 68px 24px; }
     .cta-inner {
       max-width: 800px;
       margin: 0 auto;
-      background: linear-gradient(135deg, rgba(124,108,255,0.12), rgba(34,211,238,0.08));
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 64px 40px;
+      background: var(--bg);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 48px 40px;
+      text-align: center;
     }
     .cta h2 {
-      font-size: 2.4rem;
-      font-weight: 800;
-      letter-spacing: -1.5px;
-      margin-bottom: 14px;
+      font-size: 1.9rem;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 12px;
     }
-    .cta p { color: var(--text-dim); font-size: 1.05rem; margin-bottom: 30px; }
-    .cta .btn { font-size: 1.05rem; padding: 16px 34px; }
+    .cta p { color: var(--muted); font-size: 1rem; margin-bottom: 24px; }
 
     /* ===== FOOTER ===== */
     .site-footer {
-      border-top: 1px solid var(--border-soft);
-      padding: 60px 24px 28px;
-      position: relative;
-      z-index: 1;
+      background: var(--navy);
+      color: #cdd6e2;
+      padding: 48px 24px 24px;
     }
     .footer-inner {
-      max-width: 1150px;
+      max-width: 1100px;
       margin: 0 auto;
       display: grid;
       grid-template-columns: 2fr 1fr 1fr 1fr;
       gap: 40px;
     }
+    .footer-brand .logo { color: #fff; margin-bottom: 12px; }
+    .footer-brand .logo span { color: #7fb0ff; }
     .footer-brand p {
       font-size: 0.85rem;
-      color: var(--text-faint);
-      margin-top: 10px;
       line-height: 1.7;
       max-width: 320px;
-    }
-    .footer-brand .byline {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      margin-top: 16px;
-      font-size: 0.82rem;
-      font-weight: 600;
-      color: var(--text-dim);
-      background: var(--bg-card);
-      border: 1px solid var(--border-soft);
-      padding: 6px 12px;
-      border-radius: 999px;
+      color: #9fb0c5;
     }
     .footer-col h4 {
-      font-size: 0.82rem;
-      font-weight: 700;
+      font-size: 0.8rem;
+      font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 1px;
-      color: var(--text-dim);
-      margin-bottom: 16px;
+      color: #fff;
+      margin-bottom: 14px;
     }
     .footer-col a {
       display: block;
-      color: var(--text-faint);
-      font-size: 0.88rem;
+      color: #9fb0c5;
+      font-size: 0.86rem;
       padding: 4px 0;
       transition: color 0.15s;
     }
-    .footer-col a:hover { color: var(--text); text-decoration: none; }
+    .footer-col a:hover { color: #fff; text-decoration: none; }
     .footer-bottom {
-      max-width: 1150px;
-      margin: 40px auto 0;
-      padding-top: 22px;
-      border-top: 1px solid var(--border-soft);
+      max-width: 1100px;
+      margin: 32px auto 0;
+      padding-top: 18px;
+      border-top: 1px solid #2a3d59;
       display: flex;
       justify-content: space-between;
       align-items: center;
       flex-wrap: wrap;
-      gap: 12px;
+      gap: 10px;
       font-size: 0.8rem;
-      color: var(--text-faint);
+      color: #8a9cb4;
     }
-    .footer-bottom a { color: var(--text-dim); }
+    .footer-bottom a { color: #9fb0c5; }
 
     /* ===== RESPONSIVE ===== */
     @media (max-width: 980px) {
       .features-grid, .install-grid { grid-template-columns: 1fr 1fr; }
-      .showcase-inner { grid-template-columns: 1fr; gap: 40px; }
+      .showcase-inner { grid-template-columns: 1fr; gap: 32px; }
       .toolchain-grid { grid-template-columns: 1fr 1fr; }
-      .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 32px; }
       .footer-inner { grid-template-columns: 1fr 1fr; }
     }
     @media (max-width: 700px) {
-      .hero h1 { font-size: 2.7rem; }
+      .hero h1 { font-size: 2.2rem; }
       nav { display: none; }
       .hamburger { display: block; }
       nav.show {
@@ -676,25 +551,21 @@
         top: 64px;
         left: 0;
         right: 0;
-        background: var(--bg);
-        border-bottom: 1px solid var(--border);
+        background: var(--white);
+        border-bottom: 1px solid var(--line);
         padding: 16px 24px 20px;
-        gap: 16px;
+        gap: 14px;
         align-items: flex-start;
       }
       .features-grid, .install-grid, .toolchain-grid { grid-template-columns: 1fr; }
       .footer-inner { grid-template-columns: 1fr; }
-      .section-title { font-size: 2rem; }
-      .hero { padding: 60px 20px 60px; }
-      .code-body { font-size: 0.76rem; padding: 18px 16px; }
+      .section-title { font-size: 1.7rem; }
+      .hero { padding: 52px 20px 52px; }
+      .code-body { font-size: 0.74rem; padding: 16px 14px; }
     }
   </style>
 </head>
 <body>
-
-  <div class="glow glow-1"></div>
-  <div class="glow glow-2"></div>
-  <div class="glow glow-3"></div>
 
   <header class="site-header">
     <div class="header-inner">
@@ -713,13 +584,12 @@
 
   <section class="hero">
     <div class="hero-inner">
-      <div class="hero-badge"><span class="dot"></span> Version 2.1.0 — Now with Sets &amp; Closures</div>
-      <h1>The easiest language<br><span class="accent">to learn.</span></h1>
-      <p class="lead">JTS GO is a modern programming language with Python-like syntax that compiles to bytecode and runs on its own virtual machine. Write less. Run fast. Built by <b>JayTech Solutions</b>.</p>
+      <div class="hero-badge"><span class="dot"></span> Version 2.1.0</div>
+      <h1>The easiest programming language to learn</h1>
+      <p class="lead">JTS GO is a modern programming language with a bytecode virtual machine. Built for beginners and powerful enough for real projects, by JayTech Solutions.</p>
       <div class="hero-actions">
         <a href="#install" class="btn btn-primary">Get Started</a>
         <a href="https://github.com/jayaswinjay-web/jtsdk" target="_blank" rel="noopener" class="btn btn-ghost">View on GitHub</a>
-        <button class="btn btn-copy" onclick="copyText('npm install -g @jaytechsolutions/jts-go', this)">npm install -g @jaytechsolutions/jts-go</button>
       </div>
       <div class="hero-meta">
         <span><b>1 command</b> to install</span>
@@ -739,76 +609,67 @@
     </div>
   </section>
 
-  <div class="stats">
-    <div class="stats-grid">
-      <div class="stat"><b>50+</b><span>Built-in functions</span></div>
-      <div class="stat"><b>3</b><span>One-command tools</span></div>
-      <div class="stat"><b>2.1.0</b><span>Latest version</span></div>
-      <div class="stat"><b>100%</b><span>Beginner friendly</span></div>
-    </div>
-  </div>
-
-  <section class="features" id="features">
+  <section class="section-block features" id="features">
     <div class="section-head">
       <div class="section-kicker">Features</div>
-      <h2 class="section-title">Everything you need.<br>Nothing you don't.</h2>
+      <h2 class="section-title">Everything you need. Nothing you don't.</h2>
       <p class="section-subtitle">Designed for absolute beginners, powerful enough for real projects.</p>
     </div>
     <div class="features-grid">
-      <div class="feature-card">
-        <div class="feature-icon">[]</div>
+      <div class="feature-cell">
+        <span class="feature-label">Collections</span>
         <h3>Lists, Dicts &amp; Sets</h3>
-        <p>First-class collections with <code>[1, 2, 3]</code>, <code>{"key": "value"}</code>, and <code>{1, 2, 3}</code> — plus Python-style set union, intersection, and difference.</p>
+        <p>First-class collections with <code>[1, 2, 3]</code>, <code>{"key": "value"}</code>, and <code>{1, 2, 3}</code> — with set union, intersection, and difference.</p>
       </div>
-      <div class="feature-card">
-        <div class="feature-icon">fn</div>
+      <div class="feature-cell">
+        <span class="feature-label">Functions</span>
         <h3>Closures &amp; Functions</h3>
-        <p>First-class functions with recursion and closures. Nested functions capture their surrounding scope automatically.</p>
+        <p>First-class functions with recursion and closures. Nested functions capture their surrounding scope.</p>
       </div>
-      <div class="feature-card">
-        <div class="feature-icon">&gt;_</div>
+      <div class="feature-cell">
+        <span class="feature-label">Operators</span>
         <h3>Bitwise Operators</h3>
         <p><code>&amp;</code>, <code>|</code>, <code>^</code>, <code>~</code>, <code>&lt;&lt;</code>, <code>&gt;&gt;</code> with compound assignments. Plus <code>is</code>, <code>del</code>, and <code>assert</code>.</p>
       </div>
-      <div class="feature-card">
-        <div class="feature-icon">oo</div>
-        <h3>Object-Oriented</h3>
-        <p>Classes, methods, and inheritance with <code>extends</code> and <code>self</code>. Clean, Python-like OOP out of the box.</p>
+      <div class="feature-cell">
+        <span class="feature-label">Object-Oriented</span>
+        <h3>Classes &amp; Inheritance</h3>
+        <p>Classes, methods, and inheritance with <code>extends</code> and <code>self</code>. Clean OOP out of the box.</p>
       </div>
-      <div class="feature-card">
-        <div class="feature-icon">ML</div>
-        <h3>ML/AI Built-ins</h3>
-        <p>Tensors, matrices, matmul, sigmoid, relu, and MSE loss — built directly into the language, no imports needed.</p>
+      <div class="feature-cell">
+        <span class="feature-label">ML/AI</span>
+        <h3>Machine Learning Built-ins</h3>
+        <p>Tensors, matrices, matmul, sigmoid, relu, and MSE loss — built directly into the language.</p>
       </div>
-      <div class="feature-card">
-        <div class="feature-icon">web</div>
-        <h3>Web Development</h3>
-        <p>Spin up an HTTP server with <code>http_server()</code>, serve pages, and make requests with <code>http_request()</code>.</p>
+      <div class="feature-cell">
+        <span class="feature-label">Web Development</span>
+        <h3>HTTP Server</h3>
+        <p>Spin up an HTTP server with <code>http_server()</code> and make requests with <code>http_request()</code>.</p>
       </div>
-      <div class="feature-card">
-        <div class="feature-icon">try</div>
-        <h3>Errors, Handled</h3>
-        <p>List comprehensions, <code>try / catch / finally / throw</code>, and graceful error handling built in.</p>
+      <div class="feature-cell">
+        <span class="feature-label">Error Handling</span>
+        <h3>Try, Catch, Finally</h3>
+        <p>List comprehensions, <code>try / catch / finally / throw</code>, and graceful error handling.</p>
       </div>
-      <div class="feature-card">
-        <div class="feature-icon">pkg</div>
-        <h3>Scrolls (Packages)</h3>
-        <p>Reusable library files loaded with <code>bring</code>. A growing standard library ships with the kit.</p>
+      <div class="feature-cell">
+        <span class="feature-label">Packages</span>
+        <h3>Scrolls</h3>
+        <p>Reusable library files loaded with <code>bring</code>. A standard library ships with the kit.</p>
       </div>
-      <div class="feature-card">
-        <div class="feature-icon">dbg</div>
+      <div class="feature-cell">
+        <span class="feature-label">Developer Tools</span>
         <h3>VS Code Debugger</h3>
-        <p>Full debugging support with breakpoints, step in/out/over, locals &amp; globals — all inside VS Code.</p>
+        <p>Breakpoints, step in/out/over, and variable inspection inside VS Code.</p>
       </div>
     </div>
   </section>
 
-  <section class="showcase" id="language">
+  <section class="section-block showcase" id="language">
     <div class="showcase-inner">
       <div class="showcase-copy">
         <div class="section-kicker">Language</div>
-        <h2 class="section-title">Clean, minimal, readable.</h2>
-        <p>If you know Python, you already know most of JTS GO. Blocks close with <code>end</code>, everything is an expression, and the standard library covers everyday tasks.</p>
+        <h2 class="section-title">Clean, minimal, readable</h2>
+        <p>Blocks close with <code>end</code>, everything is an expression, and the standard library covers everyday tasks.</p>
         <div class="tab-list">
           <button class="tab-btn active" onclick="switchTab('oop', this)">OOP</button>
           <button class="tab-btn" onclick="switchTab('sets', this)">Sets</button>
@@ -841,17 +702,17 @@
     </div>
   </section>
 
-  <section class="install" id="install">
+  <section class="section-block install" id="install">
     <div class="section-head">
       <div class="section-kicker">Quick Start</div>
-      <h2 class="section-title">Up and running in seconds.</h2>
+      <h2 class="section-title">Up and running in seconds</h2>
       <p class="section-subtitle">One command. No build tools. No configuration.</p>
     </div>
     <div class="install-grid">
       <div class="install-card">
         <div class="step-num">1</div>
         <h3>Install Node.js</h3>
-        <p>JTS GO installs through npm. If you don't have Node.js yet, grab it from the official site.</p>
+        <p>JTS GO installs through npm. If you don't have Node.js yet, install it from the official site.</p>
         <a href="https://nodejs.org" target="_blank" rel="noopener" class="btn btn-ghost">Download Node.js</a>
       </div>
       <div class="install-card">
@@ -875,10 +736,10 @@
     </div>
   </section>
 
-  <section class="toolchain" id="toolchain">
+  <section class="section-block toolchain" id="toolchain">
     <div class="section-head">
       <div class="section-kicker">Toolchain</div>
-      <h2 class="section-title">Three commands, every stage.</h2>
+      <h2 class="section-title">Three commands, every stage</h2>
       <p class="section-subtitle">From source to bytecode to execution — all in your terminal.</p>
     </div>
     <div class="toolchain-grid">
@@ -905,7 +766,7 @@
     <div class="cta-inner">
       <h2>Start building with JTS GO</h2>
       <p>Install in one command. Write your first program in under a minute.</p>
-      <button class="btn btn-primary" onclick="copyText('npm install -g @jaytechsolutions/jts-go', this)">npm install -g @jaytechsolutions/jts-go</button>
+      <button class="btn btn-primary" onclick="copyText('npm install -g @jaytechsolutions/jts-go', this)">Install Now</button>
     </div>
   </section>
 
@@ -913,8 +774,7 @@
     <div class="footer-inner">
       <div class="footer-brand">
         <a href="#" class="logo"><span class="logo-mark">JS</span>JTS <span>GO</span></a>
-        <p>A modern programming language with Python-like syntax and a bytecode virtual machine. Designed for clarity, built for speed.</p>
-        <span class="byline">🏢 Built by JayTech Solutions</span>
+        <p>A modern programming language with a bytecode virtual machine. Designed for clarity, built for speed. Made by JayTech Solutions.</p>
       </div>
       <div class="footer-col">
         <h4>Install</h4>
@@ -929,14 +789,14 @@
         <a href="https://github.com/jayaswinjay-web/jtsdk/tree/main/examples" target="_blank" rel="noopener">Examples</a>
       </div>
       <div class="footer-col">
-        <h4>Community</h4>
+        <h4>Company</h4>
         <a href="https://github.com/jayaswinjay-web/jtsdk" target="_blank" rel="noopener">GitHub</a>
         <a href="https://github.com/jayaswinjay-web/jtsdk/issues" target="_blank" rel="noopener">Issue Tracker</a>
         <a href="https://github.com/jayaswinjay-web/jtsdk/blob/main/PROPRIETARY_LICENSE" target="_blank" rel="noopener">License</a>
       </div>
     </div>
     <div class="footer-bottom">
-      <span>© 2026 JTS GO. Created by JayTech Solutions.</span>
+      <span>© 2026 JTS GO. JayTech Solutions.</span>
       <span><a href="https://github.com/jayaswinjay-web/jtsdk" target="_blank" rel="noopener">jayaswinjay-web/jtsdk</a> · v2.1.0</span>
     </div>
   </footer>
@@ -955,7 +815,6 @@
       }
       if (el) {
         const hint = el.querySelector('.copy-hint');
-        const oldText = hint ? hint.textContent : el.textContent;
         if (hint) { hint.textContent = 'copied!'; setTimeout(() => { hint.textContent = 'copy'; }, 2000); }
       }
     }
@@ -1038,13 +897,16 @@
     };
     const tabFilenames = { oop: 'oop.jts', sets: 'sets.jts', loops: 'loops.jts', web: 'server.jts' };
 
+    function esc(s) {
+      return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
     function renderSnippet(key) {
       const el = document.getElementById('tab-code');
       el.innerHTML = snippets[key].map(pair => {
         if (pair[0] === 'nl') return '\n';
         const cls = pair[0] === ' ' ? '' : pair[0];
-        const escaped = pair[1].replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-        return cls ? `<span class="${cls}">${escaped}</span>` : escaped;
+        return cls ? `<span class="${cls}">${esc(pair[1])}</span>` : esc(pair[1]);
       }).join('');
       document.getElementById('tab-filename').textContent = tabFilenames[key];
     }
@@ -1056,7 +918,6 @@
     }
     renderSnippet('oop');
 
-    // Typing animation for the hero code
     const heroSource = [
       ['cmt', '# JTS GO — 60 seconds to your first program'],
       ['nl', ''],
@@ -1085,28 +946,12 @@
       return tokens.map(pair => {
         if (pair[0] === 'nl') return '\n';
         const cls = pair[0] === ' ' ? '' : pair[0];
-        const escaped = pair[1].replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-        return cls ? `<span class="${cls}">${escaped}</span>` : escaped;
+        return cls ? `<span class="${cls}">${esc(pair[1])}</span>` : esc(pair[1]);
       }).join('');
     }
 
     const fullHero = renderTokens(heroSource);
-    const typeEl = document.getElementById('typed-code');
-    const shouldType = window.matchMedia('(prefers-reduced-motion: no-preference)').matches;
-
-    if (!shouldType) {
-      typeEl.innerHTML = fullHero;
-    } else {
-      let i = 0;
-      const interval = setInterval(() => {
-        i++;
-        typeEl.innerHTML = fullHero.slice(0, i) + '<span class="cursor"></span>';
-        if (i >= fullHero.length) {
-          clearInterval(interval);
-          typeEl.innerHTML = fullHero;
-        }
-      }, 18);
-    }
+    document.getElementById('typed-code').innerHTML = fullHero;
   </script>
 
 </body>

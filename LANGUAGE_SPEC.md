@@ -40,7 +40,7 @@ This document is the complete, formal specification of the JTS GO programming la
 
 ### 1.2 Indentation
 
-JTS uses indentation-based blocks (like Python). The scanner tracks an indent stack. Use spaces consistently (4 spaces recommended). Blocks opened with `if`, `elif`, `while`, `for`, `func`, `class`, `try`, `catch` must be closed with `end`.
+JTS uses indentation-based blocks. The scanner tracks an indent stack. Use spaces consistently (4 spaces recommended). Blocks opened with `if`, `elif`, `while`, `for`, `func`, `class`, `try`, `catch` must be closed with `end`.
 
 ### 1.3 Keywords
 
@@ -1049,7 +1049,7 @@ When `bring foo` runs, JTS searches (first match wins):
 
 All three access styles work after a scroll loads:
 
-```python
+```jts
 bring math
 
 math.sin(1.0)          # namespaced: <scroll>.<member>

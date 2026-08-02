@@ -2,7 +2,7 @@
 
 <p align="center">
   <b>JTS GO — The Easiest Programming Language to Learn</b><br>
-  Python-like syntax. Bytecode compilation. Sets. OOP. Web Dev. ML/AI. Zero boilerplate.
+  Bytecode compilation. Sets. OOP. Web Dev. ML/AI. Zero boilerplate.
 </p>
 
 ---
@@ -11,7 +11,7 @@
 
 JTS GO is a programming language designed for **absolute beginners**. If you've never written code before, this is where you start. Built by **JayTech Solutions**.
 
-- **Python-like syntax** — readable, indentation-based
+- **Clean, readable syntax** — indentation-based blocks that close with `end`
 - **Object-Oriented Programming** — classes, methods, inheritance
 - **Sets & bitwise operators** — `{1, 2, 3}`, `|`/`&`/`^`/`<<`/`>>`, plus `is`, `del`, and `assert`
 - **Closures** — nested functions that capture variables

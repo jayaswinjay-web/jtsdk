@@ -42,7 +42,7 @@ Welcome to JTS GO! This guide will teach you everything you need to know to star
 
 JTS GO is a programming language designed for beginners. It combines:
 
-- **Python-like syntax** — easy to read and write
+- **Clean, readable syntax** — easy to read and write
 - **Dynamic typing** — no need to declare variable types
 - **Bytecode compilation** — fast execution
 - **Simple toolchain** — one command to run your code
