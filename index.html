@@ -5,22 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>JTS GO | Programming Language by JayTech Solutions</title>
   <meta name="description" content="JTS GO is a modern programming language with a bytecode virtual machine. Sets, closures, OOP, ML/AI, and web development — built by JayTech Solutions.">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
   <style>
     :root {
-      --white: #ffffff;
-      --bg: #f5f7fa;
-      --line: #e1e6ee;
-      --navy: #0b2545;
-      --blue: #155ee8;
-      --blue-dark: #0f4cc0;
-      --text: #1c2430;
-      --muted: #5c6b7e;
-      --code-bg: #1e2632;
-      --code-text: #d7e0ec;
-      --green: #1a9e5c;
-      --font: 'Inter', -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
-      --mono: 'JetBrains Mono', Consolas, 'Courier New', monospace;
+      --text: #1a1a1a;
+      --muted: #5f6368;
+      --line: #e2e2e2;
+      --bg: #f7f8fa;
+      --accent: #1a73e8;
+      --accent-dark: #1765cc;
+      --code-bg: #f6f8fa;
+      --code-fg: #24292f;
+      --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      --mono: "SF Mono", "Cascadia Mono", Consolas, "Liberation Mono", Menlo, monospace;
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -29,539 +25,369 @@
 
     body {
       font-family: var(--font);
-      background: var(--white);
+      background: #fff;
       color: var(--text);
       line-height: 1.6;
       -webkit-font-smoothing: antialiased;
     }
 
-    a { color: var(--blue); text-decoration: none; }
+    a { color: var(--accent); text-decoration: none; }
     a:hover { text-decoration: underline; }
     code, pre { font-family: var(--mono); }
 
     .container {
-      max-width: 1100px;
+      max-width: 1080px;
       margin: 0 auto;
       padding: 0 24px;
     }
 
     /* ===== HEADER ===== */
     .site-header {
-      background: var(--white);
+      background: #fff;
       border-bottom: 1px solid var(--line);
       position: sticky;
       top: 0;
       z-index: 100;
     }
     .header-inner {
-      max-width: 1100px;
+      max-width: 1080px;
       margin: 0 auto;
       padding: 0 24px;
-      height: 64px;
+      height: 60px;
       display: flex;
       align-items: center;
       justify-content: space-between;
     }
     .logo {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-weight: 700;
-      font-size: 1.15rem;
-      color: var(--navy);
+      font-weight: 600;
+      font-size: 1.05rem;
+      color: var(--text);
+      letter-spacing: 0.2px;
     }
-    .logo-mark {
-      width: 28px; height: 28px;
-      background: var(--navy);
-      color: var(--white);
-      border-radius: 6px;
-      display: flex; align-items: center; justify-content: center;
-      font-family: var(--mono);
-      font-size: 0.62rem;
-      font-weight: 700;
-    }
-    .logo span { color: var(--blue); }
-    nav { display: flex; gap: 28px; align-items: center; }
+    nav { display: flex; gap: 26px; align-items: center; }
     nav a {
       color: var(--muted);
       font-size: 0.9rem;
-      font-weight: 500;
-      transition: color 0.15s;
     }
-    nav a:hover { color: var(--navy); text-decoration: none; }
-    .nav-cta {
-      background: var(--blue);
-      color: #fff !important;
-      padding: 9px 18px;
-      border-radius: 6px;
-      font-weight: 600;
-      transition: background 0.15s;
-    }
-    .nav-cta:hover { background: var(--blue-dark); text-decoration: none; }
-
+    nav a:hover { color: var(--text); text-decoration: none; }
     .hamburger {
       display: none;
       background: none;
       border: 1px solid var(--line);
+      border-radius: 2px;
       color: var(--text);
-      border-radius: 6px;
-      padding: 6px 10px;
+      padding: 5px 10px;
       cursor: pointer;
       font-size: 1rem;
     }
 
     /* ===== HERO ===== */
     .hero {
-      background: var(--bg);
+      background: #fff;
       border-bottom: 1px solid var(--line);
-      padding: 76px 24px 72px;
-      text-align: center;
     }
-    .hero-inner { max-width: 800px; margin: 0 auto; }
-
-    .hero-badge {
-      display: inline-flex;
+    .hero-grid {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 72px 24px 80px;
+      display: grid;
+      grid-template-columns: 5fr 6fr;
+      gap: 56px;
       align-items: center;
-      gap: 8px;
-      padding: 6px 14px;
-      background: var(--white);
-      border: 1px solid var(--line);
-      border-radius: 999px;
-      font-size: 0.8rem;
-      font-weight: 600;
-      color: var(--muted);
-      margin-bottom: 24px;
     }
-    .hero-badge .dot {
-      width: 8px; height: 8px; border-radius: 50%;
-      background: var(--green);
-    }
-
     .hero h1 {
-      font-size: 3.2rem;
-      font-weight: 800;
-      line-height: 1.15;
-      letter-spacing: -1px;
-      color: var(--navy);
-      margin-bottom: 18px;
-    }
-    .hero p.lead {
-      font-size: 1.15rem;
-      color: var(--muted);
-      max-width: 640px;
-      margin: 0 auto 32px;
-      line-height: 1.7;
-    }
-    .hero-actions {
-      display: flex;
-      gap: 14px;
-      justify-content: center;
-      align-items: center;
-      flex-wrap: wrap;
-      margin-bottom: 28px;
-    }
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 13px 26px;
-      border-radius: 6px;
-      font-size: 1rem;
+      font-size: 2.2rem;
       font-weight: 600;
-      border: none;
-      cursor: pointer;
-      transition: background 0.15s;
+      line-height: 1.25;
+      letter-spacing: -0.2px;
+      color: var(--text);
+      margin-bottom: 16px;
     }
-    .btn-primary {
-      background: var(--blue);
-      color: #fff;
+    .hero p {
+      font-size: 1rem;
+      color: var(--muted);
+      line-height: 1.7;
+      max-width: 460px;
+      margin-bottom: 26px;
     }
-    .btn-primary:hover { background: var(--blue-dark); text-decoration: none; }
-    .btn-ghost {
-      background: var(--white);
-      color: var(--navy);
-      border: 1px solid var(--line);
-    }
-    .btn-ghost:hover { background: var(--bg); text-decoration: none; }
-
-    .hero-meta {
+    .hero-links {
       display: flex;
       gap: 24px;
-      justify-content: center;
-      flex-wrap: wrap;
-      font-size: 0.85rem;
-      color: var(--muted);
-    }
-    .hero-meta span b { color: var(--navy); font-weight: 600; }
-
-    .code-window {
-      max-width: 660px;
-      margin: 44px auto 0;
-      background: var(--code-bg);
-      border-radius: 8px;
-      overflow: hidden;
-      text-align: left;
-    }
-    .code-header {
-      display: flex;
       align-items: center;
-      gap: 8px;
-      padding: 12px 16px;
-      background: #242f3d;
+      flex-wrap: wrap;
+      font-size: 0.95rem;
+      font-weight: 500;
     }
-    .code-dot { width: 11px; height: 11px; border-radius: 50%; }
-    .code-dot.r { background: #e05252; }
-    .code-dot.y { background: #e0b352; }
-    .code-dot.g { background: #52c41a; }
-    .code-title {
-      margin-left: 10px;
+    .hero-links .btn {
+      display: inline-block;
+      background: var(--accent);
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 2px;
+      font-weight: 500;
+    }
+    .hero-links .btn:hover { background: var(--accent-dark); text-decoration: none; }
+    .hero-links .link { color: var(--accent); }
+
+    /* ===== CODE PANELS ===== */
+    .code-panel {
+      border: 1px solid var(--line);
+      border-radius: 3px;
+      overflow: hidden;
+      background: #fff;
+    }
+    .code-head {
+      background: var(--code-bg);
+      border-bottom: 1px solid var(--line);
+      padding: 8px 14px;
       font-size: 0.78rem;
-      color: #8b99ab;
+      color: var(--muted);
       font-family: var(--mono);
     }
-    .code-body {
-      padding: 20px 22px;
-      font-family: var(--mono);
-      font-size: 0.85rem;
-      line-height: 1.85;
-      color: var(--code-text);
-      min-height: 300px;
-      white-space: pre-wrap;
-      word-break: break-word;
+    .code-panel pre {
+      background: #fff;
+      padding: 18px 20px;
+      font-size: 0.84rem;
+      line-height: 1.75;
+      color: var(--code-fg);
+      overflow-x: auto;
+      white-space: pre;
     }
-    .code-body .kw { color: #c792ea; }
-    .code-body .fn { color: #82aaff; }
-    .code-body .str { color: #c3e88d; }
-    .code-body .num { color: #f78c6c; }
-    .code-body .cmt { color: #697a8f; font-style: italic; }
-    .code-body .op { color: #89ddff; }
-    .code-body .out { color: #697a8f; }
 
     /* ===== SECTIONS ===== */
-    .section-head { max-width: 700px; margin: 0 auto 48px; }
-    .section-kicker {
+    .section-block { padding: 64px 24px; }
+    .section-block.alt { background: var(--bg); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+    .section-block > .container { max-width: 1080px; }
+
+    .section-label {
       font-size: 0.78rem;
-      font-weight: 700;
-      letter-spacing: 1.5px;
+      font-weight: 600;
+      letter-spacing: 1.2px;
       text-transform: uppercase;
-      color: var(--blue);
-      margin-bottom: 12px;
+      color: var(--muted);
+      margin-bottom: 10px;
     }
     .section-title {
-      font-size: 2.1rem;
-      font-weight: 700;
-      letter-spacing: -0.5px;
-      color: var(--navy);
-      margin-bottom: 14px;
-      line-height: 1.2;
+      font-size: 1.7rem;
+      font-weight: 600;
+      letter-spacing: -0.2px;
+      color: var(--text);
+      margin-bottom: 12px;
     }
     .section-subtitle {
-      font-size: 1.02rem;
+      font-size: 0.98rem;
       color: var(--muted);
       line-height: 1.7;
+      max-width: 640px;
+      margin-bottom: 40px;
     }
-
-    .section-block { padding: 68px 24px; }
 
     /* ===== FEATURES ===== */
     .features-grid {
-      max-width: 1100px;
-      margin: 0 auto;
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 1px;
-      background: var(--line);
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      overflow: hidden;
+      gap: 16px;
     }
     .feature-cell {
-      background: var(--white);
-      padding: 28px;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 3px;
+      padding: 22px 22px 24px;
     }
     .feature-cell h3 {
-      font-size: 1rem;
-      font-weight: 700;
-      color: var(--navy);
-      margin-bottom: 8px;
+      font-size: 0.98rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 7px;
     }
     .feature-cell p {
-      font-size: 0.88rem;
+      font-size: 0.86rem;
       color: var(--muted);
       line-height: 1.65;
     }
     .feature-cell code {
-      background: var(--bg);
+      background: var(--code-bg);
       border: 1px solid var(--line);
-      padding: 1px 5px;
-      border-radius: 4px;
+      padding: 1px 4px;
+      border-radius: 2px;
       font-size: 0.8rem;
       color: var(--text);
     }
-    .feature-label {
-      font-family: var(--mono);
-      font-size: 0.72rem;
-      font-weight: 600;
-      color: var(--blue);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      display: block;
-      margin-bottom: 8px;
-    }
 
-    /* ===== SHOWCASE ===== */
-    .showcase {
-      background: var(--bg);
-      border-top: 1px solid var(--line);
-      border-bottom: 1px solid var(--line);
-    }
-    .showcase-inner {
-      max-width: 1100px;
-      margin: 0 auto;
+    /* ===== LANGUAGE ===== */
+    .language-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 48px;
+      gap: 56px;
       align-items: start;
     }
-    .showcase-copy h2 { margin-bottom: 14px; }
-    .showcase-copy > p { color: var(--muted); margin-bottom: 24px; line-height: 1.7; }
-
-    .tab-list {
+    .language-grid h2 { margin-bottom: 12px; }
+    .language-grid > div > p { color: var(--muted); font-size: 0.96rem; margin-bottom: 24px; line-height: 1.7; }
+    .language-list { list-style: none; }
+    .language-list li {
       display: flex;
-      gap: 6px;
-      margin-bottom: 16px;
-      flex-wrap: wrap;
-    }
-    .tab-btn {
-      background: var(--white);
-      border: 1px solid var(--line);
-      color: var(--muted);
-      font-size: 0.82rem;
-      font-weight: 600;
-      font-family: var(--mono);
-      padding: 7px 13px;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: all 0.15s;
-    }
-    .tab-btn:hover { color: var(--navy); }
-    .tab-btn.active {
-      background: var(--blue);
-      color: #fff;
-      border-color: var(--blue);
-    }
-    .code-window.small { margin: 0; max-width: none; }
-    .code-window.small .code-body { min-height: 0; padding: 18px 20px; font-size: 0.79rem; line-height: 1.8; }
-
-    .showcase-features { list-style: none; }
-    .showcase-features li {
-      display: flex;
-      gap: 12px;
-      align-items: flex-start;
-      padding: 13px 0;
+      gap: 10px;
+      align-items: baseline;
+      padding: 10px 0;
       border-bottom: 1px solid var(--line);
       font-size: 0.92rem;
       color: var(--muted);
     }
-    .showcase-features li:last-child { border-bottom: none; }
-    .showcase-features .check {
-      color: var(--green);
-      font-weight: 700;
-      font-size: 1rem;
-      line-height: 1.2;
-      margin-top: 1px;
+    .language-list li:last-child { border-bottom: none; }
+    .language-list .dot {
+      width: 5px;
+      height: 5px;
+      background: var(--accent);
+      border-radius: 50%;
+      flex-shrink: 0;
     }
-    .showcase-features code {
-      background: var(--white);
+    .language-list code {
+      background: var(--code-bg);
       border: 1px solid var(--line);
-      padding: 1px 5px;
-      border-radius: 4px;
+      padding: 1px 4px;
+      border-radius: 2px;
       font-size: 0.8rem;
       color: var(--text);
     }
 
-    /* ===== INSTALL ===== */
-    .install-grid {
-      max-width: 1100px;
-      margin: 0 auto;
+    /* ===== GET STARTED ===== */
+    .get-started-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 20px;
+      gap: 16px;
     }
-    .install-card {
-      background: var(--white);
+    .step {
+      background: #fff;
       border: 1px solid var(--line);
-      border-radius: 8px;
-      padding: 28px;
+      border-radius: 3px;
+      padding: 24px;
     }
     .step-num {
-      width: 28px; height: 28px;
-      border-radius: 50%;
-      background: var(--blue);
-      color: #fff;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 0.82rem;
-      font-weight: 700;
-      margin-bottom: 14px;
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: var(--accent);
+      margin-bottom: 12px;
     }
-    .install-card h3 { font-size: 1rem; font-weight: 700; color: var(--navy); margin-bottom: 8px; }
-    .install-card p { font-size: 0.87rem; color: var(--muted); margin-bottom: 14px; }
-    .install-box {
-      background: var(--bg);
+    .step h3 {
+      font-size: 0.98rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 7px;
+    }
+    .step p { font-size: 0.86rem; color: var(--muted); line-height: 1.65; margin-bottom: 14px; }
+    .cmd {
+      background: var(--code-bg);
       border: 1px solid var(--line);
-      border-radius: 6px;
-      padding: 11px 14px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      cursor: pointer;
-      transition: background 0.15s;
-    }
-    .install-box:hover { background: #eef1f6; }
-    .install-box code {
+      border-radius: 2px;
+      padding: 10px 12px;
       font-family: var(--mono);
       font-size: 0.8rem;
       color: var(--text);
       word-break: break-all;
     }
-    .install-box .copy-hint {
-      font-size: 0.72rem;
-      color: var(--muted);
-      white-space: nowrap;
-    }
-    .install-card .btn-ghost { font-size: 0.85rem; padding: 9px 16px; }
+    .step .external { font-size: 0.88rem; font-weight: 500; }
 
     /* ===== TOOLCHAIN ===== */
-    .toolchain {
-      background: var(--bg);
-      border-top: 1px solid var(--line);
-      border-bottom: 1px solid var(--line);
-    }
     .toolchain-grid {
-      max-width: 1100px;
-      margin: 0 auto;
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 20px;
+      gap: 16px;
     }
-    .tool-card {
-      background: var(--white);
+    .tool-cell {
+      background: #fff;
       border: 1px solid var(--line);
-      border-radius: 8px;
-      padding: 24px;
-      text-align: center;
+      border-radius: 3px;
+      padding: 20px 20px 22px;
     }
-    .tool-card code {
-      display: inline-block;
+    .tool-cell code {
+      display: block;
       font-family: var(--mono);
-      font-size: 1.1rem;
+      font-size: 1.02rem;
       font-weight: 600;
-      color: var(--navy);
-      margin-bottom: 8px;
+      color: var(--text);
+      margin-bottom: 6px;
     }
-    .tool-card p { font-size: 0.84rem; color: var(--muted); line-height: 1.6; }
-
-    /* ===== CTA ===== */
-    .cta { padding: 68px 24px; }
-    .cta-inner {
-      max-width: 800px;
-      margin: 0 auto;
-      background: var(--bg);
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      padding: 48px 40px;
-      text-align: center;
-    }
-    .cta h2 {
-      font-size: 1.9rem;
-      font-weight: 700;
-      color: var(--navy);
-      margin-bottom: 12px;
-    }
-    .cta p { color: var(--muted); font-size: 1rem; margin-bottom: 24px; }
+    .tool-cell p { font-size: 0.84rem; color: var(--muted); line-height: 1.6; }
 
     /* ===== FOOTER ===== */
     .site-footer {
-      background: var(--navy);
-      color: #cdd6e2;
-      padding: 48px 24px 24px;
+      background: var(--bg);
+      border-top: 1px solid var(--line);
+      padding: 48px 24px 22px;
     }
     .footer-inner {
-      max-width: 1100px;
+      max-width: 1080px;
       margin: 0 auto;
       display: grid;
       grid-template-columns: 2fr 1fr 1fr 1fr;
       gap: 40px;
+      padding-bottom: 32px;
     }
-    .footer-brand .logo { color: #fff; margin-bottom: 12px; }
-    .footer-brand .logo span { color: #7fb0ff; }
+    .footer-brand .logo { color: var(--text); display: inline-block; margin-bottom: 10px; }
     .footer-brand p {
       font-size: 0.85rem;
+      color: var(--muted);
       line-height: 1.7;
       max-width: 320px;
-      color: #9fb0c5;
     }
     .footer-col h4 {
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 1px;
-      color: #fff;
-      margin-bottom: 14px;
+      color: var(--text);
+      margin-bottom: 12px;
     }
     .footer-col a {
       display: block;
-      color: #9fb0c5;
+      color: var(--muted);
       font-size: 0.86rem;
-      padding: 4px 0;
-      transition: color 0.15s;
+      padding: 3px 0;
     }
-    .footer-col a:hover { color: #fff; text-decoration: none; }
+    .footer-col a:hover { color: var(--text); text-decoration: none; }
     .footer-bottom {
-      max-width: 1100px;
-      margin: 32px auto 0;
-      padding-top: 18px;
-      border-top: 1px solid #2a3d59;
+      max-width: 1080px;
+      margin: 0 auto;
+      padding-top: 16px;
+      border-top: 1px solid var(--line);
       display: flex;
       justify-content: space-between;
       align-items: center;
       flex-wrap: wrap;
       gap: 10px;
       font-size: 0.8rem;
-      color: #8a9cb4;
+      color: var(--muted);
     }
-    .footer-bottom a { color: #9fb0c5; }
 
     /* ===== RESPONSIVE ===== */
-    @media (max-width: 980px) {
-      .features-grid, .install-grid { grid-template-columns: 1fr 1fr; }
-      .showcase-inner { grid-template-columns: 1fr; gap: 32px; }
+    @media (max-width: 900px) {
+      .hero-grid { grid-template-columns: 1fr; gap: 36px; padding: 48px 24px 56px; }
+      .hero p { max-width: none; }
+      .features-grid, .get-started-grid { grid-template-columns: 1fr 1fr; }
+      .language-grid { grid-template-columns: 1fr; gap: 32px; }
       .toolchain-grid { grid-template-columns: 1fr 1fr; }
       .footer-inner { grid-template-columns: 1fr 1fr; }
     }
-    @media (max-width: 700px) {
-      .hero h1 { font-size: 2.2rem; }
-      nav { display: none; }
-      .hamburger { display: block; }
-      nav.show {
-        display: flex;
+    @media (max-width: 640px) {
+      nav {
+        display: none;
         flex-direction: column;
         position: absolute;
-        top: 64px;
+        top: 60px;
         left: 0;
         right: 0;
-        background: var(--white);
+        background: #fff;
         border-bottom: 1px solid var(--line);
-        padding: 16px 24px 20px;
-        gap: 14px;
+        padding: 14px 24px 18px;
+        gap: 12px;
         align-items: flex-start;
       }
-      .features-grid, .install-grid, .toolchain-grid { grid-template-columns: 1fr; }
+      nav.show { display: flex; }
+      .hamburger { display: block; }
+      .features-grid, .get-started-grid, .toolchain-grid { grid-template-columns: 1fr; }
       .footer-inner { grid-template-columns: 1fr; }
-      .section-title { font-size: 1.7rem; }
-      .hero { padding: 52px 20px 52px; }
-      .code-body { font-size: 0.74rem; padding: 16px 14px; }
+      .section-block { padding: 48px 20px; }
+      .hero h1 { font-size: 1.7rem; }
     }
   </style>
 </head>
@@ -569,211 +395,188 @@
 
   <header class="site-header">
     <div class="header-inner">
-      <a href="#" class="logo"><span class="logo-mark">JS</span>JTS <span>GO</span></a>
+      <a href="#" class="logo">JTS GO</a>
       <nav id="nav">
         <a href="#features">Features</a>
         <a href="#language">Language</a>
         <a href="#install">Install</a>
         <a href="#toolchain">Toolchain</a>
         <a href="https://github.com/jayaswinjay-web/jtsdk" target="_blank" rel="noopener">GitHub</a>
-        <a href="https://www.npmjs.com/package/@jaytechsolutions/jts-go" target="_blank" rel="noopener" class="nav-cta">Get on npm</a>
+        <a href="https://www.npmjs.com/package/@jaytechsolutions/jts-go" target="_blank" rel="noopener">npm</a>
       </nav>
-      <button class="hamburger" onclick="document.getElementById('nav').classList.toggle('show')">☰</button>
+      <button class="hamburger" onclick="document.getElementById('nav').classList.toggle('show')">Menu</button>
     </div>
   </header>
 
   <section class="hero">
-    <div class="hero-inner">
-      <div class="hero-badge"><span class="dot"></span> Version 2.1.0</div>
-      <h1>The easiest programming language to learn</h1>
-      <p class="lead">JTS GO is a modern programming language with a bytecode virtual machine. Built for beginners and powerful enough for real projects, by JayTech Solutions.</p>
-      <div class="hero-actions">
-        <a href="#install" class="btn btn-primary">Get Started</a>
-        <a href="https://github.com/jayaswinjay-web/jtsdk" target="_blank" rel="noopener" class="btn btn-ghost">View on GitHub</a>
-      </div>
-      <div class="hero-meta">
-        <span><b>1 command</b> to install</span>
-        <span><b>0 boilerplate</b> to start</span>
-        <span><b>100%</b> free to learn</span>
-      </div>
-
-      <div class="code-window">
-        <div class="code-header">
-          <span class="code-dot r"></span>
-          <span class="code-dot y"></span>
-          <span class="code-dot g"></span>
-          <span class="code-title">demo.jts</span>
+    <div class="hero-grid">
+      <div>
+        <h1>The easiest programming language to learn</h1>
+        <p>JTS GO is a modern programming language with a bytecode virtual machine. Built for beginners and powerful enough for real projects, by JayTech Solutions.</p>
+        <div class="hero-links">
+          <a href="#install" class="btn">Get Started</a>
+          <a href="https://github.com/jayaswinjay-web/jtsdk" target="_blank" rel="noopener" class="link">View on GitHub</a>
         </div>
-        <div class="code-body" id="typed-code"></div>
+      </div>
+      <div class="code-panel">
+        <div class="code-head">demo.jts</div>
+        <pre># demo.jts — your first program
+func fib(n):
+    if n &lt;= 1:
+        return n
+    end
+    return fib(n - 1) + fib(n - 2)
+end
+
+for i in 0 to 10:
+    print(fib(i))
+end</pre>
       </div>
     </div>
   </section>
 
-  <section class="section-block features" id="features">
-    <div class="section-head">
-      <div class="section-kicker">Features</div>
+  <section class="section-block alt" id="features">
+    <div class="container">
+      <div class="section-label">Features</div>
       <h2 class="section-title">Everything you need. Nothing you don't.</h2>
       <p class="section-subtitle">Designed for absolute beginners, powerful enough for real projects.</p>
-    </div>
-    <div class="features-grid">
-      <div class="feature-cell">
-        <span class="feature-label">Collections</span>
-        <h3>Lists, Dicts &amp; Sets</h3>
-        <p>First-class collections with <code>[1, 2, 3]</code>, <code>{"key": "value"}</code>, and <code>{1, 2, 3}</code> — with set union, intersection, and difference.</p>
-      </div>
-      <div class="feature-cell">
-        <span class="feature-label">Functions</span>
-        <h3>Closures &amp; Functions</h3>
-        <p>First-class functions with recursion and closures. Nested functions capture their surrounding scope.</p>
-      </div>
-      <div class="feature-cell">
-        <span class="feature-label">Operators</span>
-        <h3>Bitwise Operators</h3>
-        <p><code>&amp;</code>, <code>|</code>, <code>^</code>, <code>~</code>, <code>&lt;&lt;</code>, <code>&gt;&gt;</code> with compound assignments. Plus <code>is</code>, <code>del</code>, and <code>assert</code>.</p>
-      </div>
-      <div class="feature-cell">
-        <span class="feature-label">Object-Oriented</span>
-        <h3>Classes &amp; Inheritance</h3>
-        <p>Classes, methods, and inheritance with <code>extends</code> and <code>self</code>. Clean OOP out of the box.</p>
-      </div>
-      <div class="feature-cell">
-        <span class="feature-label">ML/AI</span>
-        <h3>Machine Learning Built-ins</h3>
-        <p>Tensors, matrices, matmul, sigmoid, relu, and MSE loss — built directly into the language.</p>
-      </div>
-      <div class="feature-cell">
-        <span class="feature-label">Web Development</span>
-        <h3>HTTP Server</h3>
-        <p>Spin up an HTTP server with <code>http_server()</code> and make requests with <code>http_request()</code>.</p>
-      </div>
-      <div class="feature-cell">
-        <span class="feature-label">Error Handling</span>
-        <h3>Try, Catch, Finally</h3>
-        <p>List comprehensions, <code>try / catch / finally / throw</code>, and graceful error handling.</p>
-      </div>
-      <div class="feature-cell">
-        <span class="feature-label">Packages</span>
-        <h3>Scrolls</h3>
-        <p>Reusable library files loaded with <code>bring</code>. A standard library ships with the kit.</p>
-      </div>
-      <div class="feature-cell">
-        <span class="feature-label">Developer Tools</span>
-        <h3>VS Code Debugger</h3>
-        <p>Breakpoints, step in/out/over, and variable inspection inside VS Code.</p>
+      <div class="features-grid">
+        <div class="feature-cell">
+          <h3>Lists, Dicts &amp; Sets</h3>
+          <p>First-class collections with <code>[1, 2, 3]</code>, <code>{"key": "value"}</code>, and <code>{1, 2, 3}</code> — with set union, intersection, and difference.</p>
+        </div>
+        <div class="feature-cell">
+          <h3>Closures &amp; Functions</h3>
+          <p>First-class functions with recursion and closures. Nested functions capture their surrounding scope.</p>
+        </div>
+        <div class="feature-cell">
+          <h3>Bitwise Operators</h3>
+          <p><code>&amp;</code>, <code>|</code>, <code>^</code>, <code>~</code>, <code>&lt;&lt;</code>, <code>&gt;&gt;</code> with compound assignments. Plus <code>is</code>, <code>del</code>, and <code>assert</code>.</p>
+        </div>
+        <div class="feature-cell">
+          <h3>Classes &amp; Inheritance</h3>
+          <p>Classes, methods, and inheritance with <code>extends</code> and <code>self</code>. Clean OOP out of the box.</p>
+        </div>
+        <div class="feature-cell">
+          <h3>Machine Learning Built-ins</h3>
+          <p>Tensors, matrices, matmul, sigmoid, relu, and MSE loss — built directly into the language.</p>
+        </div>
+        <div class="feature-cell">
+          <h3>HTTP Server</h3>
+          <p>Spin up an HTTP server with <code>http_server()</code> and make requests with <code>http_request()</code>.</p>
+        </div>
+        <div class="feature-cell">
+          <h3>Try, Catch, Finally</h3>
+          <p>List comprehensions, <code>try / catch / finally / throw</code>, and graceful error handling.</p>
+        </div>
+        <div class="feature-cell">
+          <h3>Scrolls</h3>
+          <p>Reusable library files loaded with <code>bring</code>. A standard library ships with the kit.</p>
+        </div>
+        <div class="feature-cell">
+          <h3>VS Code Debugger</h3>
+          <p>Breakpoints, step in/out/over, and variable inspection inside VS Code.</p>
+        </div>
       </div>
     </div>
   </section>
 
-  <section class="section-block showcase" id="language">
-    <div class="showcase-inner">
-      <div class="showcase-copy">
-        <div class="section-kicker">Language</div>
-        <h2 class="section-title">Clean, minimal, readable</h2>
-        <p>Blocks close with <code>end</code>, everything is an expression, and the standard library covers everyday tasks.</p>
-        <div class="tab-list">
-          <button class="tab-btn active" onclick="switchTab('oop', this)">OOP</button>
-          <button class="tab-btn" onclick="switchTab('sets', this)">Sets</button>
-          <button class="tab-btn" onclick="switchTab('loops', this)">Loops</button>
-          <button class="tab-btn" onclick="switchTab('web', this)">Web</button>
-        </div>
-        <div class="code-window small">
-          <div class="code-header">
-            <span class="code-dot r"></span>
-            <span class="code-dot y"></span>
-            <span class="code-dot g"></span>
-            <span class="code-title" id="tab-filename">oop.jts</span>
+  <section class="section-block" id="language">
+    <div class="container">
+      <div class="section-label">Language</div>
+      <h2 class="section-title">Clean, minimal, readable</h2>
+      <div class="language-grid">
+        <div>
+          <p>Blocks close with <code>end</code>, everything is an expression, and the standard library covers everyday tasks.</p>
+          <div class="code-panel">
+            <div class="code-head">features.jts</div>
+            <pre># features.jts — sets and comprehension
+primes = {2, 3, 5, 7, 11}
+odds   = set([1, 3, 5, 7, 9])
+
+print(primes &amp; odds)   # {5, 7}
+print(primes | odds)   # {1, 2, 3, 5, 7, 9, 11}
+print(5 &amp; 3)           # 1
+
+assert 3 in primes
+del odds</pre>
           </div>
-          <div class="code-body" id="tab-code"></div>
         </div>
-      </div>
-      <div>
-        <ul class="showcase-features">
-          <li><span class="check">✓</span><span><code>x = 42</code> — dynamic variables, no type declarations</span></li>
-          <li><span class="check">✓</span><span><code>func name(args) ... end</code> — clean function syntax</span></li>
-          <li><span class="check">✓</span><span><code>for x in 0 to N</code> and <code>while</code> loops</span></li>
-          <li><span class="check">✓</span><span><code>if / elif / else</code> conditionals</span></li>
-          <li><span class="check">✓</span><span><code>class / extends / new / self</code> OOP with inheritance</span></li>
-          <li><span class="check">✓</span><span><code>try / catch / finally / throw</code> exceptions</span></li>
-          <li><span class="check">✓</span><span><code>print</code>, <code>input</code>, <code>len</code>, <code>type</code> built-ins</span></li>
-          <li><span class="check">✓</span><span><code>bring scroll_name</code> package system</span></li>
-          <li><span class="check">✓</span><span><code>#</code> single-line comments</span></li>
-        </ul>
+        <div>
+          <ul class="language-list">
+            <li><span class="dot"></span><span><code>x = 42</code> — dynamic variables, no type declarations</span></li>
+            <li><span class="dot"></span><span><code>func name(args) ... end</code> — clean function syntax</span></li>
+            <li><span class="dot"></span><span><code>for x in 0 to N</code> and <code>while</code> loops</span></li>
+            <li><span class="dot"></span><span><code>if / elif / else</code> conditionals</span></li>
+            <li><span class="dot"></span><span><code>class / extends / new / self</code> OOP with inheritance</span></li>
+            <li><span class="dot"></span><span><code>try / catch / finally / throw</code> exceptions</span></li>
+            <li><span class="dot"></span><span><code>print</code>, <code>input</code>, <code>len</code>, <code>type</code> built-ins</span></li>
+            <li><span class="dot"></span><span><code>bring scroll_name</code> package system</span></li>
+            <li><span class="dot"></span><span><code>#</code> single-line comments</span></li>
+          </ul>
+        </div>
       </div>
     </div>
   </section>
 
-  <section class="section-block install" id="install">
-    <div class="section-head">
-      <div class="section-kicker">Quick Start</div>
+  <section class="section-block alt" id="install">
+    <div class="container">
+      <div class="section-label">Get Started</div>
       <h2 class="section-title">Up and running in seconds</h2>
       <p class="section-subtitle">One command. No build tools. No configuration.</p>
-    </div>
-    <div class="install-grid">
-      <div class="install-card">
-        <div class="step-num">1</div>
-        <h3>Install Node.js</h3>
-        <p>JTS GO installs through npm. If you don't have Node.js yet, install it from the official site.</p>
-        <a href="https://nodejs.org" target="_blank" rel="noopener" class="btn btn-ghost">Download Node.js</a>
-      </div>
-      <div class="install-card">
-        <div class="step-num">2</div>
-        <h3>Install JTS GO</h3>
-        <p>One global npm install gives you the compiler, the VM, and the toolchain.</p>
-        <div class="install-box" onclick="copyText('npm install -g @jaytechsolutions/jts-go', this)">
-          <code>$ npm install -g @jaytechsolutions/jts-go</code>
-          <span class="copy-hint">copy</span>
+      <div class="get-started-grid">
+        <div class="step">
+          <div class="step-num">1</div>
+          <h3>Install Node.js</h3>
+          <p>JTS GO installs through npm. If you don't have Node.js yet, install it from the official site.</p>
+          <a class="external" href="https://nodejs.org" target="_blank" rel="noopener">Download Node.js</a>
         </div>
-      </div>
-      <div class="install-card">
-        <div class="step-num">3</div>
-        <h3>Run Your Code</h3>
-        <p>Create a <code>.jts</code> file and run it instantly.</p>
-        <div class="install-box" onclick="copyText('jts hello.jts', this)">
-          <code>$ jts hello.jts</code>
-          <span class="copy-hint">copy</span>
+        <div class="step">
+          <div class="step-num">2</div>
+          <h3>Install JTS GO</h3>
+          <p>One global npm install gives you the compiler, the VM, and the toolchain.</p>
+          <div class="cmd">npm install -g @jaytechsolutions/jts-go</div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <h3>Run your code</h3>
+          <p>Create a <code>.jts</code> file and run it instantly.</p>
+          <div class="cmd">jts hello.jts</div>
         </div>
       </div>
     </div>
   </section>
 
-  <section class="section-block toolchain" id="toolchain">
-    <div class="section-head">
-      <div class="section-kicker">Toolchain</div>
+  <section class="section-block" id="toolchain">
+    <div class="container">
+      <div class="section-label">Toolchain</div>
       <h2 class="section-title">Three commands, every stage</h2>
       <p class="section-subtitle">From source to bytecode to execution — all in your terminal.</p>
-    </div>
-    <div class="toolchain-grid">
-      <div class="tool-card">
-        <code>jts</code>
-        <p>Compile and run a <code>.jts</code> file in one step</p>
+      <div class="toolchain-grid">
+        <div class="tool-cell">
+          <code>jts</code>
+          <p>Compile and run a <code>.jts</code> file in one step</p>
+        </div>
+        <div class="tool-cell">
+          <code>jtsc</code>
+          <p>Compile source to <code>.jbc</code> bytecode</p>
+        </div>
+        <div class="tool-cell">
+          <code>jtsvm</code>
+          <p>Execute compiled bytecode directly</p>
+        </div>
+        <div class="tool-cell">
+          <code>--update</code>
+          <p>Update to the latest version via npm</p>
+        </div>
       </div>
-      <div class="tool-card">
-        <code>jtsc</code>
-        <p>Compile source to <code>.jbc</code> bytecode</p>
-      </div>
-      <div class="tool-card">
-        <code>jtsvm</code>
-        <p>Execute compiled bytecode directly</p>
-      </div>
-      <div class="tool-card">
-        <code>--update</code>
-        <p>Update to the latest version via npm</p>
-      </div>
-    </div>
-  </section>
-
-  <section class="cta">
-    <div class="cta-inner">
-      <h2>Start building with JTS GO</h2>
-      <p>Install in one command. Write your first program in under a minute.</p>
-      <button class="btn btn-primary" onclick="copyText('npm install -g @jaytechsolutions/jts-go', this)">Install Now</button>
     </div>
   </section>
 
   <footer class="site-footer">
     <div class="footer-inner">
       <div class="footer-brand">
-        <a href="#" class="logo"><span class="logo-mark">JS</span>JTS <span>GO</span></a>
+        <a href="#" class="logo">JTS GO</a>
         <p>A modern programming language with a bytecode virtual machine. Designed for clarity, built for speed. Made by JayTech Solutions.</p>
       </div>
       <div class="footer-col">
@@ -800,159 +603,6 @@
       <span><a href="https://github.com/jayaswinjay-web/jtsdk" target="_blank" rel="noopener">jayaswinjay-web/jtsdk</a> · v2.1.0</span>
     </div>
   </footer>
-
-  <script>
-    function copyText(text, el) {
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(text);
-      } else {
-        const ta = document.createElement('textarea');
-        ta.value = text;
-        document.body.appendChild(ta);
-        ta.select();
-        try { document.execCommand('copy'); } catch (e) {}
-        document.body.removeChild(ta);
-      }
-      if (el) {
-        const hint = el.querySelector('.copy-hint');
-        if (hint) { hint.textContent = 'copied!'; setTimeout(() => { hint.textContent = 'copy'; }, 2000); }
-      }
-    }
-
-    const snippets = {
-      oop: [
-        ['cmt', '# Object-Oriented Programming'],
-        ['kw', 'class'], [' ', ' '], ['fn', 'Animal'],
-        ['nl', ''],
-        ['    ', '    '], ['kw', 'func'], [' ', ' '], ['fn', 'init'], ['op', '('], ['kw', 'self'], ['op', ', '], ['fn', 'name'], ['op', ')'],
-        ['nl', ''],
-        ['        ', '        '], ['kw', 'self'], ['op', '.'], ['fn', 'name'], [' ', ' '], ['op', '='], [' ', ' '], ['fn', 'name'],
-        ['nl', ''],
-        ['    ', '    '], ['kw', 'end'],
-        ['nl', ''],
-        ['    ', '    '], ['kw', 'func'], [' ', ' '], ['fn', 'speak'], ['op', '('], ['kw', 'self'], ['op', ')'],
-        ['nl', ''],
-        ['        ', '        '], ['fn', 'print'], ['op', '('], ['kw', 'self'], ['op', '.'], ['fn', 'name'], [' ', ' '], ['op', '+'], [' ', ' '], ['str', '" says hello!"'], ['op', ')'],
-        ['nl', ''],
-        ['    ', '    '], ['kw', 'end'],
-        ['nl', ''],
-        ['kw', 'end'],
-        ['nl', ''],
-        ['fn', 'a'], [' ', ' '], ['op', '='], [' ', ' '], ['kw', 'new'], [' ', ' '], ['fn', 'Animal'], ['op', '('], ['str', '"Cat"'], ['op', ')'],
-        ['nl', ''],
-        ['fn', 'a'], ['op', '.'], ['fn', 'speak'], ['op', '()'], [' ', ' '], ['cmt', '# Cat says hello!'],
-        ['nl', ''],
-        ['out', '> Cat says hello!']
-      ],
-      sets: [
-        ['cmt', '# Sets'],
-        ['fn', 'primes'], [' ', ' '], ['op', '='], [' ', ' '], ['op', '{2, 3, 5, 7, 11}'],
-        ['nl', ''],
-        ['fn', 'odds'], [' ', ' '], ['op', '='], [' ', ' '], ['fn', 'set'], ['op', '([1, 3, 5, 7, 9])'],
-        ['nl', ''],
-        ['fn', 'print'], ['op', '('], ['fn', 'primes'], [' ', ' '], ['op', '&'], [' ', ' '], ['fn', 'odds'], ['op', ')'], [' ', ' '], ['cmt', '# {5, 7}'],
-        ['nl', ''],
-        ['fn', 'print'], ['op', '('], ['fn', 'primes'], [' ', ' '], ['op', '|'], [' ', ' '], ['fn', 'odds'], ['op', ')'], [' ', ' '], ['cmt', '# union'],
-        ['nl', ''],
-        ['fn', 'print'], ['op', '('], ['num', '5'], [' ', ' '], ['op', '&'], [' ', ' '], ['num', '3'], ['op', ')'], [' ', ' '], ['cmt', '# bitwise 1'],
-        ['nl', ''],
-        ['kw', 'assert'], [' ', ' '], ['num', '3'], [' ', ' '], ['op', 'in'], [' ', ' '], ['fn', 'primes'],
-        ['nl', ''],
-        ['kw', 'del'], [' ', ' '], ['fn', 'odds'],
-        ['nl', ''],
-        ['out', '> {5, 7}'],
-        ['nl', ''],
-        ['out', '> {1, 2, 3, 5, 7, 9, 11}']
-      ],
-      loops: [
-        ['cmt', '# List comprehension'],
-        ['fn', 'squares'], [' ', ' '], ['op', '='], [' ', ' '], ['op', '['], ['fn', 'x'], [' ', ' '], ['kw', 'for'], [' ', ' '], ['fn', 'x'], [' ', ' '], ['kw', 'in'], [' ', ' '], ['fn', 'range'], ['op', '(10)'], [' ', ' '], ['kw', 'if'], [' ', ' '], ['fn', 'x'], [' ', ' '], ['op', '%'], [' ', ' '], ['num', '2'], [' ', ' '], ['op', '=='], [' ', ' '], ['num', '0'], ['op', ']'],
-        ['nl', ''],
-        ['fn', 'print'], ['op', '('], ['fn', 'squares'], ['op', ')'],
-        ['nl', ''],
-        ['kw', 'for'], [' ', ' '], ['fn', 'i'], [' ', ' '], ['kw', 'in'], [' ', ' '], ['num', '0'], [' ', ' '], ['kw', 'to'], [' ', ' '], ['num', '5'],
-        ['nl', ''],
-        ['    ', '    '], ['fn', 'print'], ['op', '('], ['fn', 'i'], [' ', ' '], ['op', '*'], [' ', ' '], ['num', '2'], ['op', ')'],
-        ['nl', ''],
-        ['kw', 'end'],
-        ['nl', ''],
-        ['out', '> [0, 2, 4, 6, 8]'],
-        ['nl', ''],
-        ['out', '> 0 2 4 6 8 10']
-      ],
-      web: [
-        ['cmt', '# Simple web server'],
-        ['fn', 'html'], [' ', ' '], ['op', '='], [' ', ' '], ['str', '"<h1>Hello from JTS GO!</h1>"'],
-        ['nl', ''],
-        ['fn', 'srv'], [' ', ' '], ['op', '='], [' ', ' '], ['fn', 'http_server'], ['op', '('], ['num', '8080'], ['op', ', '], ['fn', 'html'], ['op', ')'],
-        ['nl', ''],
-        ['fn', 'http_start'], ['op', '('], ['fn', 'srv'], ['op', ')'],
-        ['nl', ''],
-        ['fn', 'res'], [' ', ' '], ['op', '='], [' ', ' '], ['fn', 'http_request'], ['op', '('], ['str', '"GET"'], ['op', ', '], ['str', '"http://localhost:8080"'], ['op', ')'],
-        ['nl', ''],
-        ['fn', 'print'], ['op', '('], ['fn', 'res'], ['op', ')'],
-        ['nl', ''],
-        ['out', '> <h1>Hello from JTS GO!</h1>']
-      ]
-    };
-    const tabFilenames = { oop: 'oop.jts', sets: 'sets.jts', loops: 'loops.jts', web: 'server.jts' };
-
-    function esc(s) {
-      return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-    }
-
-    function renderSnippet(key) {
-      const el = document.getElementById('tab-code');
-      el.innerHTML = snippets[key].map(pair => {
-        if (pair[0] === 'nl') return '\n';
-        const cls = pair[0] === ' ' ? '' : pair[0];
-        return cls ? `<span class="${cls}">${esc(pair[1])}</span>` : esc(pair[1]);
-      }).join('');
-      document.getElementById('tab-filename').textContent = tabFilenames[key];
-    }
-
-    function switchTab(key, btn) {
-      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      renderSnippet(key);
-    }
-    renderSnippet('oop');
-
-    const heroSource = [
-      ['cmt', '# JTS GO — 60 seconds to your first program'],
-      ['nl', ''],
-      ['kw', 'func'], [' ', ' '], ['fn', 'fib'], ['op', '('], ['fn', 'n'], ['op', ')'],
-      ['nl', ''],
-      ['    ', '    '], ['kw', 'if'], [' ', ' '], ['fn', 'n'], [' ', ' '], ['op', '<='], [' ', ' '], ['num', '1'],
-      ['nl', ''],
-      ['        ', '        '], ['kw', 'return'], [' ', ' '], ['fn', 'n'],
-      ['nl', ''],
-      ['    ', '    '], ['kw', 'end'],
-      ['nl', ''],
-      ['    ', '    '], ['kw', 'return'], [' ', ' '], ['fn', 'fib'], ['op', '('], ['fn', 'n'], [' ', ' '], ['op', '-'], [' ', ' '], ['num', '1'], ['op', ')'], [' ', ' '], ['op', '+'], [' ', ' '], ['fn', 'fib'], ['op', '('], ['fn', 'n'], [' ', ' '], ['op', '-'], [' ', ' '], ['num', '2'], ['op', ')'],
-      ['nl', ''],
-      ['kw', 'end'],
-      ['nl', ''],
-      ['kw', 'for'], [' ', ' '], ['fn', 'i'], [' ', ' '], ['kw', 'in'], [' ', ' '], ['num', '0'], [' ', ' '], ['kw', 'to'], [' ', ' '], ['num', '10'],
-      ['nl', ''],
-      ['    ', '    '], ['fn', 'print'], ['op', '('], ['fn', 'fib'], ['op', '('], ['fn', 'i'], ['op', ')'], ['op', ')'],
-      ['nl', ''],
-      ['kw', 'end'],
-      ['nl', ''],
-      ['out', '# 0 1 1 2 3 5 8 13 21 34 55']
-    ];
-
-    function renderTokens(tokens) {
-      return tokens.map(pair => {
-        if (pair[0] === 'nl') return '\n';
-        const cls = pair[0] === ' ' ? '' : pair[0];
-        return cls ? `<span class="${cls}">${esc(pair[1])}</span>` : esc(pair[1]);
-      }).join('');
-    }
-
-    const fullHero = renderTokens(heroSource);
-    document.getElementById('typed-code').innerHTML = fullHero;
-  </script>
 
 </body>
 </html>
