@@ -13,6 +13,7 @@
     <SourceRoot Include="C:\Users\jayas\.nuget\packages\" />
   </ItemGroup>
   <PropertyGroup Condition=" '$(ExcludeRestorePackageImports)' != 'true' ">
+    <PkgMicrosoft_NETFramework_ReferenceAssemblies Condition=" '$(PkgMicrosoft_NETFramework_ReferenceAssemblies)' == '' ">C:\Users\jayas\.nuget\packages\microsoft.netframework.referenceassemblies\1.0.3</PkgMicrosoft_NETFramework_ReferenceAssemblies>
     <PkgFSharp_Core Condition=" '$(PkgFSharp_Core)' == '' ">C:\Users\jayas\.nuget\packages\fsharp.core\8.0.403</PkgFSharp_Core>
   </PropertyGroup>
 </Project>

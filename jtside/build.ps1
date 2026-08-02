@@ -19,11 +19,11 @@ Write-Host "SDK: $(& dotnet --version)" -ForegroundColor Gray
 dotnet build (Join-Path $root "JtsIde.sln") -c Release
 if ($LASTEXITCODE -ne 0) { throw "Solution build failed" }
 
-# 2. Publish the IDE (self-contained, win-x64)
+# 2. Publish the IDE (framework-dependent, .NET Framework 4.8 -> Windows 7+)
 $ideOut = Join-Path $payload "ide"
 if (Test-Path $ideOut) { Remove-Item $ideOut -Recurse -Force }
 Write-Host "Publishing IDE..." -ForegroundColor Cyan
-dotnet publish (Join-Path $root "src\Jts.Ide") -c Release -r win-x64 --self-contained true -o $ideOut
+dotnet publish (Join-Path $root "src\Jts.Ide") -c Release -o $ideOut
 if ($LASTEXITCODE -ne 0) { throw "IDE publish failed" }
 
 # 3. Assemble the payload: language binaries + stdlib + examples + IDE
@@ -46,13 +46,12 @@ $zip = Join-Path $dist "payload.zip"
 if (Test-Path $zip) { Remove-Item $zip -Force }
 Compress-Archive -Path (Join-Path $payload "*") -DestinationPath $zip -CompressionLevel Optimal -Force
 
-# 5. Publish the installer (single-file, self-contained, payload embedded)
+# 5. Build the native installer (Windows 7+ compatible, payload embedded)
 $setupOut = Join-Path $dist "setup"
 if (Test-Path $setupOut) { Remove-Item $setupOut -Recurse -Force }
-Write-Host "Publishing installer..." -ForegroundColor Cyan
-dotnet publish (Join-Path $root "src\Jts.Installer") -c Release -r win-x64 --self-contained true `
-    -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o $setupOut
-if ($LASTEXITCODE -ne 0) { throw "Installer publish failed" }
+Write-Host "Building native installer..." -ForegroundColor Cyan
+& (Join-Path $root "src\NativeInstaller\build.ps1") -Payload $zip -OutDir $setupOut
+if ($LASTEXITCODE -ne 0) { throw "Installer build failed" }
 
 Write-Host ""
 Write-Host "Done." -ForegroundColor Green

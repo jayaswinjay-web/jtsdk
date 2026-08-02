@@ -87,7 +87,7 @@ public class ReplSession
 
     public void Stop()
     {
-        try { _process?.Kill(entireProcessTree: true); } catch { /* already gone */ }
+        try { _process?.Kill(); } catch { /* already gone */ }
         _process = null;
         _stdin = null;
     }

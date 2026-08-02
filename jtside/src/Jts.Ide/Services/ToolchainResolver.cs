@@ -49,7 +49,7 @@ public class ToolchainResolver
     private static string? FindOnPath(string name)
     {
         var path = Environment.GetEnvironmentVariable("PATH") ?? "";
-        foreach (var dir in path.Split(';', StringSplitOptions.RemoveEmptyEntries))
+        foreach (var dir in path.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries))
         {
             try
             {

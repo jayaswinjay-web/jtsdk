@@ -457,8 +457,12 @@ public partial class MainWindow : Window
     }
     private void OnOpenFolder(object sender, RoutedEventArgs e)
     {
-        var dlg = new Microsoft.Win32.OpenFolderDialog { Title = "Open a JTS GO project folder" };
-        if (dlg.ShowDialog(this) == true) OpenFolder(dlg.FolderName);
+        using (var dlg = new System.Windows.Forms.FolderBrowserDialog())
+        {
+            dlg.Description = "Open a JTS GO project folder";
+            if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+                OpenFolder(dlg.SelectedPath);
+        }
     }
     private void OnBrowseFolder(object sender, RoutedEventArgs e) => OnOpenFolder(sender, e);
     private void OnSave(object sender, RoutedEventArgs e)

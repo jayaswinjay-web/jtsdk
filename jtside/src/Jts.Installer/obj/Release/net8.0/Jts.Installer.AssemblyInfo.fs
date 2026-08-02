@@ -10,7 +10,7 @@ open System.Reflection
 [<assembly: System.Reflection.AssemblyCompanyAttribute("JTS-IDE-Setup")>]
 [<assembly: System.Reflection.AssemblyConfigurationAttribute("Release")>]
 [<assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")>]
-[<assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+fd7fc87e082c85e74bdc107cf2d2fa9eca4bca44")>]
+[<assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+93d5767abd162f1de9950bc520547695e23e4b55")>]
 [<assembly: System.Reflection.AssemblyProductAttribute("JTS-IDE-Setup")>]
 [<assembly: System.Reflection.AssemblyTitleAttribute("JTS-IDE-Setup")>]
 [<assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")>]
