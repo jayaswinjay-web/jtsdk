@@ -45,10 +45,22 @@ int disassemble_instruction(Chunk* chunk, int offset) {
         case OP_MULTIPLY:       return simple_instruction("OP_MULTIPLY", offset);
         case OP_DIVIDE:         return simple_instruction("OP_DIVIDE", offset);
         case OP_MODULO:         return simple_instruction("OP_MODULO", offset);
+        case OP_POWER:          return simple_instruction("OP_POWER", offset);
+        case OP_FLOOR_DIV:      return simple_instruction("OP_FLOOR_DIV", offset);
+        case OP_BIT_OR:         return simple_instruction("OP_BIT_OR", offset);
+        case OP_BIT_AND:        return simple_instruction("OP_BIT_AND", offset);
+        case OP_BIT_XOR:        return simple_instruction("OP_BIT_XOR", offset);
+        case OP_BIT_NOT:        return simple_instruction("OP_BIT_NOT", offset);
+        case OP_SHIFT_LEFT:     return simple_instruction("OP_SHIFT_LEFT", offset);
+        case OP_SHIFT_RIGHT:    return simple_instruction("OP_SHIFT_RIGHT", offset);
         case OP_NEGATE:         return simple_instruction("OP_NEGATE", offset);
         case OP_NOT:            return simple_instruction("OP_NOT", offset);
         case OP_EQUAL:          return simple_instruction("OP_EQUAL", offset);
         case OP_NOT_EQUAL:      return simple_instruction("OP_NOT_EQUAL", offset);
+        case OP_IS:             return simple_instruction("OP_IS", offset);
+        case OP_ASSERT:         return simple_instruction("OP_ASSERT", offset);
+        case OP_DEL_GLOBAL:     return byte_instruction("OP_DEL_GLOBAL", chunk, offset);
+        case OP_DEL_INDEX:      return simple_instruction("OP_DEL_INDEX", offset);
         case OP_GREATER:        return simple_instruction("OP_GREATER", offset);
         case OP_LESS:           return simple_instruction("OP_LESS", offset);
         case OP_GREATER_EQUAL:  return simple_instruction("OP_GREATER_EQUAL", offset);
@@ -60,10 +72,31 @@ int disassemble_instruction(Chunk* chunk, int offset) {
         case OP_GET_LOCAL:      return byte_instruction("OP_GET_LOCAL", chunk, offset);
         case OP_SET_LOCAL:      return byte_instruction("OP_SET_LOCAL", chunk, offset);
         case OP_CALL:           return byte_instruction("OP_CALL", chunk, offset);
+        case OP_CLOSURE: {
+            uint8_t constant = chunk->code[offset + 1];
+            printf("%-16s %4d ", "OP_CLOSURE", constant);
+            print_value(chunk->constants.values[constant]);
+            printf("\n");
+            int upvalue_count = chunk->code[offset + 2];
+            offset += 3;
+            for (int i = 0; i < upvalue_count; i++) {
+                int is_local = chunk->code[offset];
+                int index = chunk->code[offset + 1];
+                printf("%04d    |                     %s %d\n", offset - 1,
+                       is_local ? "local" : "upvalue", index);
+                offset += 2;
+            }
+            return offset;
+        }
+        case OP_GET_UPVALUE:    return byte_instruction("OP_GET_UPVALUE", chunk, offset);
+        case OP_SET_UPVALUE:    return byte_instruction("OP_SET_UPVALUE", chunk, offset);
+        case OP_CLOSE_UPVALUE:  return simple_instruction("OP_CLOSE_UPVALUE", offset);
         case OP_LIST:           return byte_instruction("OP_LIST", chunk, offset);
+        case OP_SET_LITERAL:    return byte_instruction("OP_SET_LITERAL", chunk, offset);
         case OP_INDEX:          return simple_instruction("OP_INDEX", offset);
         case OP_INDEX_SET:      return simple_instruction("OP_INDEX_SET", offset);
         case OP_RETURN:         return simple_instruction("OP_RETURN", offset);
+        case OP_YIELD:          return simple_instruction("OP_YIELD", offset);
         // OOP
         case OP_CLASS:          return byte_instruction("OP_CLASS", chunk, offset);
         case OP_INHERIT:        return simple_instruction("OP_INHERIT", offset);

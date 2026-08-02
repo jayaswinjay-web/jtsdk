@@ -79,7 +79,7 @@ npm install -g @jaytechsolutions/jts-go
 jts --version
 ```
 
-You should see the version number (e.g., `2.0.2`).
+You should see the version number (e.g., `2.1.0`).
 
 ### Updating JTS GO
 
@@ -1075,7 +1075,7 @@ print(content)
 
 # Build and save a report
 name = "JTS GO"
-version = "2.0.2"
+version = "2.1.0"
 report = name + " version " + version
 write_file("report.txt", report)
 print("Report saved!")
@@ -1548,6 +1548,6 @@ print(s.contains("ell"))
 ---
 
 <p align="center">
-  Made with passion by <b>Jayaswin Jay</b><br>
-  JTS GO v2.0.2 — 2026
+  Made with passion by <b>JayTech Solutions</b><br>
+  JTS GO v2.1.0 — 2026
 </p>

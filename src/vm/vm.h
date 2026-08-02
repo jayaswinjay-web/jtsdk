@@ -12,9 +12,11 @@
 
 typedef struct {
     ObjFunction* function;
+    ObjClosure* closure;
     uint8_t* ip;
     Value* slots;
     int arg_count;
+    ObjGenerator* generator;
 } CallFrame;
 
 typedef struct {
@@ -41,6 +43,7 @@ typedef struct {
     Table strings;
     Table scrolls_loaded;
     Obj* objects;
+    ObjUpvalue* open_upvalues;
     ExceptionHandler handlers[MAX_EXCEPTION_HANDLERS];
     int handler_count;
 
@@ -63,7 +66,8 @@ typedef struct {
 typedef enum {
     INTERPRET_OK,
     INTERPRET_COMPILE_ERROR,
-    INTERPRET_RUNTIME_ERROR
+    INTERPRET_RUNTIME_ERROR,
+    INTERPRET_YIELD
 } InterpretResult;
 
 extern VM vm;
@@ -73,7 +77,7 @@ void free_vm(void);
 InterpretResult interpret(const char* source);
 InterpretResult interpret_isolated(const char* source);
 InterpretResult vm_exec(void);
-bool vm_call(ObjFunction* func, int arg_count);
+bool vm_call(Value func, int arg_count);
 void push(Value value);
 Value pop(void);
 void vm_set_dirs(const char* program_dir, const char* install_dir);
@@ -94,5 +98,7 @@ void vm_get_variables(int frame, const char** names, int* name_lengths, Value* v
 void vm_get_globals(const char** names, Value* values, int* count, int* total);
 const char* vm_get_source(void);
 int vm_get_source_length(void);
+
+InterpretResult vm_resume_generator(ObjGenerator* generator);
 
 #endif

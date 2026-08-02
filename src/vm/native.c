@@ -111,6 +111,14 @@ static bool native_len(int arg_count, Value* args, Value* result) {
         *result = NUMBER_VAL((double)AS_LIST(args[0])->count);
         return true;
     }
+    if (IS_DICT(args[0])) {
+        *result = NUMBER_VAL((double)AS_DICT(args[0])->entries.count);
+        return true;
+    }
+    if (IS_SET(args[0])) {
+        *result = NUMBER_VAL((double)AS_SET(args[0])->count);
+        return true;
+    }
     if (IS_TENSOR(args[0])) {
         *result = NUMBER_VAL((double)AS_TENSOR(args[0])->size);
         return true;
@@ -119,7 +127,7 @@ static bool native_len(int arg_count, Value* args, Value* result) {
         *result = NUMBER_VAL((double)(AS_MATRIX(args[0])->rows * AS_MATRIX(args[0])->cols));
         return true;
     }
-    fprintf(stderr, "JTS GO: len() argument must be a string, list, tensor, or matrix\n");
+    fprintf(stderr, "JTS GO: len() argument must be a string, list, dict, set, tensor, or matrix\n");
     return false;
 }
 
@@ -136,12 +144,14 @@ static bool native_type(int arg_count, Value* args, Value* result) {
         case VAL_OBJ:
             if (IS_STRING(args[0])) {
                 type_name = "string";
-            } else if (IS_FUNCTION(args[0])) {
+            } else if (IS_FUNCTION(args[0]) || IS_CLOSURE(args[0])) {
                 type_name = "function";
             } else if (IS_LIST(args[0])) {
                 type_name = "list";
             } else if (IS_DICT(args[0])) {
                 type_name = "dict";
+            } else if (IS_SET(args[0])) {
+                type_name = "set";
             } else if (IS_CLASS(args[0])) {
                 type_name = "class";
             } else if (IS_INSTANCE(args[0])) {
@@ -1117,6 +1127,25 @@ static bool native_import_file(int arg_count, Value* args, Value* result) {
     return (res == INTERPRET_OK);
 }
 
+static bool native_next(int arg_count, Value* args, Value* result) {
+    if (arg_count != 1 || !IS_GENERATOR(args[0])) {
+        fprintf(stderr, "JTS GO: next() expects 1 generator argument\n");
+        return false;
+    }
+    ObjGenerator* gen = AS_GENERATOR(args[0]);
+    InterpretResult res = vm_resume_generator(gen);
+    if (res == INTERPRET_YIELD) {
+        *result = pop();
+        return true;
+    } else if (res == INTERPRET_OK) {
+        gen->exhausted = true;
+        *result = pop();
+        return true;
+    } else {
+        return false;
+    }
+}
+
 static void path_join(char* out, size_t outsize, const char* dir, const char* rel) {
     if (dir == NULL || dir[0] == '\0') {
         snprintf(out, outsize, "%s", rel);
@@ -2042,6 +2071,86 @@ static bool native_list_copy(int arg_count, Value* args, Value* result) {
     return true;
 }
 
+static bool native_set(int arg_count, Value* args, Value* result) {
+    if (arg_count != 1) {
+        fprintf(stderr, "JTS GO: set() expects 1 argument (a list)\n");
+        return false;
+    }
+    ObjSet* set = new_set();
+    if (IS_LIST(args[0])) {
+        ObjList* list = AS_LIST(args[0]);
+        for (int i = 0; i < list->count; i++) set_add(set, list->values[i]);
+    } else if (IS_SET(args[0])) {
+        ObjSet* src = AS_SET(args[0]);
+        for (int i = 0; i < src->count; i++) set_add(set, src->values[i]);
+    } else if (IS_STRING(args[0])) {
+        ObjString* str = AS_STRING(args[0]);
+        for (int i = 0; i < str->length; i++) {
+            set_add(set, OBJ_VAL(copy_string(&str->chars[i], 1)));
+        }
+    } else {
+        fprintf(stderr, "JTS GO: set() expects a list, set, or string\n");
+        return false;
+    }
+    *result = OBJ_VAL(set);
+    return true;
+}
+
+static bool native_set_add(int arg_count, Value* args, Value* result) {
+    if (arg_count != 2 || !IS_SET(args[0])) { fprintf(stderr, "JTS GO: set_add() expects (set, value)\n"); return false; }
+    set_add(AS_SET(args[0]), args[1]);
+    *result = args[0];
+    return true;
+}
+
+static bool native_set_remove(int arg_count, Value* args, Value* result) {
+    if (arg_count != 2 || !IS_SET(args[0])) { fprintf(stderr, "JTS GO: set_remove() expects (set, value)\n"); return false; }
+    set_remove(AS_SET(args[0]), args[1]);
+    *result = args[0];
+    return true;
+}
+
+static bool native_set_contains(int arg_count, Value* args, Value* result) {
+    if (arg_count != 2 || !IS_SET(args[0])) { fprintf(stderr, "JTS GO: set_contains() expects (set, value)\n"); return false; }
+    *result = BOOL_VAL(set_contains(AS_SET(args[0]), args[1]));
+    return true;
+}
+
+static bool native_set_union(int arg_count, Value* args, Value* result) {
+    if (arg_count != 2 || !IS_SET(args[0]) || !IS_SET(args[1])) { fprintf(stderr, "JTS GO: set_union() expects (set, set)\n"); return false; }
+    ObjSet* out = new_set();
+    ObjSet* a = AS_SET(args[0]);
+    ObjSet* b = AS_SET(args[1]);
+    for (int i = 0; i < a->count; i++) set_add(out, a->values[i]);
+    for (int i = 0; i < b->count; i++) set_add(out, b->values[i]);
+    *result = OBJ_VAL(out);
+    return true;
+}
+
+static bool native_set_intersection(int arg_count, Value* args, Value* result) {
+    if (arg_count != 2 || !IS_SET(args[0]) || !IS_SET(args[1])) { fprintf(stderr, "JTS GO: set_intersection() expects (set, set)\n"); return false; }
+    ObjSet* out = new_set();
+    ObjSet* a = AS_SET(args[0]);
+    ObjSet* b = AS_SET(args[1]);
+    for (int i = 0; i < a->count; i++) {
+        if (set_contains(b, a->values[i])) set_add(out, a->values[i]);
+    }
+    *result = OBJ_VAL(out);
+    return true;
+}
+
+static bool native_set_difference(int arg_count, Value* args, Value* result) {
+    if (arg_count != 2 || !IS_SET(args[0]) || !IS_SET(args[1])) { fprintf(stderr, "JTS GO: set_difference() expects (set, set)\n"); return false; }
+    ObjSet* out = new_set();
+    ObjSet* a = AS_SET(args[0]);
+    ObjSet* b = AS_SET(args[1]);
+    for (int i = 0; i < a->count; i++) {
+        if (!set_contains(b, a->values[i])) set_add(out, a->values[i]);
+    }
+    *result = OBJ_VAL(out);
+    return true;
+}
+
 static bool native_dict_keys(int arg_count, Value* args, Value* result) {
     if (arg_count != 1 || !IS_DICT(args[0])) { fprintf(stderr, "JTS GO: keys() expects 1 dict argument\n"); return false; }
     ObjDict* dict = AS_DICT(args[0]);
@@ -2498,6 +2607,14 @@ static NativeDef native_functions[] = {
     {"copy", 1, native_list_copy},
     {"reverse", 1, native_list_reverse},
     {"index", 2, native_list_index},
+    // Set operations
+    {"set", 1, native_set},
+    {"set_add", 2, native_set_add},
+    {"set_remove", 2, native_set_remove},
+    {"set_contains", 2, native_set_contains},
+    {"set_union", 2, native_set_union},
+    {"set_intersection", 2, native_set_intersection},
+    {"set_difference", 2, native_set_difference},
     // Dict methods
     {"keys", 1, native_dict_keys},
     {"values", 1, native_dict_values},
@@ -2523,6 +2640,8 @@ static NativeDef native_functions[] = {
     // Import
     {"import_file", 1, native_import_file},
     {"bring_scroll", 1, native_bring_scroll},
+    // Generator
+    {"next", 1, native_next},
     {NULL,     0, NULL}
 };
 

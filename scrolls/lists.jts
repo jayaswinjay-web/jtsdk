@@ -1,17 +1,14 @@
 # lists scroll - list utilities
-func flatten_into(lst, out)
+func flatten(lst)
+    out = []
     for item in lst
         if type(item) == "list"
-            flatten_into(item, out)
+            out.extend(flatten(item))
         else
             out.append(item)
         end
     end
     return out
-end
-
-func flatten(lst)
-    return flatten_into(lst, [])
 end
 
 func unique(lst)

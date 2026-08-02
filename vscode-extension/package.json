@@ -1,8 +1,8 @@
 {
   "name": "jts-go",
   "displayName": "JTS GO",
-  "description": "Syntax highlighting and language support for JTS GO programming language. List comprehensions, try/catch/finally, and more.",
-  "version": "2.0.6",
+  "description": "Syntax highlighting and language support for JTS GO programming language. Sets, bitwise operators, is/del/assert, list comprehensions, try/catch/finally, and more.",
+  "version": "2.0.7",
   "publisher": "jaytechsolutions",
   "author": {
     "name": "Jay Tech Solutions"

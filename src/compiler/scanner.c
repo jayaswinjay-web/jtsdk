@@ -108,6 +108,7 @@ static TokenType identifier_type(Scanner* scanner) {
                 switch (scanner->start[1]) {
                     case 'n': return check_keyword(scanner, 1, 2, "nd", TOKEN_AND);
                     case 'p': return check_keyword(scanner, 1, 5, "ppend", TOKEN_APPEND);
+                    case 's': return check_keyword(scanner, 1, 5, "ssert", TOKEN_ASSERT);
                 }
             }
             break;
@@ -132,6 +133,13 @@ static TokenType identifier_type(Scanner* scanner) {
                     case 'l': return check_keyword(scanner, 2, 3, "ass", TOKEN_CLASS);
                     case 'a': return check_keyword(scanner, 2, 3, "tch", TOKEN_CATCH);
                     case 'o': return check_keyword(scanner, 2, 6, "ntinue", TOKEN_CONTINUE);
+                }
+            }
+            break;
+        case 'd':
+            if (scanner->current - scanner->start > 1) {
+                switch (scanner->start[1]) {
+                    case 'e': return check_keyword(scanner, 2, 1, "l", TOKEN_DEL);
                 }
             }
             break;
@@ -178,6 +186,7 @@ static TokenType identifier_type(Scanner* scanner) {
                         }
                         return check_keyword(scanner, 1, 1, "n", TOKEN_IN);
                     case 'm': return check_keyword(scanner, 2, 4, "port", TOKEN_IMPORT);
+                    case 's': return check_keyword(scanner, 1, 1, "s", TOKEN_IS);
                 }
             }
             break;
@@ -241,6 +250,8 @@ static TokenType identifier_type(Scanner* scanner) {
                                 return check_keyword(scanner, 3, 1, "f", TOKEN_SELF);
                             if (scanner->start[2] == 'r')
                                 return check_keyword(scanner, 3, 3, "ver", TOKEN_SERVER);
+                            if (scanner->start[2] == 't')
+                                return check_keyword(scanner, 1, 2, "et", TOKEN_SET);
                         }
                         break;
                     case 'u': return check_keyword(scanner, 2, 3, "per", TOKEN_SUPER);
@@ -273,6 +284,7 @@ static TokenType identifier_type(Scanner* scanner) {
             }
             break;
         case 'w': return check_keyword(scanner, 1, 4, "hile", TOKEN_WHILE);
+        case 'y': return check_keyword(scanner, 1, 4, "ield", TOKEN_YIELD);
     }
     return TOKEN_IDENTIFIER;
 }
@@ -614,6 +626,23 @@ Token scan_token(Scanner* scanner) {
                 return make_token(scanner, TOKEN_PERCENT_EQUAL);
             }
             return make_token(scanner, TOKEN_PERCENT);
+        case '&':
+            if (match_char(scanner, '=')) {
+                return make_token(scanner, TOKEN_AMPERSAND_EQUAL);
+            }
+            return make_token(scanner, TOKEN_AMPERSAND);
+        case '|':
+            if (match_char(scanner, '=')) {
+                return make_token(scanner, TOKEN_BAR_EQUAL);
+            }
+            return make_token(scanner, TOKEN_BAR);
+        case '^':
+            if (match_char(scanner, '=')) {
+                return make_token(scanner, TOKEN_CARET_EQUAL);
+            }
+            return make_token(scanner, TOKEN_CARET);
+        case '~':
+            return make_token(scanner, TOKEN_TILDE);
         case ',': { Token t = {TOKEN_COMMA, scanner->start, 1, scanner->line}; return t; }
         case '.': { Token t = {TOKEN_DOT, scanner->start, 1, scanner->line}; return t; }
         case '?': { Token t = {TOKEN_QUESTION, scanner->start, 1, scanner->line}; return t; }
@@ -628,11 +657,23 @@ Token scan_token(Scanner* scanner) {
             }
             return make_token(scanner, TOKEN_BANG);
         case '<':
+            if (match_char(scanner, '<')) {
+                if (match_char(scanner, '=')) {
+                    return make_token(scanner, TOKEN_LESS_LESS_EQUAL);
+                }
+                return make_token(scanner, TOKEN_LESS_LESS);
+            }
             if (match_char(scanner, '=')) {
                 return make_token(scanner, TOKEN_LESS_EQUAL);
             }
             return make_token(scanner, TOKEN_LESS);
         case '>':
+            if (match_char(scanner, '>')) {
+                if (match_char(scanner, '=')) {
+                    return make_token(scanner, TOKEN_GREATER_GREATER_EQUAL);
+                }
+                return make_token(scanner, TOKEN_GREATER_GREATER);
+            }
             if (match_char(scanner, '=')) {
                 return make_token(scanner, TOKEN_GREATER_EQUAL);
             }

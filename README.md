@@ -1,18 +1,21 @@
-# JTS Development Kit v2.0.2
+# JTS Development Kit v2.1.0
 
 <p align="center">
   <b>JTS GO — The Easiest Programming Language to Learn</b><br>
-  Python-like syntax. Bytecode compilation. OOP. Web Dev. ML/AI. Zero boilerplate.
+  Python-like syntax. Bytecode compilation. Sets. OOP. Web Dev. ML/AI. Zero boilerplate.
 </p>
 
 ---
 
 ## What is JTS GO?
 
-JTS GO is a programming language designed for **absolute beginners**. If you've never written code before, this is where you start.
+JTS GO is a programming language designed for **absolute beginners**. If you've never written code before, this is where you start. Built by **JayTech Solutions**.
 
 - **Python-like syntax** — readable, indentation-based
 - **Object-Oriented Programming** — classes, methods, inheritance
+- **Sets & bitwise operators** — `{1, 2, 3}`, `|`/`&`/`^`/`<<`/`>>`, plus `is`, `del`, and `assert`
+- **Closures** — nested functions that capture variables
+- **Scrolls (packages)** — `bring` reusable library scrolls
 - **Dynamic typing** — no need to declare variable types
 - **Built-in ML/AI** — tensors, matrices, activation functions
 - **Web Development** — HTTP server support
@@ -328,6 +331,6 @@ For permissions beyond this license, contact: jayaswinjay.web@gmail.com
 ---
 
 <p align="center">
-  Made with passion by <b>Jayaswin Jay</b><br>
-  JTS GO v2.0.2 — 2026
+  Made with passion by <b>JayTech Solutions</b><br>
+  JTS GO v2.1.0 — 2026
 </p>

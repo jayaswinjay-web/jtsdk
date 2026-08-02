@@ -43,6 +43,15 @@ static void free_object(Obj* object) {
             FREE_ARRAY(ObjFunction, object, sizeof(ObjFunction));
             break;
         }
+        case OBJ_CLOSURE: {
+            ObjClosure* closure = (ObjClosure*)object;
+            FREE_ARRAY(ObjUpvalue*, closure->upvalues, closure->upvalue_count);
+            FREE_ARRAY(ObjClosure, object, sizeof(ObjClosure));
+            break;
+        }
+        case OBJ_UPVALUE:
+            FREE_ARRAY(ObjUpvalue, object, sizeof(ObjUpvalue));
+            break;
         case OBJ_LIST: {
             ObjList* list = (ObjList*)object;
             FREE_ARRAY(Value, list->values, list->capacity);
@@ -53,6 +62,12 @@ static void free_object(Obj* object) {
             ObjDict* dict = (ObjDict*)object;
             free_table(&dict->entries);
             FREE_ARRAY(ObjDict, object, sizeof(ObjDict));
+            break;
+        }
+        case OBJ_SET: {
+            ObjSet* set = (ObjSet*)object;
+            FREE_ARRAY(Value, set->values, set->capacity);
+            FREE_ARRAY(ObjSet, object, sizeof(ObjSet));
             break;
         }
         case OBJ_CLASS: {
@@ -89,6 +104,13 @@ static void free_object(Obj* object) {
             }
             FREE_ARRAY(double*, matrix->data, matrix->rows);
             FREE_ARRAY(ObjMatrix, object, sizeof(ObjMatrix));
+            break;
+        }
+        case OBJ_GENERATOR: {
+            ObjGenerator* generator = (ObjGenerator*)object;
+            if (generator->args) FREE_ARRAY(Value, generator->args, generator->arg_count);
+            if (generator->saved_slots) FREE_ARRAY(Value, generator->saved_slots, generator->saved_slot_count);
+            FREE_ARRAY(ObjGenerator, object, sizeof(ObjGenerator));
             break;
         }
     }

@@ -51,8 +51,29 @@ ObjFunction* new_function(void) {
     function->arity = 0;
     function->max_arity = 0;
     function->name = NULL;
+    function->is_generator = false;
     init_chunk(&function->chunk);
     return function;
+}
+
+ObjUpvalue* new_upvalue(Value* slot) {
+    ObjUpvalue* upvalue = ALLOCATE_OBJ(ObjUpvalue, OBJ_UPVALUE);
+    upvalue->location = slot;
+    upvalue->closed = NIL_VAL;
+    upvalue->next = NULL;
+    return upvalue;
+}
+
+ObjClosure* new_closure(ObjFunction* function) {
+    ObjUpvalue** upvalues = ALLOCATE(ObjUpvalue*, function->upvalue_count);
+    for (int i = 0; i < function->upvalue_count; i++) {
+        upvalues[i] = NULL;
+    }
+    ObjClosure* closure = ALLOCATE_OBJ(ObjClosure, OBJ_CLOSURE);
+    closure->function = function;
+    closure->upvalues = upvalues;
+    closure->upvalue_count = function->upvalue_count;
+    return closure;
 }
 
 ObjList* new_list(void) {
@@ -102,6 +123,42 @@ bool dict_get(ObjDict* dict, ObjString* key, Value* result) {
     return table_get(&dict->entries, key, result);
 }
 
+ObjSet* new_set(void) {
+    ObjSet* set = ALLOCATE_OBJ(ObjSet, OBJ_SET);
+    set->capacity = 0;
+    set->count = 0;
+    set->values = NULL;
+    return set;
+}
+
+void set_add(ObjSet* set, Value value) {
+    if (set_contains(set, value)) return;
+    if (set->capacity < set->count + 1) {
+        int old_capacity = set->capacity;
+        set->capacity = GROW_CAPACITY(old_capacity);
+        set->values = GROW_ARRAY(Value, set->values, old_capacity, set->capacity);
+    }
+    set->values[set->count] = value;
+    set->count++;
+}
+
+bool set_contains(ObjSet* set, Value value) {
+    for (int i = 0; i < set->count; i++) {
+        if (values_equal(set->values[i], value)) return true;
+    }
+    return false;
+}
+
+void set_remove(ObjSet* set, Value value) {
+    for (int i = 0; i < set->count; i++) {
+        if (values_equal(set->values[i], value)) {
+            set->values[i] = set->values[set->count - 1];
+            set->count--;
+            return;
+        }
+    }
+}
+
 ObjClass* new_class(ObjString* name) {
     ObjClass* klass = ALLOCATE_OBJ(ObjClass, OBJ_CLASS);
     klass->name = name;
@@ -116,7 +173,7 @@ ObjInstance* new_instance(ObjClass* klass) {
     return instance;
 }
 
-ObjBoundMethod* new_bound_method(Value receiver, ObjFunction* method) {
+ObjBoundMethod* new_bound_method(Value receiver, Value method) {
     ObjBoundMethod* bound = ALLOCATE_OBJ(ObjBoundMethod, OBJ_BOUND_METHOD);
     bound->receiver = receiver;
     bound->method = method;
@@ -159,6 +216,20 @@ ObjMatrix* new_matrix(int rows, int cols, double** data) {
     return matrix;
 }
 
+ObjGenerator* new_generator(ObjClosure* closure) {
+    ObjGenerator* generator = ALLOCATE_OBJ(ObjGenerator, OBJ_GENERATOR);
+    generator->closure = closure;
+    generator->ip = 0;
+    generator->slots = NULL;
+    generator->slot_count = 0;
+    generator->args = NULL;
+    generator->arg_count = 0;
+    generator->exhausted = false;
+    generator->saved_slots = NULL;
+    generator->saved_slot_count = 0;
+    return generator;
+}
+
 void print_obj(Value value) {
     switch (AS_OBJ(value)->type) {
         case OBJ_STRING:
@@ -170,6 +241,16 @@ void print_obj(Value value) {
             } else {
                 printf("<script>");
             }
+            break;
+        case OBJ_CLOSURE:
+            if (AS_CLOSURE(value)->function->name != NULL) {
+                printf("<func %s>", AS_CLOSURE(value)->function->name->chars);
+            } else {
+                printf("<script>");
+            }
+            break;
+        case OBJ_UPVALUE:
+            printf("<upvalue>");
             break;
         case OBJ_LIST: {
             ObjList* list = AS_LIST(value);
@@ -199,15 +280,29 @@ void print_obj(Value value) {
             printf("}");
             break;
         }
+        case OBJ_SET: {
+            ObjSet* set = AS_SET(value);
+            printf("{");
+            for (int i = 0; i < set->count; i++) {
+                if (i > 0) printf(", ");
+                print_value(set->values[i]);
+            }
+            printf("}");
+            break;
+        }
         case OBJ_CLASS:
             printf("<class %s>", AS_CLASS(value)->name->chars);
             break;
         case OBJ_INSTANCE:
             printf("<%s instance>", AS_INSTANCE(value)->klass->name->chars);
             break;
-        case OBJ_BOUND_METHOD:
-            printf("<bound method %s>", AS_BOUND_METHOD(value)->method->name->chars);
+        case OBJ_BOUND_METHOD: {
+            Value method = AS_BOUND_METHOD(value)->method;
+            const char* name = IS_CLOSURE(method) ? AS_CLOSURE(method)->function->name->chars
+                                                  : AS_FUNCTION(method)->name->chars;
+            printf("<bound method %s>", name);
             break;
+        }
         case OBJ_NATIVE:
             printf("<native function>");
             break;
@@ -226,6 +321,9 @@ void print_obj(Value value) {
         }
         case OBJ_MATRIX:
             printf("<matrix %dx%d>", AS_MATRIX(value)->rows, AS_MATRIX(value)->cols);
+            break;
+        case OBJ_GENERATOR:
+            printf("<generator>");
             break;
     }
 }

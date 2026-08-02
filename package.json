@@ -1,7 +1,7 @@
 {
   "name": "@jaytechsolutions/jts-go",
-  "version": "2.0.3",
-  "description": "JTS GO - The easiest programming language to learn. Development Kit v2.0.3 with list comprehensions, try/catch/finally, and the full Python-compatible stdlib.",
+  "version": "2.1.0",
+  "description": "JTS GO - The easiest programming language to learn. Development Kit v2.1.0 with sets, bitwise operators, is/del/assert, closures, scrolls (packages), list comprehensions, try/catch/finally, and the full Python-compatible stdlib.",
   "keywords": [
     "programming language",
     "jts",

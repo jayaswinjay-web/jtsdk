@@ -67,6 +67,22 @@
           "match": "\\b(import|bring)\\b"
         },
         {
+          "name": "keyword.control.delete.jts",
+          "match": "\\b(del)\\b"
+        },
+        {
+          "name": "keyword.control.assert.jts",
+          "match": "\\b(assert)\\b"
+        },
+        {
+          "name": "keyword.operator.identity.jts",
+          "match": "\\b(is)\\b"
+        },
+        {
+          "name": "keyword.control.set.jts",
+          "match": "\\b(set)\\b"
+        },
+        {
           "name": "keyword.declaration.function.jts",
           "match": "\\b(func)\\b"
         },
@@ -104,7 +120,7 @@
       "patterns": [
         {
           "name": "support.function.builtin.jts",
-          "match": "\\b(print|input|len|type|str|number|math|sqrt|sin|cos|tan|log|exp|file_exists|append|tensor|matrix|matmul|sigmoid|relu|mse|http_server|http_start|http_request|read_file|write_file)\\b"
+          "match": "\\b(print|input|len|type|str|number|math|sqrt|sin|cos|tan|log|exp|file_exists|append|tensor|matrix|matmul|sigmoid|relu|mse|http_server|http_start|http_request|read_file|write_file|set_add|set_remove|set_contains|set_union|set_intersection|set_difference)\\b"
         }
       ]
     },
@@ -128,11 +144,15 @@
         },
         {
           "name": "keyword.operator.assignment.jts",
-          "match": "\\+=|-=|\\*=|="
+          "match": "\\+=|-=|\\*=|/=|%=|&=|\\|=|\\^=|<<=|>>="
         },
         {
           "name": "keyword.operator.arithmetic.jts",
           "match": "\\+|-|\\*|/|%"
+        },
+        {
+          "name": "keyword.operator.bitwise.jts",
+          "match": "&|\\||\\^|~|<<|>>"
         }
       ]
     },

@@ -1,0 +1,83 @@
+# Test function-local scoping makes recursion safe
+# Plain assignments inside a function must create function-scoped
+# locals (not shared globals), so each recursive frame has its own
+# accumulator list.
+
+func flatten(lst)
+    out = []
+    for item in lst
+        if type(item) == "list"
+            out.extend(flatten(item))
+        else
+            out.append(item)
+        end
+    end
+    return out
+end
+
+print("--- recursion ---")
+print("flatten([1, [2, 3], [4, [5, 6]]]) = ", flatten([1, [2, 3], [4, [5, 6]]]))
+
+func collect_evens(lst)
+    evens = []
+    for item in lst
+        if type(item) == "list"
+            evens.extend(collect_evens(item))
+        else
+            if item % 2 == 0
+                evens.append(item)
+            end
+        end
+    end
+    return evens
+end
+
+print("collect_evens([1, [2, [3, 4]], 6]) = ", collect_evens([1, [2, [3, 4]], 6]))
+
+func fib(n)
+    if n <= 1
+        return n
+    end
+    return fib(n - 1) + fib(n - 2)
+end
+
+print("fib(10) = ", fib(10))
+
+func counter(n)
+    total = 0
+    while n > 0
+        total = total + n
+        n = n - 1
+    end
+    return total
+end
+
+print("counter(5) = ", counter(5))
+
+# Persisting a local across loop iterations (reassignment)
+func sum_list(lst)
+    total = 0
+    for x in lst
+        total = total + x
+    end
+    return total
+end
+
+print("sum_list([1, 2, 3, 4, 5]) = ", sum_list([1, 2, 3, 4, 5]))
+
+# Recursion must not corrupt outer loop state
+func nested(lst, depth)
+    result = []
+    for item in lst
+        if depth > 0 and type(item) == "list"
+            result.extend(nested(item, depth - 1))
+        else
+            result.append(item)
+        end
+    end
+    return result
+end
+
+print("nested([1, [2, [3, [4]]]], 3) = ", nested([1, [2, [3, [4]]]], 3))
+
+print("--- All recursion tests passed! ---")

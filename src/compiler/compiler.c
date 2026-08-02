@@ -17,6 +17,10 @@ typedef enum {
     PREC_AND,
     PREC_EQUALITY,
     PREC_COMPARISON,
+    PREC_BIT_OR,
+    PREC_BIT_XOR,
+    PREC_BIT_AND,
+    PREC_SHIFT,
     PREC_TERM,
     PREC_FACTOR,
     PREC_UNARY,
@@ -36,6 +40,8 @@ static void expression(Compiler* compiler);
 static void statement(Compiler* compiler);
 static void declaration(Compiler* compiler);
 static void expression_statement(Compiler* compiler);
+static void del_statement(Compiler* compiler);
+static void assert_statement(Compiler* compiler);
 static ParseRule* get_rule(TokenType type);
 static void parse_precedence(Compiler* compiler, Precedence precedence);
 
@@ -152,7 +158,11 @@ static void end_scope(Compiler* compiler) {
     compiler->scope_depth--;
     while (compiler->local_count > 0 &&
            compiler->locals[compiler->local_count - 1].depth > compiler->scope_depth) {
-        emit_byte(compiler, OP_POP);
+        if (compiler->locals[compiler->local_count - 1].is_captured) {
+            emit_byte(compiler, OP_CLOSE_UPVALUE);
+        } else {
+            emit_byte(compiler, OP_POP);
+        }
         compiler->local_count--;
     }
 }
@@ -180,6 +190,38 @@ static int resolve_local(Compiler* compiler, Token* name) {
     return -1;
 }
 
+static int add_upvalue(Compiler* compiler, uint8_t index, bool is_local) {
+    int upvalue_count = compiler->upvalue_count;
+    for (int i = 0; i < upvalue_count; i++) {
+        Upvalue* upvalue = &compiler->upvalues[i];
+        if (upvalue->index == index && upvalue->is_local == is_local) {
+            return i;
+        }
+    }
+    if (upvalue_count == UINT8_COUNT) {
+        error(compiler, "Too many closure variables in function");
+        return 0;
+    }
+    compiler->upvalues[upvalue_count].index = index;
+    compiler->upvalues[upvalue_count].is_local = is_local;
+    compiler->upvalue_count++;
+    return compiler->upvalue_count - 1;
+}
+
+static int resolve_upvalue(Compiler* compiler, Token* name) {
+    if (compiler->parent == NULL) return -1;
+    int local = resolve_local(compiler->parent, name);
+    if (local != -1) {
+        compiler->parent->locals[local].is_captured = true;
+        return add_upvalue(compiler, (uint8_t)local, true);
+    }
+    int upvalue = resolve_upvalue(compiler->parent, name);
+    if (upvalue != -1) {
+        return add_upvalue(compiler, (uint8_t)upvalue, false);
+    }
+    return -1;
+}
+
 static void add_local(Compiler* compiler, Token name) {
     if (compiler->local_count == MAX_LOCALS) {
         error(compiler, "Too many local variables");
@@ -188,6 +230,7 @@ static void add_local(Compiler* compiler, Token name) {
     Local* local = &compiler->locals[compiler->local_count++];
     local->name = name;
     local->depth = -1;
+    local->is_captured = false;
 
     if (compiler->debug_func != NULL) {
         Chunk* chunk = current_chunk(compiler);
@@ -601,8 +644,11 @@ static void func_definition(Compiler* compiler) {
     fn_compiler.scanner = compiler->scanner;
     fn_compiler.had_error = false;
     fn_compiler.panic_mode = false;
+    fn_compiler.has_yield = false;
     fn_compiler.local_count = 0;
     fn_compiler.scope_depth = 0;
+    fn_compiler.upvalue_count = 0;
+    fn_compiler.function_type = TYPE_FUNCTION;
     fn_compiler.current = compiler->current;
     fn_compiler.previous = compiler->previous;
 
@@ -638,6 +684,7 @@ static void func_definition(Compiler* compiler) {
     end_scope(&fn_compiler);
 
     ObjFunction* function = fn_compiler.function;
+    function->is_generator = fn_compiler.has_yield;
 
     compiler->had_error = fn_compiler.had_error;
     compiler->current = fn_compiler.current;
@@ -646,9 +693,17 @@ static void func_definition(Compiler* compiler) {
     if (fn_compiler.had_error) return;
 
     uint8_t constant = make_constant(compiler, OBJ_VAL(function));
-    emit_bytes(compiler, OP_CONSTANT, constant);
+    function->upvalue_count = fn_compiler.upvalue_count;
+    emit_bytes(compiler, OP_CLOSURE, constant);
+    emit_byte(compiler, (uint8_t)fn_compiler.upvalue_count);
+    for (int i = 0; i < fn_compiler.upvalue_count; i++) {
+        emit_byte(compiler, (uint8_t)(fn_compiler.upvalues[i].is_local ? 1 : 0));
+        emit_byte(compiler, fn_compiler.upvalues[i].index);
+    }
 
     uint8_t name_constant = identifier_constant(compiler, &name);
+    compiler->previous = name;
+    declare_variable(compiler);
     define_variable(compiler, name_constant);
 }
 
@@ -695,6 +750,8 @@ static void class_declaration(Compiler* compiler) {
             fn_compiler.panic_mode = false;
             fn_compiler.local_count = 0;
             fn_compiler.scope_depth = 0;
+            fn_compiler.upvalue_count = 0;
+            fn_compiler.function_type = TYPE_FUNCTION;
             fn_compiler.current = compiler->current;
             fn_compiler.previous = compiler->previous;
 
@@ -704,12 +761,13 @@ static void class_declaration(Compiler* compiler) {
             Chunk* method_chunk = current_chunk(&fn_compiler);
             fn_compiler.debug_func = chunk_add_debug_func(method_chunk, method_name.start, method_name.length, 0);
 
-            Local* local = &fn_compiler.locals[fn_compiler.local_count++];
-            local->depth = 0;
-            local->name.start = "";
-            local->name.length = 0;
+    Local* local = &fn_compiler.locals[fn_compiler.local_count++];
+    local->depth = 0;
+    local->name.start = "";
+    local->name.length = 0;
+    local->is_captured = false;
 
-            begin_scope(&fn_compiler);
+    begin_scope(&fn_compiler);
 
             consume(&fn_compiler, TOKEN_LEFT_PAREN, "Expect '(' after method name");
 
@@ -784,6 +842,21 @@ static void return_statement(Compiler* compiler) {
     emit_byte(compiler, OP_RETURN);
 }
 
+static void yield_statement(Compiler* compiler) {
+    if (compiler->function->name == NULL) {
+        error(compiler, "Can't yield from top-level code");
+    }
+    compiler->has_yield = true;
+    if (compiler->current.type != TOKEN_NEWLINE &&
+        compiler->current.type != TOKEN_DEDENT &&
+        compiler->current.type != TOKEN_EOF) {
+        expression(compiler);
+    } else {
+        emit_byte(compiler, OP_NIL);
+    }
+    emit_byte(compiler, OP_YIELD);
+}
+
 static void statement(Compiler* compiler) {
     if (match(compiler, TOKEN_PRINT)) {
         print_statement(compiler);
@@ -795,6 +868,8 @@ static void statement(Compiler* compiler) {
         for_statement(compiler);
     } else if (match(compiler, TOKEN_RETURN)) {
         return_statement(compiler);
+    } else if (match(compiler, TOKEN_YIELD)) {
+        yield_statement(compiler);
     } else if (match(compiler, TOKEN_BREAK)) {
         if (loop_depth == 0) {
             error(compiler, "Can't use 'break' outside of a loop");
@@ -895,6 +970,10 @@ static void statement(Compiler* compiler) {
     } else if (match(compiler, TOKEN_THROW)) {
         expression(compiler);
         emit_byte(compiler, OP_THROW);
+    } else if (match(compiler, TOKEN_DEL)) {
+        del_statement(compiler);
+    } else if (match(compiler, TOKEN_ASSERT)) {
+        assert_statement(compiler);
     } else if (match(compiler, TOKEN_INPUT)) {
         input_expression(compiler, false);
         emit_byte(compiler, OP_POP);
@@ -909,7 +988,59 @@ static void statement(Compiler* compiler) {
 
 static void expression_statement(Compiler* compiler) {
     expression(compiler);
-    emit_byte(compiler, OP_POP);
+    if (compiler->assign_created_local) {
+        compiler->assign_created_local = false;
+    } else {
+        emit_byte(compiler, OP_POP);
+    }
+}
+
+static void del_statement(Compiler* compiler) {
+    if (compiler->current.type == TOKEN_IDENTIFIER) {
+        Token name = compiler->current;
+        advance(compiler);
+        if (match(compiler, TOKEN_LEFT_BRACKET)) {
+            uint8_t get_op;
+            int arg = resolve_local(compiler, &name);
+            if (arg != -1) {
+                get_op = OP_GET_LOCAL;
+            } else if ((arg = resolve_upvalue(compiler, &name)) != -1) {
+                get_op = OP_GET_UPVALUE;
+            } else {
+                arg = identifier_constant(compiler, &name);
+                get_op = OP_GET_GLOBAL;
+            }
+            emit_bytes(compiler, get_op, (uint8_t)arg);
+            expression(compiler);
+            consume(compiler, TOKEN_RIGHT_BRACKET, "Expect ']' after index");
+            emit_byte(compiler, OP_DEL_INDEX);
+        } else {
+            int arg = resolve_local(compiler, &name);
+            if (arg != -1) {
+                emit_byte(compiler, OP_NIL);
+                emit_bytes(compiler, OP_SET_LOCAL, (uint8_t)arg);
+            } else if ((arg = resolve_upvalue(compiler, &name)) != -1) {
+                emit_byte(compiler, OP_NIL);
+                emit_bytes(compiler, OP_SET_UPVALUE, (uint8_t)arg);
+            } else {
+                uint8_t c = identifier_constant(compiler, &name);
+                emit_bytes(compiler, OP_DEL_GLOBAL, c);
+            }
+        }
+        return;
+    }
+    error(compiler, "Expect variable name after 'del'");
+}
+
+static void assert_statement(Compiler* compiler) {
+    expression(compiler);
+    if (match(compiler, TOKEN_COMMA)) {
+        expression(compiler);
+        emit_byte(compiler, OP_ASSERT);
+    } else {
+        emit_byte(compiler, OP_NIL);
+        emit_byte(compiler, OP_ASSERT);
+    }
 }
 
 static void declaration(Compiler* compiler) {
@@ -1042,8 +1173,14 @@ static void binary(Compiler* compiler, bool can_assign) {
         case TOKEN_PERCENT:       emit_byte(compiler, OP_MODULO); break;
         case TOKEN_STAR_STAR:     emit_byte(compiler, OP_POWER); break;
         case TOKEN_SLASH_SLASH:   emit_byte(compiler, OP_FLOOR_DIV); break;
+        case TOKEN_AMPERSAND:     emit_byte(compiler, OP_BIT_AND); break;
+        case TOKEN_BAR:           emit_byte(compiler, OP_BIT_OR); break;
+        case TOKEN_CARET:         emit_byte(compiler, OP_BIT_XOR); break;
+        case TOKEN_LESS_LESS:     emit_byte(compiler, OP_SHIFT_LEFT); break;
+        case TOKEN_GREATER_GREATER: emit_byte(compiler, OP_SHIFT_RIGHT); break;
         case TOKEN_EQUAL_EQUAL:   emit_byte(compiler, OP_EQUAL); break;
         case TOKEN_BANG_EQUAL:    emit_byte(compiler, OP_NOT_EQUAL); break;
+        case TOKEN_IS:            emit_byte(compiler, OP_IS); break;
         case TOKEN_GREATER:       emit_byte(compiler, OP_GREATER); break;
         case TOKEN_LESS:          emit_byte(compiler, OP_LESS); break;
         case TOKEN_GREATER_EQUAL: emit_byte(compiler, OP_GREATER_EQUAL); break;
@@ -1093,11 +1230,167 @@ static void grouping(Compiler* compiler, bool can_assign) {
     consume(compiler, TOKEN_RIGHT_PAREN, "Expect ')' after expression");
 }
 
-static void number_literal(Compiler* compiler, bool can_assign) {
+static void lambda_expression_impl(Compiler* compiler, bool can_assign) {
+    // Anonymous function (lambda) expression. Consumes the 'func' token and parses a function literal.
+    // Syntax: func (params) ... end
+    // No name, not defined as global.
+    Compiler fn_compiler;
+    fn_compiler.parent = compiler;
+    fn_compiler.scanner = compiler->scanner;
+    fn_compiler.had_error = false;
+    fn_compiler.panic_mode = false;
+    fn_compiler.has_yield = false;
+    fn_compiler.assign_created_local = false;
+    fn_compiler.function_type = TYPE_FUNCTION;
+    fn_compiler.local_count = 0;
+    fn_compiler.scope_depth = 0;
+    fn_compiler.upvalue_count = 0;
+    fn_compiler.current = compiler->current;
+    fn_compiler.previous = compiler->previous;
+
+    fn_compiler.function = new_function();
+    fn_compiler.function->name = NULL; // anonymous
+
+    Chunk* chunk = current_chunk(&fn_compiler);
+    fn_compiler.debug_func = chunk_add_debug_func(chunk, "<lambda>", 8, 0);
+
+    // Slot 0 placeholder for the function itself.
+    Local* local = &fn_compiler.locals[fn_compiler.local_count++];
+    local->depth = 0;
+    local->name.start = "";
+    local->name.length = 0;
+    local->is_captured = false;
+
+    begin_scope(&fn_compiler);
+
+    // Expect '(' after 'func'
+    consume(&fn_compiler, TOKEN_LEFT_PAREN, "Expect '(' after 'func' for lambda parameters");
+    parse_parameters(&fn_compiler);
+    if (fn_compiler.debug_func) {
+        fn_compiler.debug_func->arity = fn_compiler.function->arity;
+    }
+
+    // Optional newline after parameters
+    if (fn_compiler.current.type == TOKEN_NEWLINE) {
+        advance(&fn_compiler);
+    }
+
+    block(&fn_compiler);
+    match(&fn_compiler, TOKEN_END);
+
+    emit_return(&fn_compiler);
+
+    end_scope(&fn_compiler);
+    ObjFunction* function = fn_compiler.function;
+    function->upvalue_count = fn_compiler.upvalue_count;
+
+    // Propagate updates
+    compiler->had_error = fn_compiler.had_error;
+    compiler->current = fn_compiler.current;
+    compiler->previous = fn_compiler.previous;
+
+    if (fn_compiler.had_error) return;
+
+    // Emit closure; leaves it on stack as a value.
+    uint8_t constant = make_constant(compiler, OBJ_VAL(function));
+    emit_bytes(compiler, OP_CLOSURE, constant);
+    emit_byte(compiler, (uint8_t)fn_compiler.upvalue_count);
+    for (int i = 0; i < fn_compiler.upvalue_count; i++) {
+        emit_byte(compiler, (uint8_t)(fn_compiler.upvalues[i].is_local ? 1 : 0));
+        emit_byte(compiler, fn_compiler.upvalues[i].index);
+    }
+    // No define_variable – closure stays on stack as a value.
+}
+
+static void number_literal_impl(Compiler* compiler, bool can_assign) {
+    double value = strtod(compiler->previous.start, NULL);
+emit_constant(compiler, NUMBER_VAL(value));
+}
+#if 0
+static void lambda_expression_impl(Compiler* compiler, bool can_assign) {
+    // Anonymous function (lambda) expression. Consumes the 'func' token and parses a function literal.
+    // Syntax: func (params) ... end
+    // No name, not defined as global.
+    Compiler fn_compiler;
+    fn_compiler.parent = compiler;
+    fn_compiler.scanner = compiler->scanner;
+    fn_compiler.had_error = false;
+    fn_compiler.panic_mode = false;
+    fn_compiler.has_yield = false;
+    fn_compiler.assign_created_local = false;
+    fn_compiler.function_type = TYPE_FUNCTION;
+    fn_compiler.local_count = 0;
+    fn_compiler.scope_depth = 0;
+    fn_compiler.upvalue_count = 0;
+    fn_compiler.current = compiler->current;
+    fn_compiler.previous = compiler->previous;
+
+    fn_compiler.function = new_function();
+    fn_compiler.function->name = NULL; // anonymous
+
+    Chunk* chunk = current_chunk(&fn_compiler);
+    fn_compiler.debug_func = chunk_add_debug_func(chunk, "<lambda>", 8, 0);
+
+    // Slot 0 placeholder for the function itself.
+    Local* local = &fn_compiler.locals[fn_compiler.local_count++];
+    local->depth = 0;
+    local->name.start = "";
+    local->name.length = 0;
+    local->is_captured = false;
+
+    begin_scope(&fn_compiler);
+
+    // Expect '(' after 'func'
+    consume(&fn_compiler, TOKEN_LEFT_PAREN, "Expect '(' after 'func' for lambda parameters");
+    parse_parameters(&fn_compiler);
+    if (fn_compiler.debug_func) {
+        fn_compiler.debug_func->arity = fn_compiler.function->arity;
+    }
+
+    // Optional newline after parameters
+    if (fn_compiler.current.type == TOKEN_NEWLINE) {
+        advance(&fn_compiler);
+    }
+
+    block(&fn_compiler);
+    match(&fn_compiler, TOKEN_END);
+
+    emit_return(&fn_compiler);
+
+    end_scope(&fn_compiler);
+    ObjFunction* function = fn_compiler.function;
+    function->upvalue_count = fn_compiler.upvalue_count;
+
+    // Propagate updates
+    compiler->had_error = fn_compiler.had_error;
+    compiler->current = fn_compiler.current;
+    compiler->previous = fn_compiler.previous;
+
+    if (fn_compiler.had_error) return;
+
+    // Emit closure; leaves it on stack as a value.
+    uint8_t constant = make_constant(compiler, OBJ_VAL(function));
+    emit_bytes(compiler, OP_CLOSURE, constant);
+    emit_byte(compiler, (uint8_t)fn_compiler.upvalue_count);
+    for (int i = 0; i < fn_compiler.upvalue_count; i++) {
+        emit_byte(compiler, (uint8_t)(fn_compiler.upvalues[i].is_local ? 1 : 0));
+        emit_byte(compiler, fn_compiler.upvalues[i].index);
+    }
+    // No define_variable – closure stays on stack as a value.
+}
+
+static void number_literal_impl(Compiler* compiler, bool can_assign) {
     double value = strtod(compiler->previous.start, NULL);
     emit_constant(compiler, NUMBER_VAL(value));
 }
+#endif
 
+static void lambda_expression(Compiler* compiler, bool can_assign) {
+    lambda_expression_impl(compiler, can_assign);
+}
+static void number_literal(Compiler* compiler, bool can_assign) {
+    number_literal_impl(compiler, can_assign);
+}
 static ObjString* unescape_string(const char* src, int length) {
     char* buf = ALLOCATE(char, length + 1);
     int pos = 0;
@@ -1142,6 +1435,7 @@ static void unary(Compiler* compiler, bool can_assign) {
     switch (operator_type) {
         case TOKEN_MINUS: emit_byte(compiler, OP_NEGATE); break;
         case TOKEN_NOT:   emit_byte(compiler, OP_NOT); break;
+        case TOKEN_TILDE: emit_byte(compiler, OP_BIT_NOT); break;
         default: return;
     }
 }
@@ -1149,7 +1443,21 @@ static void unary(Compiler* compiler, bool can_assign) {
 static void named_variable(Compiler* compiler, Token name, bool can_assign) {
     uint8_t get_op, set_op;
     int arg = resolve_local(compiler, &name);
+    bool created_local = false;
     if (arg != -1) {
+        get_op = OP_GET_LOCAL;
+        set_op = OP_SET_LOCAL;
+    } else if ((arg = resolve_upvalue(compiler, &name)) != -1) {
+        get_op = OP_GET_UPVALUE;
+        set_op = OP_SET_UPVALUE;
+    } else if (can_assign && compiler->function_type == TYPE_FUNCTION &&
+               compiler->scope_depth > 0 &&
+               compiler->current.type == TOKEN_EQUAL) {
+        arg = compiler->local_count;
+        add_local(compiler, name);
+        compiler->locals[compiler->local_count - 1].depth = compiler->scope_depth;
+        compiler->assign_created_local = true;
+        created_local = true;
         get_op = OP_GET_LOCAL;
         set_op = OP_SET_LOCAL;
     } else {
@@ -1160,14 +1468,21 @@ static void named_variable(Compiler* compiler, Token name, bool can_assign) {
 
     if (can_assign && match(compiler, TOKEN_EQUAL)) {
         expression(compiler);
-        emit_bytes(compiler, set_op, (uint8_t)arg);
+        if (!created_local) {
+            emit_bytes(compiler, set_op, (uint8_t)arg);
+        }
     } else if (can_assign && (compiler->current.type == TOKEN_PLUS_EQUAL ||
                               compiler->current.type == TOKEN_MINUS_EQUAL ||
                               compiler->current.type == TOKEN_STAR_EQUAL ||
                               compiler->current.type == TOKEN_SLASH_EQUAL ||
                               compiler->current.type == TOKEN_PERCENT_EQUAL ||
                               compiler->current.type == TOKEN_STAR_STAR_EQUAL ||
-                              compiler->current.type == TOKEN_SLASH_SLASH_EQUAL)) {
+                              compiler->current.type == TOKEN_SLASH_SLASH_EQUAL ||
+                              compiler->current.type == TOKEN_AMPERSAND_EQUAL ||
+                              compiler->current.type == TOKEN_BAR_EQUAL ||
+                              compiler->current.type == TOKEN_CARET_EQUAL ||
+                              compiler->current.type == TOKEN_LESS_LESS_EQUAL ||
+                              compiler->current.type == TOKEN_GREATER_GREATER_EQUAL)) {
         TokenType op = compiler->current.type;
         advance(compiler);
         emit_bytes(compiler, get_op, (uint8_t)arg);
@@ -1180,6 +1495,11 @@ static void named_variable(Compiler* compiler, Token name, bool can_assign) {
             case TOKEN_PERCENT_EQUAL:   emit_byte(compiler, OP_MODULO); break;
             case TOKEN_STAR_STAR_EQUAL: emit_byte(compiler, OP_POWER); break;
             case TOKEN_SLASH_SLASH_EQUAL: emit_byte(compiler, OP_FLOOR_DIV); break;
+            case TOKEN_AMPERSAND_EQUAL: emit_byte(compiler, OP_BIT_AND); break;
+            case TOKEN_BAR_EQUAL:       emit_byte(compiler, OP_BIT_OR); break;
+            case TOKEN_CARET_EQUAL:     emit_byte(compiler, OP_BIT_XOR); break;
+            case TOKEN_LESS_LESS_EQUAL: emit_byte(compiler, OP_SHIFT_LEFT); break;
+            case TOKEN_GREATER_GREATER_EQUAL: emit_byte(compiler, OP_SHIFT_RIGHT); break;
             default: break;
         }
         emit_bytes(compiler, set_op, (uint8_t)arg);
@@ -1293,6 +1613,14 @@ static void type_expr(Compiler* compiler, bool can_assign) {
     consume(compiler, TOKEN_LEFT_PAREN, "Expect '(' after 'type'");
     expression(compiler);
     consume(compiler, TOKEN_RIGHT_PAREN, "Expect ')' after type argument");
+    emit_bytes(compiler, OP_CALL, 1);
+}
+
+static void set_expr(Compiler* compiler, bool can_assign) {
+    emit_constant(compiler, OBJ_VAL(copy_string("set", 3)));
+    consume(compiler, TOKEN_LEFT_PAREN, "Expect '(' after 'set'");
+    expression(compiler);
+    consume(compiler, TOKEN_RIGHT_PAREN, "Expect ')' after set argument");
     emit_bytes(compiler, OP_CALL, 1);
 }
 
@@ -1526,6 +1854,64 @@ static void dict_literal(Compiler* compiler, bool can_assign) {
     emit_byte(compiler, OP_DICT);
 }
 
+static void set_literal(Compiler* compiler, bool can_assign) {
+    int count = 0;
+    if (compiler->current.type != TOKEN_RIGHT_BRACE) {
+        do {
+            expression(compiler);
+            count++;
+            if (count > 255) {
+                error_at_current(compiler, "Too many set elements");
+            }
+        } while (match(compiler, TOKEN_COMMA));
+    }
+    consume(compiler, TOKEN_RIGHT_BRACE, "Expect '}' after set elements");
+    emit_bytes(compiler, OP_SET_LITERAL, (uint8_t)count);
+}
+
+static bool brace_is_set_literal(Compiler* compiler) {
+    // {a: b, c: d} is a dict; {1, 2, 3} is a set. Empty {} is a dict.
+    Scanner saved = *compiler->scanner;
+    Token t = scan_token(compiler->scanner);
+    *compiler->scanner = saved;
+    if (t.type == TOKEN_RIGHT_BRACE) return false;
+    int depth = 0;
+    for (;;) {
+        Scanner before = *compiler->scanner;
+        Token u = scan_token(compiler->scanner);
+        if (u.type == TOKEN_EOF || u.type == TOKEN_ERROR) {
+            *compiler->scanner = saved;
+            return false;
+        }
+        if (u.type == TOKEN_LEFT_PAREN || u.type == TOKEN_LEFT_BRACKET ||
+            u.type == TOKEN_LEFT_BRACE) { depth++; continue; }
+        if (u.type == TOKEN_RIGHT_PAREN || u.type == TOKEN_RIGHT_BRACKET ||
+            u.type == TOKEN_RIGHT_BRACE) {
+            if (depth == 0) break;
+            depth--;
+            continue;
+        }
+        if (depth == 0 && u.type == TOKEN_COLON) {
+            *compiler->scanner = saved;
+            return false;
+        }
+        if (depth == 0 && u.type == TOKEN_NEWLINE) {
+            *compiler->scanner = saved;
+            return false;
+        }
+    }
+    *compiler->scanner = saved;
+    return true;
+}
+
+static void brace_literal(Compiler* compiler, bool can_assign) {
+    if (brace_is_set_literal(compiler)) {
+        set_literal(compiler, can_assign);
+    } else {
+        dict_literal(compiler, can_assign);
+    }
+}
+
 static void index_expr(Compiler* compiler, bool can_assign) {
     if (compiler->current.type == TOKEN_COLON) {
         advance(compiler);
@@ -1743,7 +2129,7 @@ ParseRule rules[] = {
     [TOKEN_RIGHT_PAREN]   = {NULL,     NULL,        PREC_NONE},
     [TOKEN_LEFT_BRACKET]  = {list_literal, index_expr, PREC_CALL},
     [TOKEN_RIGHT_BRACKET] = {NULL,     NULL,        PREC_NONE},
-    [TOKEN_LEFT_BRACE]    = {dict_literal, NULL,    PREC_NONE},
+    [TOKEN_LEFT_BRACE]    = {brace_literal, NULL,    PREC_NONE},
     [TOKEN_RIGHT_BRACE]   = {NULL,     NULL,        PREC_NONE},
     [TOKEN_PLUS]          = {NULL,     binary,      PREC_TERM},
     [TOKEN_MINUS]         = {unary,    binary,      PREC_TERM},
@@ -1752,6 +2138,12 @@ ParseRule rules[] = {
     [TOKEN_PERCENT]       = {NULL,     binary,      PREC_FACTOR},
     [TOKEN_STAR_STAR]     = {NULL,     binary,      PREC_FACTOR},
     [TOKEN_SLASH_SLASH]   = {NULL,     binary,      PREC_FACTOR},
+    [TOKEN_AMPERSAND]     = {NULL,     binary,      PREC_BIT_AND},
+    [TOKEN_BAR]           = {NULL,     binary,      PREC_BIT_OR},
+    [TOKEN_CARET]         = {NULL,     binary,      PREC_BIT_XOR},
+    [TOKEN_TILDE]         = {unary,    NULL,        PREC_NONE},
+    [TOKEN_LESS_LESS]     = {NULL,     binary,      PREC_SHIFT},
+    [TOKEN_GREATER_GREATER] = {NULL,   binary,      PREC_SHIFT},
     [TOKEN_QUESTION]      = {NULL,     ternary_expr, PREC_OR},
     [TOKEN_COMMA]         = {NULL,     NULL,        PREC_NONE},
     [TOKEN_EQUAL]         = {NULL,     NULL,        PREC_NONE},
@@ -1765,6 +2157,7 @@ ParseRule rules[] = {
     [TOKEN_EQUAL_EQUAL]   = {NULL,     binary,      PREC_EQUALITY},
     [TOKEN_BANG]          = {unary,    NULL,        PREC_NONE},
     [TOKEN_BANG_EQUAL]    = {NULL,     binary,      PREC_EQUALITY},
+    [TOKEN_IS]            = {NULL,     binary,      PREC_EQUALITY},
     [TOKEN_LESS]          = {NULL,     binary,      PREC_COMPARISON},
     [TOKEN_LESS_EQUAL]    = {NULL,     binary,      PREC_COMPARISON},
     [TOKEN_GREATER]       = {NULL,     binary,      PREC_COMPARISON},
@@ -1785,6 +2178,7 @@ ParseRule rules[] = {
     [TOKEN_NOT]           = {unary,    NULL,        PREC_NONE},
     [TOKEN_LEN]           = {len_expr, NULL,        PREC_NONE},
     [TOKEN_TYPE]          = {type_expr, NULL,       PREC_NONE},
+    [TOKEN_SET]           = {set_expr, NULL,        PREC_NONE},
     [TOKEN_INPUT]         = {input_expression, NULL, PREC_NONE},
     [TOKEN_APPEND]        = {append_expr, NULL,     PREC_NONE},
     [TOKEN_TO_NUM]        = {number_expr, NULL,     PREC_NONE},
@@ -1800,6 +2194,7 @@ ParseRule rules[] = {
     [TOKEN_REQUEST]       = {NULL,     NULL,        PREC_NONE},
     [TOKEN_RESPONSE]      = {NULL,     NULL,        PREC_NONE},
     [TOKEN_MODEL]         = {NULL,     NULL,        PREC_NONE},
+    [TOKEN_FUNC]          = {lambda_expression, NULL, PREC_NONE},
 };
 
 #define RULE_COUNT (sizeof(rules) / sizeof(rules[0]))

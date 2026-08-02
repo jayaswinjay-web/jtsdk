@@ -12,7 +12,18 @@
 typedef struct {
     Token name;
     int depth;
+    bool is_captured;
 } Local;
+
+typedef struct {
+    uint8_t index;
+    bool is_local;
+} Upvalue;
+
+typedef enum {
+    TYPE_SCRIPT,
+    TYPE_FUNCTION
+} CompilerFunctionType;
 
 typedef struct Compiler {
     struct Compiler* parent;
@@ -22,10 +33,15 @@ typedef struct Compiler {
     Token previous;
     bool had_error;
     bool panic_mode;
+    bool assign_created_local;
+    CompilerFunctionType function_type;
     Local locals[MAX_LOCALS];
     int local_count;
     int scope_depth;
+    Upvalue upvalues[UINT8_COUNT];
+    int upvalue_count;
     DebugFuncInfo* debug_func;
+    bool has_yield;
 } Compiler;
 
 bool compile(const char* source, Chunk* chunk);

@@ -38,6 +38,7 @@ static void reset_stack(void) {
     vm.stack_top = vm.stack;
     vm.frame_count = 0;
     vm.handler_count = 0;
+    vm.open_upvalues = NULL;
 }
 
 void init_vm(void) {
@@ -46,6 +47,7 @@ void init_vm(void) {
     init_table(&vm.strings);
     init_table(&vm.scrolls_loaded);
     vm.objects = NULL;
+    vm.open_upvalues = NULL;
     register_native_functions();
 
     vm.debug_enabled = false;
@@ -77,9 +79,11 @@ void init_vm(void) {
         "format",
         "insert", "extend", "clear", "copy", "reverse", "index",
         "keys", "values", "items", "get", "has", "update",
+        "set", "set_add", "set_remove", "set_contains", "set_union", "set_intersection", "set_difference",
         "json_parse", "json_stringify",
         "now", "sleep", "strftime",
         "env", "args", "exit", "cwd",
+        "next",
         NULL
     };
     for (int i = 0; native_names[i] != NULL; i++) {
@@ -147,7 +151,47 @@ static void runtime_error(const char* format, ...) {
     reset_stack();
 }
 
-static bool call(ObjFunction* function, int arg_count) {
+static ObjUpvalue* capture_upvalue(Value* local) {
+    ObjUpvalue* prev_upvalue = NULL;
+    ObjUpvalue* upvalue = vm.open_upvalues;
+    while (upvalue != NULL && upvalue->location > local) {
+        prev_upvalue = upvalue;
+        upvalue = upvalue->next;
+    }
+    if (upvalue != NULL && upvalue->location == local) {
+        return upvalue;
+    }
+    ObjUpvalue* created_upvalue = new_upvalue(local);
+    created_upvalue->next = upvalue;
+    if (prev_upvalue == NULL) {
+        vm.open_upvalues = created_upvalue;
+    } else {
+        prev_upvalue->next = created_upvalue;
+    }
+    return created_upvalue;
+}
+
+static void close_upvalues(Value* last) {
+    while (vm.open_upvalues != NULL && vm.open_upvalues->location >= last) {
+        ObjUpvalue* upvalue = vm.open_upvalues;
+        upvalue->closed = *upvalue->location;
+        upvalue->location = &upvalue->closed;
+        vm.open_upvalues = upvalue->next;
+    }
+}
+
+static bool call(Value callee, int arg_count) {
+    ObjClosure* closure = NULL;
+    ObjFunction* function;
+    if (IS_CLOSURE(callee)) {
+        closure = AS_CLOSURE(callee);
+        function = closure->function;
+    } else if (IS_FUNCTION(callee)) {
+        function = AS_FUNCTION(callee);
+    } else {
+        return false;
+    }
+
     int min_arity = function->arity;
     int max_arity = function->max_arity;
     if (max_arity < min_arity) max_arity = min_arity;
@@ -175,11 +219,37 @@ static bool call(ObjFunction* function, int arg_count) {
         padded = max_arity;
     }
 
+    // If the function is a generator, create a generator object instead of calling directly.
+    if (function->is_generator) {
+        // Create a closure for the function if we don't have one
+        ObjClosure* gen_closure = closure;
+        if (gen_closure == NULL) {
+            gen_closure = new_closure(function);
+        }
+        ObjGenerator* generator = new_generator(gen_closure);
+        // Store the arguments in the generator for later use.
+        generator->arg_count = padded;
+        generator->args = (Value*)malloc(sizeof(Value) * padded);
+        if (generator->args == NULL) {
+            runtime_error("Failed to allocate generator args");
+            return false;
+        }
+        for (int i = 0; i < padded; i++) {
+            generator->args[i] = vm.stack[vm.stack_top - vm.stack - padded + i];
+        }
+        // Pop the arguments and the callee from the stack.
+        vm.stack_top -= padded + 1; // +1 for the callee
+        push(OBJ_VAL(generator));
+        return true;
+    }
+
     CallFrame* frame = &vm.frames[vm.frame_count++];
+    frame->closure = closure;
     frame->function = function;
     frame->ip = function->chunk.code;
     frame->arg_count = arg_count;
     frame->slots = vm.stack_top - padded - 1;
+    frame->generator = NULL;
     return true;
 }
 
@@ -379,6 +449,17 @@ static InterpretResult run(void) {
     } while (0)
 
     for (;;) {
+#ifdef DEBUG_TRACE_EXECUTION
+        int tr_off = (int)(frame->ip - frame->function->chunk.code);
+        disassemble_instruction(&frame->function->chunk, tr_off);
+        printf("stack:");
+        for (Value* v = vm.stack; v < vm.stack_top; v++) {
+            printf(" [");
+            print_value(*v);
+            printf("]");
+        }
+        printf("\n");
+#endif
         if (vm.debug_enabled) {
             int current_offset = (int)(frame->ip - frame->function->chunk.code);
             int current_line = 0;
@@ -521,7 +602,24 @@ static InterpretResult run(void) {
             break;
         }
 
-        case OP_SUBTRACT: BINARY_OP(NUMBER_VAL, -); break;
+        case OP_SUBTRACT: {
+            if (IS_SET(peek(0)) || IS_SET(peek(1))) {
+                if (!IS_SET(peek(0)) || !IS_SET(peek(1))) {
+                    runtime_error("Both operands must be sets for set difference.");
+                    return INTERPRET_RUNTIME_ERROR;
+                }
+                ObjSet* b = AS_SET(pop());
+                ObjSet* a = AS_SET(pop());
+                ObjSet* out = new_set();
+                for (int i = 0; i < a->count; i++) {
+                    if (!set_contains(b, a->values[i])) set_add(out, a->values[i]);
+                }
+                push(OBJ_VAL(out));
+                break;
+            }
+            BINARY_OP(NUMBER_VAL, -);
+            break;
+        }
         case OP_MULTIPLY: {
             if (IS_STRING(peek(0)) && IS_NUMBER(peek(1))) {
                 ObjString* str = AS_STRING(pop());
@@ -617,6 +715,123 @@ static InterpretResult run(void) {
             break;
         }
 
+        case OP_BIT_AND: {
+            if (IS_SET(peek(0)) || IS_SET(peek(1))) {
+                if (!IS_SET(peek(0)) || !IS_SET(peek(1))) {
+                    runtime_error("Both operands must be sets for set intersection.");
+                    return INTERPRET_RUNTIME_ERROR;
+                }
+                ObjSet* b = AS_SET(pop());
+                ObjSet* a = AS_SET(pop());
+                ObjSet* out = new_set();
+                for (int i = 0; i < a->count; i++) {
+                    if (set_contains(b, a->values[i])) set_add(out, a->values[i]);
+                }
+                push(OBJ_VAL(out));
+                break;
+            }
+            if (!IS_NUMBER(peek(0)) || !IS_NUMBER(peek(1))) {
+                runtime_error("Operands must be numbers.");
+                return INTERPRET_RUNTIME_ERROR;
+            }
+            long long b = (long long)AS_NUMBER(pop());
+            long long a = (long long)AS_NUMBER(pop());
+            push(NUMBER_VAL((double)(a & b)));
+            break;
+        }
+
+        case OP_BIT_OR: {
+            if (IS_SET(peek(0)) || IS_SET(peek(1))) {
+                if (!IS_SET(peek(0)) || !IS_SET(peek(1))) {
+                    runtime_error("Both operands must be sets for set union.");
+                    return INTERPRET_RUNTIME_ERROR;
+                }
+                ObjSet* b = AS_SET(pop());
+                ObjSet* a = AS_SET(pop());
+                ObjSet* out = new_set();
+                for (int i = 0; i < a->count; i++) set_add(out, a->values[i]);
+                for (int i = 0; i < b->count; i++) set_add(out, b->values[i]);
+                push(OBJ_VAL(out));
+                break;
+            }
+            if (!IS_NUMBER(peek(0)) || !IS_NUMBER(peek(1))) {
+                runtime_error("Operands must be numbers.");
+                return INTERPRET_RUNTIME_ERROR;
+            }
+            long long b = (long long)AS_NUMBER(pop());
+            long long a = (long long)AS_NUMBER(pop());
+            push(NUMBER_VAL((double)(a | b)));
+            break;
+        }
+
+        case OP_BIT_XOR: {
+            if (IS_SET(peek(0)) || IS_SET(peek(1))) {
+                if (!IS_SET(peek(0)) || !IS_SET(peek(1))) {
+                    runtime_error("Both operands must be sets for symmetric difference.");
+                    return INTERPRET_RUNTIME_ERROR;
+                }
+                ObjSet* b = AS_SET(pop());
+                ObjSet* a = AS_SET(pop());
+                ObjSet* out = new_set();
+                for (int i = 0; i < a->count; i++) {
+                    if (!set_contains(b, a->values[i])) set_add(out, a->values[i]);
+                }
+                for (int i = 0; i < b->count; i++) {
+                    if (!set_contains(a, b->values[i])) set_add(out, b->values[i]);
+                }
+                push(OBJ_VAL(out));
+                break;
+            }
+            if (!IS_NUMBER(peek(0)) || !IS_NUMBER(peek(1))) {
+                runtime_error("Operands must be numbers.");
+                return INTERPRET_RUNTIME_ERROR;
+            }
+            long long b = (long long)AS_NUMBER(pop());
+            long long a = (long long)AS_NUMBER(pop());
+            push(NUMBER_VAL((double)(a ^ b)));
+            break;
+        }
+
+        case OP_BIT_NOT: {
+            if (!IS_NUMBER(peek(0))) {
+                runtime_error("Operand must be a number.");
+                return INTERPRET_RUNTIME_ERROR;
+            }
+            long long a = (long long)AS_NUMBER(pop());
+            push(NUMBER_VAL((double)(~a)));
+            break;
+        }
+
+        case OP_SHIFT_LEFT: {
+            if (!IS_NUMBER(peek(0)) || !IS_NUMBER(peek(1))) {
+                runtime_error("Operands must be numbers.");
+                return INTERPRET_RUNTIME_ERROR;
+            }
+            long long b = (long long)AS_NUMBER(pop());
+            long long a = (long long)AS_NUMBER(pop());
+            if (b < 0 || b >= 64) {
+                runtime_error("Shift amount out of range.");
+                return INTERPRET_RUNTIME_ERROR;
+            }
+            push(NUMBER_VAL((double)(a << b)));
+            break;
+        }
+
+        case OP_SHIFT_RIGHT: {
+            if (!IS_NUMBER(peek(0)) || !IS_NUMBER(peek(1))) {
+                runtime_error("Operands must be numbers.");
+                return INTERPRET_RUNTIME_ERROR;
+            }
+            long long b = (long long)AS_NUMBER(pop());
+            long long a = (long long)AS_NUMBER(pop());
+            if (b < 0 || b >= 64) {
+                runtime_error("Shift amount out of range.");
+                return INTERPRET_RUNTIME_ERROR;
+            }
+            push(NUMBER_VAL((double)(a >> b)));
+            break;
+        }
+
         case OP_NEGATE: {
             if (!IS_NUMBER(peek(0))) {
                 runtime_error("Operand must be a number.");
@@ -646,6 +861,24 @@ static InterpretResult run(void) {
             Value b = pop();
             Value a = pop();
             push(BOOL_VAL(!values_equal(a, b)));
+            break;
+        }
+
+        case OP_IS: {
+            Value b = pop();
+            Value a = pop();
+            bool identical = false;
+            if (a.type != b.type) {
+                identical = false;
+            } else {
+                switch (a.type) {
+                    case VAL_NIL:    identical = true; break;
+                    case VAL_BOOL:   identical = AS_BOOL(a) == AS_BOOL(b); break;
+                    case VAL_NUMBER: identical = AS_NUMBER(a) == AS_NUMBER(b); break;
+                    case VAL_OBJ:    identical = AS_OBJ(a) == AS_OBJ(b); break;
+                }
+            }
+            push(BOOL_VAL(identical));
             break;
         }
 
@@ -720,11 +953,30 @@ static InterpretResult run(void) {
                     Value result;
                     found = dict_get(AS_DICT(container), AS_STRING(item), &result);
                 }
+            } else if (IS_SET(container)) {
+                found = set_contains(AS_SET(container), item);
             } else {
-                runtime_error("Right operand of 'in' must be a list, string, or dict.");
+                runtime_error("Right operand of 'in' must be a list, string, dict, or set.");
                 return INTERPRET_RUNTIME_ERROR;
             }
             push(BOOL_VAL(found));
+            break;
+        }
+
+        case OP_ASSERT: {
+            Value message = pop();
+            Value condition = pop();
+            bool is_falsy = IS_NIL(condition) || (IS_BOOL(condition) && !AS_BOOL(condition)) ||
+                            (IS_NUMBER(condition) && AS_NUMBER(condition) == 0) ||
+                            (IS_STRING(condition) && AS_STRING(condition)->length == 0);
+            if (is_falsy) {
+                if (IS_STRING(message) && AS_STRING(message)->length > 0) {
+                    runtime_error("Assertion failed: %s", AS_CSTRING(message));
+                } else {
+                    runtime_error("Assertion failed.");
+                }
+                return INTERPRET_RUNTIME_ERROR;
+            }
             break;
         }
 
@@ -780,13 +1032,13 @@ static InterpretResult run(void) {
                     if (member_found) {
                         int receiver_idx = (int)(vm.stack_top - vm.stack) - arg_count;
                         int m_argc = arg_count - 1;
-                        if (IS_FUNCTION(member)) {
+                        if (IS_FUNCTION(member) || IS_CLOSURE(member)) {
                             for (int i = 0; i < m_argc; i++) {
                                 vm.stack[receiver_idx + i] = vm.stack[receiver_idx + 1 + i];
                             }
                             vm.stack_top--;
                             vm.stack[receiver_idx - 1] = member;
-                            if (!call(AS_FUNCTION(member), m_argc)) {
+                            if (!call(member, m_argc)) {
                                 return INTERPRET_RUNTIME_ERROR;
                             }
                             frame = &vm.frames[vm.frame_count - 1];
@@ -823,18 +1075,63 @@ static InterpretResult run(void) {
                 }
             }
 
-            if (!IS_OBJ(callee) || AS_OBJ(callee)->type != OBJ_FUNCTION) {
+            if (IS_BOUND_METHOD(callee)) {
+                ObjBoundMethod* bound = AS_BOUND_METHOD(callee);
+                vm.stack_top[-arg_count - 1] = bound->receiver;
+                if (!call(bound->method, arg_count)) {
+                    return INTERPRET_RUNTIME_ERROR;
+                }
+                frame = &vm.frames[vm.frame_count - 1];
+                break;
+            }
+
+            if (!IS_OBJ(callee) ||
+                (AS_OBJ(callee)->type != OBJ_FUNCTION && AS_OBJ(callee)->type != OBJ_CLOSURE)) {
                 runtime_error("Can only call functions.");
                 return INTERPRET_RUNTIME_ERROR;
             }
 
-            ObjFunction* function = AS_FUNCTION(callee);
-            if (!call(function, arg_count)) {
+            if (!call(callee, arg_count)) {
                 return INTERPRET_RUNTIME_ERROR;
             }
             frame = &vm.frames[vm.frame_count - 1];
             break;
         }
+
+        case OP_CLOSURE: {
+            uint8_t const_idx = READ_BYTE();
+            ObjFunction* function = AS_FUNCTION(frame->function->chunk.constants.values[const_idx]);
+            ObjClosure* closure = new_closure(function);
+            push(OBJ_VAL(closure));
+            uint8_t upvalue_count = READ_BYTE();
+            for (int i = 0; i < upvalue_count; i++) {
+                uint8_t is_local = READ_BYTE();
+                uint8_t index = READ_BYTE();
+                if (is_local) {
+                    closure->upvalues[i] = capture_upvalue(frame->slots + index);
+                } else {
+                    closure->upvalues[i] = frame->closure->upvalues[index];
+                }
+            }
+            break;
+        }
+
+        case OP_GET_UPVALUE: {
+            uint8_t slot = READ_BYTE();
+            push(*frame->closure->upvalues[slot]->location);
+            break;
+        }
+
+        case OP_SET_UPVALUE: {
+            uint8_t slot = READ_BYTE();
+            *frame->closure->upvalues[slot]->location = peek(0);
+            break;
+        }
+
+        case OP_CLOSE_UPVALUE:
+            close_upvalues(vm.stack_top - 1);
+            pop();
+            break;
 
         case OP_LIST: {
             int count = READ_BYTE();
@@ -844,6 +1141,17 @@ static InterpretResult run(void) {
             }
             vm.stack_top -= count;
             push(OBJ_VAL(list));
+            break;
+        }
+
+        case OP_SET_LITERAL: {
+            int count = READ_BYTE();
+            ObjSet* set = new_set();
+            for (int i = count - 1; i >= 0; i--) {
+                set_add(set, peek(i));
+            }
+            vm.stack_top -= count;
+            push(OBJ_VAL(set));
             break;
         }
 
@@ -928,6 +1236,48 @@ static InterpretResult run(void) {
             break;
         }
 
+        case OP_DEL_GLOBAL: {
+            ObjString* name = READ_STRING();
+            table_delete(&vm.globals, name);
+            break;
+        }
+
+        case OP_DEL_INDEX: {
+            Value index = pop();
+            Value obj = pop();
+            if (IS_DICT(obj)) {
+                if (!IS_STRING(index)) {
+                    runtime_error("Dict key must be a string.");
+                    return INTERPRET_RUNTIME_ERROR;
+                }
+                if (!table_delete(&AS_DICT(obj)->entries, AS_STRING(index))) {
+                    runtime_error("Dict key not found.");
+                    return INTERPRET_RUNTIME_ERROR;
+                }
+                break;
+            }
+            if (!IS_OBJ(obj) || !IS_LIST(obj)) {
+                runtime_error("Can only delete from lists or dicts.");
+                return INTERPRET_RUNTIME_ERROR;
+            }
+            if (!IS_NUMBER(index)) {
+                runtime_error("List index must be a number.");
+                return INTERPRET_RUNTIME_ERROR;
+            }
+            ObjList* list = AS_LIST(obj);
+            int i = (int)AS_NUMBER(index);
+            if (i < 0) i += list->count;
+            if (i < 0 || i >= list->count) {
+                runtime_error("List index out of bounds.");
+                return INTERPRET_RUNTIME_ERROR;
+            }
+            for (int j = i; j < list->count - 1; j++) {
+                list->values[j] = list->values[j + 1];
+            }
+            list->count--;
+            break;
+        }
+
         case OP_SLICE: {
             Value step_v = pop();
             Value end_v = pop();
@@ -994,6 +1344,8 @@ static InterpretResult run(void) {
                 push(NUMBER_VAL((double)AS_LIST(obj)->count));
             } else if (IS_DICT(obj)) {
                 push(NUMBER_VAL((double)AS_DICT(obj)->entries.count));
+            } else if (IS_SET(obj)) {
+                push(NUMBER_VAL((double)AS_SET(obj)->count));
             } else if (IS_TENSOR(obj)) {
                 push(NUMBER_VAL((double)AS_TENSOR(obj)->size));
             } else if (IS_MATRIX(obj)) {
@@ -1045,6 +1397,13 @@ static InterpretResult run(void) {
                     return INTERPRET_RUNTIME_ERROR;
                 }
                 push(OBJ_VAL(dict->entries.entries[found].key));
+            } else if (IS_SET(iterable)) {
+                ObjSet* set = AS_SET(iterable);
+                if (i < 0 || i >= set->count) {
+                    runtime_error("Set index out of bounds.");
+                    return INTERPRET_RUNTIME_ERROR;
+                }
+                push(set->values[i]);
             } else {
                 runtime_error("Cannot iterate over this value.");
                 return INTERPRET_RUNTIME_ERROR;
@@ -1212,7 +1571,7 @@ static InterpretResult run(void) {
                 }
                 Value method;
                 if (table_get(&instance->klass->methods, name, &method)) {
-                    ObjBoundMethod* bound = new_bound_method(obj, AS_FUNCTION(method));
+                    ObjBoundMethod* bound = new_bound_method(obj, method);
                     pop();
                     push(OBJ_VAL(bound));
                     break;
@@ -1258,9 +1617,9 @@ static InterpretResult run(void) {
                     return INTERPRET_RUNTIME_ERROR;
                 }
                 int base = (int)(vm.stack_top - vm.stack) - arg_count - 1;
-                if (IS_FUNCTION(method_val)) {
+                if (IS_FUNCTION(method_val) || IS_CLOSURE(method_val)) {
                     vm.stack[base] = method_val;
-                    if (!call(AS_FUNCTION(method_val), arg_count)) {
+                    if (!call(method_val, arg_count)) {
                         return INTERPRET_RUNTIME_ERROR;
                     }
                     frame = &vm.frames[vm.frame_count - 1];
@@ -1302,7 +1661,7 @@ static InterpretResult run(void) {
             }
             vm.stack[base] = method_val;
             vm.stack_top++;
-            if (!call(AS_FUNCTION(method_val), arg_count + 1)) {
+            if (!call(method_val, arg_count + 1)) {
                 return INTERPRET_RUNTIME_ERROR;
             }
             frame = &vm.frames[vm.frame_count - 1];
@@ -1334,7 +1693,7 @@ static InterpretResult run(void) {
                 runtime_error("Undefined method '%s' in superclass.", name->chars);
                 return INTERPRET_RUNTIME_ERROR;
             }
-            ObjBoundMethod* super_bound = new_bound_method(bound->receiver, AS_FUNCTION(method));
+            ObjBoundMethod* super_bound = new_bound_method(bound->receiver, method);
             pop();
             push(OBJ_VAL(super_bound));
             break;
@@ -1350,16 +1709,52 @@ static InterpretResult run(void) {
                 runtime_error("Undefined method '%s' in superclass.", method->chars);
                 return INTERPRET_RUNTIME_ERROR;
             }
-            ObjFunction* func = AS_FUNCTION(method_val);
-            if (!call(func, arg_count)) {
+            if (!call(method_val, arg_count)) {
                 return INTERPRET_RUNTIME_ERROR;
             }
             frame = &vm.frames[vm.frame_count - 1];
             break;
         }
 
+        case OP_YIELD: {
+            Value yielded = pop();
+            // Save generator state (IP and local variables)
+            if (frame->generator != NULL) {
+                ObjGenerator* gen = frame->generator;
+                gen->ip = (int)(frame->ip - frame->function->chunk.code);
+                int count = (int)(vm.stack_top - frame->slots);
+                if (gen->saved_slot_count < count) {
+                    gen->saved_slots = (Value*)reallocate(gen->saved_slots,
+                        gen->saved_slot_count * sizeof(Value),
+                        count * sizeof(Value));
+                    gen->saved_slot_count = count;
+                }
+                for (int i = 0; i < count; i++) {
+                    gen->saved_slots[i] = frame->slots[i];
+                }
+            }
+            // Pop the generator frame; the caller (vm_resume_generator)
+            // restores the stack to its own saved position.
+            close_upvalues(frame->slots);
+            vm.frame_count--;
+            push(yielded);
+            return INTERPRET_YIELD;
+        }
+
         case OP_RETURN: {
             Value result = pop();
+            close_upvalues(frame->slots);
+            
+            // If this frame belongs to a generator, mark it as exhausted
+            if (frame->generator != NULL) {
+                frame->generator->exhausted = true;
+                // Push the return value so vm_resume_generator can grab it,
+                // and stop the VM loop to hand control back to the resumer.
+                vm.frame_count--;
+                push(result);
+                return INTERPRET_OK;
+            }
+            
             vm.frame_count--;
             if (vm.frame_count == 0) {
                 pop();
@@ -1397,7 +1792,7 @@ InterpretResult interpret(const char* source) {
     function->chunk = chunk;
 
     push(OBJ_VAL(function));
-    call(function, 0);
+    call(OBJ_VAL(function), 0);
 
     InterpretResult result = run();
 
@@ -1430,7 +1825,7 @@ InterpretResult interpret_isolated(const char* source) {
 
     vm.frame_count = 0;
     push(OBJ_VAL(function));
-    call(function, 0);
+    call(OBJ_VAL(function), 0);
 
     InterpretResult result = run();
 
@@ -1447,6 +1842,66 @@ InterpretResult vm_exec(void) {
     return run();
 }
 
-bool vm_call(ObjFunction* func, int arg_count) {
+bool vm_call(Value func, int arg_count) {
     return call(func, arg_count);
+}
+
+InterpretResult vm_resume_generator(ObjGenerator* generator) {
+    if (generator->exhausted) {
+        push(NIL_VAL);
+        return INTERPRET_OK;
+    }
+    
+    ObjClosure* closure = generator->closure;
+    ObjFunction* function = closure->function;
+    int arg_count = generator->arg_count;
+    
+    // Save the caller's stack position so we can restore it after
+    // the generator suspends or completes.
+    Value* saved_top = vm.stack_top;
+    int saved_frame_count = vm.frame_count;
+    
+    // Push the closure and arguments onto the stack
+    push(OBJ_VAL(closure));
+    for (int i = 0; i < arg_count; i++) {
+        push(generator->args[i]);
+    }
+    
+    // Set up frame directly, bypassing generator creation logic
+    CallFrame* frame = &vm.frames[vm.frame_count++];
+    frame->closure = closure;
+    frame->function = function;
+    frame->ip = (generator->ip > 0) ? (function->chunk.code + generator->ip) : function->chunk.code;
+    frame->arg_count = arg_count;
+    frame->slots = vm.stack_top - arg_count - 1;
+    frame->generator = generator;
+    
+    // Restore saved local variables if this is a resume
+    if (generator->ip > 0 && generator->saved_slot_count > 0) {
+        int count = generator->saved_slot_count;
+        if (frame->slots + count >= vm.stack + STACK_MAX) {
+            runtime_error("Stack overflow.");
+            vm.frame_count--;
+            vm.stack_top = saved_top;
+            return INTERPRET_RUNTIME_ERROR;
+        }
+        for (int i = 0; i < count; i++) {
+            frame->slots[i] = generator->saved_slots[i];
+        }
+        vm.stack_top = frame->slots + count;
+    }
+    
+    InterpretResult result = run();
+    
+    // The generator suspended or completed. Pull the produced value off the
+    // stack (if any), then restore the caller's stack state and hand the
+    // value back on top.
+    Value produced = NIL_VAL;
+    if (result == INTERPRET_YIELD) {
+        produced = pop();
+    }
+    vm.stack_top = saved_top;
+    vm.frame_count = saved_frame_count;
+    push(produced);
+    return result;
 }

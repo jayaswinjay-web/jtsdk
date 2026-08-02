@@ -189,7 +189,7 @@ static void run_file(const char* path, ToolType tool) {
                 ObjFunction* function = new_function();
                 function->chunk = chunk;
                 push(OBJ_VAL(function));
-                vm_call(function, 0);
+                vm_call(OBJ_VAL(function), 0);
                 InterpretResult result = vm_exec();
                 free_vm();
                 free_chunk(&chunk);
@@ -283,7 +283,7 @@ static void debug_run_file(const char* path) {
     function->chunk = chunk;
 
     push(OBJ_VAL(function));
-    vm_call(function, 0);
+    vm_call(OBJ_VAL(function), 0);
 
     fprintf(stderr, "{\"event\":\"started\"}\n");
     fflush(stderr);
