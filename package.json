@@ -18,7 +18,7 @@
   "license": "SEE-LICENSE-IN-PROPRIETARY_LICENSE",
   "repository": {
     "type": "git",
-    "url": "https://github.com/jayaswinjay-web/jtsdk.git"
+    "url": "git+https://github.com/jayaswinjay-web/jtsdk.git"
   },
   "homepage": "https://github.com/jayaswinjay-web/jtsdk#readme",
   "bugs": {
