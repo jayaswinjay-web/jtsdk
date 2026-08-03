@@ -1,0 +1,251 @@
+# number scroll - number utilities
+hexdigits = "0123456789abcdef"
+
+func is_numeric(s)
+    if len(s) == 0
+        return false
+    end
+    i = 0
+    if s[0] == "-"
+        i = 1
+    end
+    if i >= len(s)
+        return false
+    end
+    while i < len(s)
+        if not s[i].is_digit()
+            return false
+        end
+        i = i + 1
+    end
+    return true
+end
+
+func is_integer(x)
+    return floor(x) == x
+end
+
+func is_whole(x)
+    return is_integer(x)
+end
+
+func digit_count(n)
+    n = int(abs(n))
+    if n == 0
+        return 1
+    end
+    c = 0
+    while n > 0
+        c = c + 1
+        n = n // 10
+    end
+    return c
+end
+
+func digits(n)
+    n = int(abs(n))
+    if n == 0
+        return [0]
+    end
+    out = []
+    while n > 0
+        out.append(n % 10)
+        n = n // 10
+    end
+    out.reverse()
+    return out
+end
+
+func from_digits(lst)
+    n = 0
+    for d in lst
+        n = n * 10 + int(d)
+    end
+    return n
+end
+
+func reverse_digits(n)
+    lst = digits(n)
+    lst.reverse()
+    return from_digits(lst)
+end
+
+func to_binary(n)
+    if n == 0
+        return "0"
+    end
+    n = int(n)
+    neg = n < 0
+    if neg
+        n = -n
+    end
+    out = ""
+    while n > 0
+        out = str(n % 2) + out
+        n = n // 2
+    end
+    if neg
+        return "-" + out
+    end
+    return out
+end
+
+func to_octal(n)
+    if n == 0
+        return "0"
+    end
+    n = int(n)
+    neg = n < 0
+    if neg
+        n = -n
+    end
+    out = ""
+    while n > 0
+        out = str(n % 8) + out
+        n = n // 8
+    end
+    if neg
+        return "-" + out
+    end
+    return out
+end
+
+func to_hex(n)
+    if n == 0
+        return "0"
+    end
+    n = int(n)
+    neg = n < 0
+    if neg
+        n = -n
+    end
+    out = ""
+    while n > 0
+        out = hexdigits[n % 16] + out
+        n = n // 16
+    end
+    if neg
+        return "-" + out
+    end
+    return out
+end
+
+func from_base(s, base)
+    s = s.lower()
+    n = 0
+    neg = false
+    i = 0
+    if len(s) > 0 and s[0] == "-"
+        neg = true
+        i = 1
+    end
+    while i < len(s)
+        c = s[i]
+        v = hexdigits.find(c)
+        if v < 0 or v >= base
+            return nil
+        end
+        n = n * base + v
+        i = i + 1
+    end
+    if neg
+        return -n
+    end
+    return n
+end
+
+func from_binary(s)
+    return from_base(s, 2)
+end
+
+func from_octal(s)
+    return from_base(s, 8)
+end
+
+func from_hex(s)
+    return from_base(s, 16)
+end
+
+func percent(part, whole)
+    if whole == 0
+        return 0
+    end
+    return part * 100.0 / whole
+end
+
+func percent_change(old_val, new_val)
+    if old_val == 0
+        return 0
+    end
+    return (new_val - old_val) * 100.0 / old_val
+end
+
+func round_to(x, d)
+    return round(x, d)
+end
+
+func ordinal(n)
+    n = int(n)
+    rem100 = n % 100
+    if rem100 >= 11 and rem100 <= 13
+        return str(n) + "th"
+    end
+    rem = n % 10
+    if rem == 1
+        return str(n) + "st"
+    end
+    if rem == 2
+        return str(n) + "nd"
+    end
+    if rem == 3
+        return str(n) + "rd"
+    end
+    return str(n) + "th"
+end
+
+func with_commas(n)
+    n = int(n)
+    neg = n < 0
+    if neg
+        n = -n
+    end
+    s = str(n)
+    out = ""
+    l = len(s)
+    i = 0
+    while i < l
+        out = out + s[i]
+        rem = l - i - 1
+        if rem > 0 and rem % 3 == 0
+            out = out + ","
+        end
+        i = i + 1
+    end
+    if neg
+        return "-" + out
+    end
+    return out
+end
+
+func is_power_of_two(n)
+    n = int(n)
+    if n <= 0
+        return false
+    end
+    return n & (n - 1) == 0
+end
+
+func count_bits(n)
+    n = int(n)
+    if n < 0
+        n = -n
+    end
+    c = 0
+    while n > 0
+        if n % 2 == 1
+            c = c + 1
+        end
+        n = n // 2
+    end
+    return c
+end

@@ -1,7 +1,7 @@
 {
   "name": "@jaytechsolutions/jts-go",
-  "version": "2.1.3",
-  "description": "JTS GO - The easiest programming language to learn. Development Kit v2.1.3 with sets, bitwise operators, is/del/assert, closures, scrolls (packages), list comprehensions, try/catch/finally, and a complete standard library.",
+  "version": "2.1.4",
+  "description": "JTS GO - The easiest programming language to learn. Development Kit v2.1.4 with sets, bitwise operators, is/del/assert, closures, scrolls (packages), list comprehensions, try/catch/finally, and a complete standard library.",
   "keywords": [
     "programming language",
     "jts",
@@ -34,6 +34,7 @@
   },
   "files": [
     "bin/",
+    "scrolls/",
     "install.js",
     "PROPRIETARY_LICENSE",
     "README.md"

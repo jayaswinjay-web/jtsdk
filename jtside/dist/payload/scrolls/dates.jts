@@ -1,0 +1,219 @@
+# dates scroll - date and time helpers (epoch seconds via now())
+func unix()
+    return now()
+end
+
+func today()
+    return strftime("%Y-%m-%d")
+end
+
+func time_str()
+    return strftime("%H:%M:%S")
+end
+
+func stamp()
+    return strftime("%Y-%m-%d %H:%M:%S")
+end
+
+func fmt(ts, pattern)
+    return strftime(pattern, ts)
+end
+
+func date_parts(ts)
+    d = {}
+    d = update(d, { "year": int(strftime("%Y", ts)) })
+    d = update(d, { "month": int(strftime("%m", ts)) })
+    d = update(d, { "day": int(strftime("%d", ts)) })
+    d = update(d, { "hour": int(strftime("%H", ts)) })
+    d = update(d, { "minute": int(strftime("%M", ts)) })
+    d = update(d, { "second": int(strftime("%S", ts)) })
+    d = update(d, { "weekday": day_of_week(ts) })
+    return d
+end
+
+func add_seconds(ts, n)
+    return ts + n
+end
+
+func add_minutes(ts, n)
+    return ts + n * 60
+end
+
+func add_hours(ts, n)
+    return ts + n * 3600
+end
+
+func add_days(ts, n)
+    return ts + n * 86400
+end
+
+func add_weeks(ts, n)
+    return ts + n * 604800
+end
+
+func add_months(ts, n)
+    return ts + n * 2592000
+end
+
+func add_years(ts, n)
+    return ts + n * 31557600
+end
+
+func seconds_between(a, b)
+    return abs(a - b)
+end
+
+func minutes_between(a, b)
+    return abs(a - b) / 60.0
+end
+
+func hours_between(a, b)
+    return abs(a - b) / 3600.0
+end
+
+func days_between(a, b)
+    return abs(a - b) / 86400.0
+end
+
+func mod(a, b)
+    m = a % b
+    if m < 0
+        m = m + b
+    end
+    return m
+end
+
+func day_of_week(ts)
+    w = int(strftime("%w", ts))
+    if w == 0
+        return 7
+    end
+    return w
+end
+
+func day_name(ts)
+    return strftime("%a", ts)
+end
+
+func day_name_full(ts)
+    return strftime("%A", ts)
+end
+
+func month_name(ts)
+    return strftime("%b", ts)
+end
+
+func month_name_full(ts)
+    return strftime("%B", ts)
+end
+
+func is_weekend(ts)
+    dow = day_of_week(ts)
+    return dow == 6 or dow == 7
+end
+
+func is_weekday(ts)
+    return not is_weekend(ts)
+end
+
+func start_of_day(ts)
+    h = int(strftime("%H", ts))
+    m = int(strftime("%M", ts))
+    s = int(strftime("%S", ts))
+    return ts - (h * 3600 + m * 60 + s)
+end
+
+func end_of_day(ts)
+    return start_of_day(ts) + 86399
+end
+
+func start_of_hour(ts)
+    m = int(strftime("%M", ts))
+    s = int(strftime("%S", ts))
+    return ts - (m * 60 + s)
+end
+
+func start_of_minute(ts)
+    return ts - int(strftime("%S", ts))
+end
+
+func is_leap_year(year)
+    return (year % 4 == 0 and year % 100 != 0) or year % 400 == 0
+end
+
+func month_days(year, month)
+    if month == 2
+        if is_leap_year(year)
+            return 29
+        end
+        return 28
+    end
+    if month == 4 or month == 6 or month == 9 or month == 11
+        return 30
+    end
+    return 31
+end
+
+func day_of_year(ts)
+    return int(strftime("%j", ts))
+end
+
+func iso_weeks_in(jan1_wd, year)
+    if jan1_wd == 4 or (is_leap_year(year) and jan1_wd == 3)
+        return 53
+    end
+    return 52
+end
+
+func iso_week(ts)
+    doy = int(strftime("%j", ts))
+    dow = day_of_week(ts)
+    year = int(strftime("%Y", ts))
+    jan1 = mod(dow - (doy - 1), 7)
+    if jan1 == 0
+        jan1 = 7
+    end
+    w = (doy - dow + 10) // 7
+    if w < 1
+        prev_days = 365
+        if is_leap_year(year - 1)
+            prev_days = 366
+        end
+        prev = mod(jan1 - prev_days, 7)
+        if prev == 0
+            prev = 7
+        end
+        return iso_weeks_in(prev, year - 1)
+    end
+    if w > iso_weeks_in(jan1, year)
+        return 1
+    end
+    return w
+end
+
+func human_duration(secs)
+    secs = int(secs)
+    if secs < 60
+        return str(secs) + "s"
+    end
+    days = secs // 86400
+    rem = secs % 86400
+    hours = rem // 3600
+    rem = rem % 3600
+    mins = rem // 60
+    rem = rem % 60
+    out = []
+    if days > 0
+        out.append(str(days) + "d")
+    end
+    if hours > 0
+        out.append(str(hours) + "h")
+    end
+    if mins > 0
+        out.append(str(mins) + "m")
+    end
+    if rem > 0
+        out.append(str(rem) + "s")
+    end
+    return " ".join(out)
+end
