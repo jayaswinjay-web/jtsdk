@@ -439,14 +439,16 @@ static void for_statement(Compiler* compiler) {
 
         expression(compiler);
 
-        uint8_t end_name = make_constant(compiler,
-            OBJ_VAL(copy_string("_jts_for_end", 11)));
-        emit_bytes(compiler, OP_DEFINE_GLOBAL, end_name);
+        Token end_name = (Token){TOKEN_IDENTIFIER, "_jts_for_end", 11, var_name.line};
+        add_local(compiler, end_name);
+        mark_initialized(compiler);
+        int end_slot = compiler->local_count - 1;
+        emit_bytes(compiler, OP_SET_LOCAL, (uint8_t)end_slot);
 
         int loop_start = current_chunk(compiler)->count;
 
         emit_bytes(compiler, OP_GET_GLOBAL, var_constant);
-        emit_bytes(compiler, OP_GET_GLOBAL, end_name);
+        emit_bytes(compiler, OP_GET_LOCAL, (uint8_t)end_slot);
         emit_byte(compiler, OP_LESS);
 
         int exit_jump = emit_jump(compiler, OP_JUMP_IF_FALSE);
