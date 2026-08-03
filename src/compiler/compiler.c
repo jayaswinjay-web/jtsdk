@@ -413,15 +413,18 @@ static void while_statement(Compiler* compiler) {
 
     emit_loop(compiler, loop_start);
 
-    // Patch break jumps to after loop
+    // The condition value is still on the stack on the false path.
+    // JUMP_IF_FALSE lands on this POP; 'break' lands after it so the
+    // break path does not over-pop the value stack.
+    patch_jump(compiler, exit_jump);
+    emit_byte(compiler, OP_POP);
+
+    // Patch break jumps to just after the exit pop
     for (int i = saved_break_count; i < break_count; i++) {
         patch_jump(compiler, break_jumps[i]);
     }
     break_count = saved_break_count;
     loop_depth--;
-
-    patch_jump(compiler, exit_jump);
-    emit_byte(compiler, OP_POP);
 }
 
 static void for_statement(Compiler* compiler) {
@@ -467,7 +470,8 @@ static void for_statement(Compiler* compiler) {
         end_scope(compiler);
         match(compiler, TOKEN_END);
 
-        // Patch continue jumps to increment
+        // Patch continue jumps to increment (they must land ON the
+        // increment so the loop variable still advances)
         int increment_start = current_chunk(compiler)->count;
 
         emit_bytes(compiler, OP_GET_GLOBAL, var_constant);
@@ -477,7 +481,7 @@ static void for_statement(Compiler* compiler) {
         emit_byte(compiler, OP_POP);
 
         for (int i = saved_continue_count; i < continue_count; i++) {
-            int offset = current_chunk(compiler)->count - continue_jumps[i] - 2;
+            int offset = increment_start - continue_jumps[i] - 2;
             current_chunk(compiler)->code[continue_jumps[i]] = (offset >> 8) & 0xff;
             current_chunk(compiler)->code[continue_jumps[i] + 1] = offset & 0xff;
         }
@@ -485,15 +489,17 @@ static void for_statement(Compiler* compiler) {
 
         emit_loop(compiler, loop_start);
 
+        // Exit pop: JUMP_IF_FALSE lands on the POP (condition still on the
+        // stack); 'break' lands after it to keep the stack balanced.
+        patch_jump(compiler, exit_jump);
+        emit_byte(compiler, OP_POP);
+
         // Patch break jumps
         for (int i = saved_break_count; i < break_count; i++) {
             patch_jump(compiler, break_jumps[i]);
         }
         break_count = saved_break_count;
         loop_depth--;
-
-        patch_jump(compiler, exit_jump);
-        emit_byte(compiler, OP_POP);
 
         end_scope(compiler);
         return;
@@ -552,7 +558,7 @@ static void for_statement(Compiler* compiler) {
     emit_byte(compiler, OP_POP);
 
     for (int i = saved_continue_count; i < continue_count; i++) {
-        int offset = current_chunk(compiler)->count - continue_jumps[i] - 2;
+        int offset = increment_start - continue_jumps[i] - 2;
         current_chunk(compiler)->code[continue_jumps[i]] = (offset >> 8) & 0xff;
         current_chunk(compiler)->code[continue_jumps[i] + 1] = offset & 0xff;
     }
@@ -560,15 +566,17 @@ static void for_statement(Compiler* compiler) {
 
     emit_loop(compiler, loop_start);
 
+    // Exit pop: JUMP_IF_FALSE lands on the POP (condition still on the
+    // stack); 'break' lands after it to keep the stack balanced.
+    patch_jump(compiler, exit_jump);
+    emit_byte(compiler, OP_POP);
+
     // Patch break jumps
     for (int i = saved_break_count; i < break_count; i++) {
         patch_jump(compiler, break_jumps[i]);
     }
     break_count = saved_break_count;
     loop_depth--;
-
-    patch_jump(compiler, exit_jump);
-    emit_byte(compiler, OP_POP);
 
     end_scope(compiler);
 }
@@ -637,49 +645,117 @@ static void parse_parameters(Compiler* compiler) {
     compiler->function->max_arity = total;
 }
 
+// Set up a fresh function compiler and parse its parameter list. The scanner
+// state is captured at the start of the parameter list so the body can be
+// recompiled from scratch if hoisted locals are discovered.
+static void begin_function_compile(Compiler* outer, Compiler* fn, Token name,
+                                   const char* debug_name, bool detect,
+                                   Scanner* out_saved, Token* out_cur,
+                                   Token* out_prev) {
+    *out_saved = *outer->scanner;
+    *out_cur = outer->current;
+    *out_prev = outer->previous;
+
+    fn->parent = outer;
+    fn->scanner = outer->scanner;
+    fn->had_error = false;
+    fn->panic_mode = false;
+    fn->has_yield = false;
+    fn->assign_created_local = false;
+    fn->detect_hoists = detect;
+    fn->hoist_count = 0;
+    fn->local_count = 0;
+    fn->scope_depth = 0;
+    fn->upvalue_count = 0;
+    fn->function_type = TYPE_FUNCTION;
+    fn->current = outer->current;
+    fn->previous = outer->previous;
+
+    fn->function = new_function();
+    if (name.length > 0) {
+        fn->function->name = copy_string(name.start, name.length);
+    } else {
+        fn->function->name = NULL;
+    }
+
+    Chunk* chunk = current_chunk(fn);
+    fn->debug_func = chunk_add_debug_func(chunk, debug_name,
+                                          (int)strlen(debug_name), 0);
+
+    Local* local = &fn->locals[fn->local_count++];
+    local->depth = 0;
+    local->name.start = "";
+    local->name.length = 0;
+    local->is_captured = false;
+
+    begin_scope(fn);
+
+    consume(fn, TOKEN_LEFT_PAREN, "Expect '(' after function name");
+
+    parse_parameters(fn);
+    if (fn->debug_func) {
+        fn->debug_func->arity = fn->function->arity;
+    }
+
+    if (fn->current.type == TOKEN_NEWLINE) {
+        advance(fn);
+    }
+}
+
+// Compile a function body twice when needed: the first pass runs with
+// detect_hoists set so that implicit locals assigned inside loops can be
+// discovered. When any are found, the body is recompiled with those names
+// hoisted to function scope (pre-filled with OP_NIL before the body) so their
+// slots keep stable values across loop iterations instead of relying on the
+// stack-adjacent value-as-slot convention.
+static bool compile_function_body(Compiler* outer, Compiler* fn, Token name,
+                                  const char* debug_name,
+                                  Scanner* out_saved, Token* out_cur,
+                                  Token* out_prev) {
+    block(fn);
+    match(fn, TOKEN_END);
+
+    if (fn->hoist_count > 0 && !fn->had_error) {
+        Token hoists[MAX_LOCALS];
+        int hoist_count = fn->hoist_count;
+        for (int i = 0; i < hoist_count; i++) {
+            hoists[i] = fn->hoist_names[i];
+        }
+
+        *outer->scanner = *out_saved;
+        outer->current = *out_cur;
+        outer->previous = *out_prev;
+
+        begin_function_compile(outer, fn, name, debug_name, false,
+                               out_saved, out_cur, out_prev);
+
+        for (int i = 0; i < hoist_count; i++) {
+            add_local(fn, hoists[i]);
+            mark_initialized(fn);
+            emit_byte(fn, OP_NIL);
+        }
+
+        block(fn);
+        match(fn, TOKEN_END);
+        return true;
+    }
+    return false;
+}
+
 static void func_definition(Compiler* compiler) {
     consume(compiler, TOKEN_IDENTIFIER, "Expect function name");
     Token name = compiler->previous;
 
     Compiler fn_compiler;
-    fn_compiler.parent = compiler;
-    fn_compiler.scanner = compiler->scanner;
-    fn_compiler.had_error = false;
-    fn_compiler.panic_mode = false;
-    fn_compiler.has_yield = false;
-    fn_compiler.local_count = 0;
-    fn_compiler.scope_depth = 0;
-    fn_compiler.upvalue_count = 0;
-    fn_compiler.function_type = TYPE_FUNCTION;
-    fn_compiler.current = compiler->current;
-    fn_compiler.previous = compiler->previous;
+    Scanner saved_scanner;
+    Token saved_current;
+    Token saved_previous;
 
-    fn_compiler.function = new_function();
-    fn_compiler.function->name = copy_string(name.start, name.length);
+    begin_function_compile(compiler, &fn_compiler, name, name.start, true,
+                           &saved_scanner, &saved_current, &saved_previous);
 
-    Chunk* chunk = current_chunk(&fn_compiler);
-    fn_compiler.debug_func = chunk_add_debug_func(chunk, name.start, name.length, 0);
-
-    Local* local = &fn_compiler.locals[fn_compiler.local_count++];
-    local->depth = 0;
-    local->name.start = "";
-    local->name.length = 0;
-
-    begin_scope(&fn_compiler);
-
-    consume(&fn_compiler, TOKEN_LEFT_PAREN, "Expect '(' after function name");
-
-    parse_parameters(&fn_compiler);
-    if (fn_compiler.debug_func) {
-        fn_compiler.debug_func->arity = fn_compiler.function->arity;
-    }
-
-    if (fn_compiler.current.type == TOKEN_NEWLINE) {
-        advance(&fn_compiler);
-    }
-
-    block(&fn_compiler);
-    match(&fn_compiler, TOKEN_END);
+    compile_function_body(compiler, &fn_compiler, name, name.start,
+                          &saved_scanner, &saved_current, &saved_previous);
 
     emit_return(&fn_compiler);
 
@@ -746,44 +822,17 @@ static void class_declaration(Compiler* compiler) {
             uint8_t method_constant = identifier_constant(compiler, &method_name);
 
             Compiler fn_compiler;
-            fn_compiler.parent = compiler;
-            fn_compiler.scanner = compiler->scanner;
-            fn_compiler.had_error = false;
-            fn_compiler.panic_mode = false;
-            fn_compiler.local_count = 0;
-            fn_compiler.scope_depth = 0;
-            fn_compiler.upvalue_count = 0;
-            fn_compiler.function_type = TYPE_FUNCTION;
-            fn_compiler.current = compiler->current;
-            fn_compiler.previous = compiler->previous;
+            Scanner saved_scanner;
+            Token saved_current;
+            Token saved_previous;
 
-            fn_compiler.function = new_function();
-            fn_compiler.function->name = copy_string(method_name.start, method_name.length);
+            begin_function_compile(compiler, &fn_compiler, method_name,
+                                   method_name.start, true,
+                                   &saved_scanner, &saved_current, &saved_previous);
 
-            Chunk* method_chunk = current_chunk(&fn_compiler);
-            fn_compiler.debug_func = chunk_add_debug_func(method_chunk, method_name.start, method_name.length, 0);
-
-    Local* local = &fn_compiler.locals[fn_compiler.local_count++];
-    local->depth = 0;
-    local->name.start = "";
-    local->name.length = 0;
-    local->is_captured = false;
-
-    begin_scope(&fn_compiler);
-
-            consume(&fn_compiler, TOKEN_LEFT_PAREN, "Expect '(' after method name");
-
-            parse_parameters(&fn_compiler);
-            if (fn_compiler.debug_func) {
-                fn_compiler.debug_func->arity = fn_compiler.function->arity;
-            }
-
-            if (fn_compiler.current.type == TOKEN_NEWLINE) {
-                advance(&fn_compiler);
-            }
-
-            block(&fn_compiler);
-            match(&fn_compiler, TOKEN_END);
+            compile_function_body(compiler, &fn_compiler, method_name,
+                                  method_name.start,
+                                  &saved_scanner, &saved_current, &saved_previous);
 
             // If method is "init", implicitly return self
             if (method_name.length == 4 && memcmp(method_name.start, "init", 4) == 0) {
@@ -1237,48 +1286,15 @@ static void lambda_expression_impl(Compiler* compiler, bool can_assign) {
     // Syntax: func (params) ... end
     // No name, not defined as global.
     Compiler fn_compiler;
-    fn_compiler.parent = compiler;
-    fn_compiler.scanner = compiler->scanner;
-    fn_compiler.had_error = false;
-    fn_compiler.panic_mode = false;
-    fn_compiler.has_yield = false;
-    fn_compiler.assign_created_local = false;
-    fn_compiler.function_type = TYPE_FUNCTION;
-    fn_compiler.local_count = 0;
-    fn_compiler.scope_depth = 0;
-    fn_compiler.upvalue_count = 0;
-    fn_compiler.current = compiler->current;
-    fn_compiler.previous = compiler->previous;
+    Scanner saved_scanner;
+    Token saved_current;
+    Token saved_previous;
 
-    fn_compiler.function = new_function();
-    fn_compiler.function->name = NULL; // anonymous
+    begin_function_compile(compiler, &fn_compiler, (Token){0}, "<lambda>", true,
+                           &saved_scanner, &saved_current, &saved_previous);
 
-    Chunk* chunk = current_chunk(&fn_compiler);
-    fn_compiler.debug_func = chunk_add_debug_func(chunk, "<lambda>", 8, 0);
-
-    // Slot 0 placeholder for the function itself.
-    Local* local = &fn_compiler.locals[fn_compiler.local_count++];
-    local->depth = 0;
-    local->name.start = "";
-    local->name.length = 0;
-    local->is_captured = false;
-
-    begin_scope(&fn_compiler);
-
-    // Expect '(' after 'func'
-    consume(&fn_compiler, TOKEN_LEFT_PAREN, "Expect '(' after 'func' for lambda parameters");
-    parse_parameters(&fn_compiler);
-    if (fn_compiler.debug_func) {
-        fn_compiler.debug_func->arity = fn_compiler.function->arity;
-    }
-
-    // Optional newline after parameters
-    if (fn_compiler.current.type == TOKEN_NEWLINE) {
-        advance(&fn_compiler);
-    }
-
-    block(&fn_compiler);
-    match(&fn_compiler, TOKEN_END);
+    compile_function_body(compiler, &fn_compiler, (Token){0}, "<lambda>",
+                          &saved_scanner, &saved_current, &saved_previous);
 
     emit_return(&fn_compiler);
 
@@ -1462,6 +1478,16 @@ static void named_variable(Compiler* compiler, Token name, bool can_assign) {
         created_local = true;
         get_op = OP_GET_LOCAL;
         set_op = OP_SET_LOCAL;
+        if (compiler->detect_hoists && loop_depth > 0) {
+            int i;
+            for (i = 0; i < compiler->hoist_count; i++) {
+                if (identifiers_equal(&compiler->hoist_names[i], &name)) break;
+            }
+            if (i == compiler->hoist_count &&
+                compiler->hoist_count < MAX_LOCALS) {
+                compiler->hoist_names[compiler->hoist_count++] = name;
+            }
+        }
     } else {
         arg = identifier_constant(compiler, &name);
         get_op = OP_GET_GLOBAL;

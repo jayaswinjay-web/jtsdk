@@ -34,6 +34,9 @@ typedef struct Compiler {
     bool had_error;
     bool panic_mode;
     bool assign_created_local;
+    bool detect_hoists;
+    Token hoist_names[MAX_LOCALS];
+    int hoist_count;
     CompilerFunctionType function_type;
     Local locals[MAX_LOCALS];
     int local_count;
