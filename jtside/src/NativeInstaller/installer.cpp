@@ -1,9 +1,13 @@
 ﻿// JTS GO native installer (Windows 7+ compatible, no .NET / Node dependency).
-// Self-contained: embeds the payload.zip as a Win32 RCDATA resource and extracts it.
+// Self-contained: embeds payload.zip as a Win32 RCDATA resource and extracts it.
+//
+// GUI mode (default): a PropertySheet wizard with Welcome / License / Location /
+// PATH / Ready / Progress / Done pages.
 //
 // Usage:
-//   JTS-IDE-Setup                install
-//   JTS-IDE-Setup --install      install (same as no argument)
+//   JTS-IDE-Setup                GUI wizard install
+//   JTS-IDE-Setup --install      GUI wizard install (same as no argument)
+//   JTS-IDE-Setup --silent       silent install (accept license, default dir, add PATH)
 //   JTS-IDE-Setup --uninstall    remove the language and the IDE
 //   JTS-IDE-Setup --uninstall --silent
 //   JTS-IDE-Setup --version      print version
@@ -11,11 +15,13 @@
 #define _WIN32_WINNT 0x0601
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
+#include <commctrl.h>
+#include <prsht.h>
 #include <shlobj.h>
 #include <shlwapi.h>
 #include <objbase.h>
-#include <shobjidl.h>
 #include <shellapi.h>
+#include <urlmon.h>
 
 #include <cstdio>
 #include <cstring>
@@ -26,6 +32,27 @@
 #include "miniz.h"
 
 #define IDR_PAYLOAD 101
+#define IDR_LICENSE 102
+#define IDI_APP 1
+
+#define IDD_WELCOME 200
+#define IDD_LICENSE 201
+#define IDD_LOCATION 202
+#define IDD_PATH 203
+#define IDD_READY 204
+#define IDD_PROGRESS 205
+#define IDD_DONE 206
+
+#define IDC_ACCEPT 1001
+#define IDC_DIR 1002
+#define IDC_BROWSE 1003
+#define IDC_PATH_YES 1004
+#define IDC_PATH_NO 1005
+#define IDC_SUMMARY 1006
+#define IDC_PROGRESS_BAR 1007
+#define IDC_STATUS 1008
+#define IDC_LAUNCH 1009
+#define IDC_LICENSE_EDIT 1010
 
 namespace {
 
@@ -35,6 +62,18 @@ const wchar_t* kCompany = L"JayTech Solutions";
 const wchar_t* kRepoUrl = L"https://github.com/jayaswinjay-web/jtsdk";
 const wchar_t* kUninstallKey =
     L"Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\JTS GO";
+
+const UINT kInstallDoneMsg = WM_APP + 1;
+const int kPageWelcome = 0;
+const int kPageLicense = 1;
+const int kPageLocation = 2;
+const int kPagePath = 3;
+const int kPageReady = 4;
+const int kPageProgress = 5;
+const int kPageDone = 6;
+
+std::wstring g_installDir;  // default filled in before use
+bool g_pathChoice = true;   // add to PATH?
 
 // ---- forward declarations ----
 void RecursiveDelete(const std::wstring& dir);
@@ -50,12 +89,42 @@ std::wstring GetSpecialFolder(int csidl) {
 std::wstring GetLocalAppData() { return GetSpecialFolder(CSIDL_LOCAL_APPDATA); }
 std::wstring GetProgramsMenu() { return GetSpecialFolder(CSIDL_PROGRAMS); }
 
-std::wstring GetInstallDir() {
+std::wstring GetDefaultInstallDir() {
     return GetLocalAppData() + L"\\Programs\\JTS GO";
 }
-std::wstring GetBinDir() { return GetInstallDir() + L"\\bin"; }
-std::wstring GetIdeDir() { return GetInstallDir() + L"\\ide"; }
+
+std::wstring GetInstallDir() {
+    return g_installDir.empty() ? GetDefaultInstallDir() : g_installDir;
+}
+
+std::wstring GetBinDir() {
+    std::wstring base = g_installDir.empty() ? GetDefaultInstallDir() : g_installDir;
+    return base + L"\\bin";
+}
+std::wstring GetIdeDir() {
+    std::wstring base = g_installDir.empty() ? GetDefaultInstallDir() : g_installDir;
+    return base + L"\\ide";
+}
 std::wstring GetStartMenuFolder() { return GetProgramsMenu() + L"\\JTS GO"; }
+
+std::wstring ReadInstallLocationFromRegistry() {
+    HKEY key = NULL;
+    if (RegOpenKeyExW(HKEY_CURRENT_USER, kUninstallKey, 0, KEY_READ, &key) !=
+        ERROR_SUCCESS)
+        return L"";
+    DWORD sz = 0, type = 0;
+    RegQueryValueExW(key, L"InstallLocation", NULL, &type, NULL, &sz);
+    std::wstring val;
+    if (sz > 0) {
+        val.resize(sz / sizeof(wchar_t));
+        RegQueryValueExW(key, L"InstallLocation", NULL, &type, (LPBYTE)&val[0],
+                         &sz);
+        val.resize(sz / sizeof(wchar_t));
+        if (!val.empty() && val.back() == L'\0') val.pop_back();
+    }
+    RegCloseKey(key);
+    return val;
+}
 
 std::string WideToUtf8(const std::wstring& w) {
     if (w.empty()) return std::string();
@@ -90,8 +159,7 @@ void CreateParentDirs(const std::wstring& fullPath) {
 }
 
 std::vector<BYTE> LoadPayload() {
-    HRSRC h = FindResourceW(NULL, MAKEINTRESOURCE(IDR_PAYLOAD),
-                            RT_RCDATA);
+    HRSRC h = FindResourceW(NULL, MAKEINTRESOURCE(IDR_PAYLOAD), RT_RCDATA);
     if (h == NULL) return std::vector<BYTE>();
     HGLOBAL g = LoadResource(NULL, h);
     if (g == NULL) return std::vector<BYTE>();
@@ -101,23 +169,39 @@ std::vector<BYTE> LoadPayload() {
     return std::vector<BYTE>((BYTE*)p, (BYTE*)p + sz);
 }
 
-// Print a wide string to stdout. Uses WriteConsoleW when attached to a real
-// console; otherwise converts to the ANSI codepage (keeps ASCII messages
-// intact when output is redirected/piped).
+std::string LoadLicenseText() {
+    HRSRC h = FindResourceW(NULL, MAKEINTRESOURCE(IDR_LICENSE), RT_RCDATA);
+    if (h == NULL) return std::string();
+    HGLOBAL g = LoadResource(NULL, h);
+    if (g == NULL) return std::string();
+    void* p = LockResource(g);
+    DWORD sz = SizeofResource(NULL, h);
+    if (p == NULL || sz == 0) return std::string();
+    return std::string((const char*)p, (size_t)sz);
+}
+
+// Print a wide string to stdout. Works both when attached to a real console
+// and when stdout is a pipe (writes UTF-8 bytes to the inherited handle).
 void Output(const std::wstring& s) {
     HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
     DWORD mode = 0;
-    if (hOut != INVALID_HANDLE_VALUE && GetConsoleMode(hOut, &mode)) {
+    if (hOut != INVALID_HANDLE_VALUE && hOut != NULL &&
+        GetConsoleMode(hOut, &mode)) {
         WriteConsoleW(hOut, s.c_str(), (DWORD)s.size(), NULL, NULL);
-    } else {
-        int n = WideCharToMultiByte(CP_ACP, 0, s.c_str(), (int)s.size(), NULL,
-                                    0, NULL, NULL);
-        if (n > 0) {
-            std::string a(n, '\0');
-            WideCharToMultiByte(CP_ACP, 0, s.c_str(), (int)s.size(), &a[0], n,
-                                NULL, NULL);
-            fwrite(a.data(), 1, a.size(), stdout);
-            fflush(stdout);
+        return;
+    }
+    if (hOut != INVALID_HANDLE_VALUE && hOut != NULL) {
+        std::string utf8 = WideToUtf8(s);
+        WriteFile(hOut, utf8.data(), (DWORD)utf8.size(), &mode, NULL);
+        return;
+    }
+    // No usable std handle: attach to a console and open CONOUT$ directly.
+    if (AttachConsole(ATTACH_PARENT_PROCESS)) {
+        HANDLE c = CreateFileW(L"CONOUT$", GENERIC_WRITE, FILE_SHARE_WRITE,
+                               NULL, OPEN_EXISTING, 0, NULL);
+        if (c != INVALID_HANDLE_VALUE) {
+            WriteConsoleW(c, s.c_str(), (DWORD)s.size(), NULL, NULL);
+            CloseHandle(c);
         }
     }
 }
@@ -137,8 +221,11 @@ size_t ExtractWrite(void* opaque, mz_uint64 /*file_ofs*/, const void* buf,
     return written;
 }
 
+typedef void (*ProgressFn)(void* ctx, int done, int total);
+
 // Returns number of files extracted, or -1 on failure.
-int ExtractPayload(const std::vector<BYTE>& data, const std::wstring& destRoot) {
+int ExtractPayload(const std::vector<BYTE>& data, const std::wstring& destRoot,
+                   ProgressFn prog = NULL, void* progCtx = NULL) {
     mz_zip_archive zip;
     ZeroMemory(&zip, sizeof(zip));
     if (!mz_zip_reader_init_mem(&zip, data.data(), data.size(), 0)) return -1;
@@ -167,6 +254,7 @@ int ExtractPayload(const std::vector<BYTE>& data, const std::wstring& destRoot) 
         CloseHandle(h);
         if (!ok) continue;
         ++count;
+        if (prog && ((i % 4) == 0 || i == n - 1)) prog(progCtx, (int)i + 1, (int)n);
     }
     mz_zip_reader_end(&zip);
     return count;
@@ -200,7 +288,6 @@ void SetUserPath(const std::wstring& value) {
     RegSetValueExW(key, L"Path", 0, REG_EXPAND_SZ, (const BYTE*)value.c_str(),
                    len);
     RegCloseKey(key);
-    // Tell the shell (and future processes) the environment changed.
     SendMessageTimeoutW(HWND_BROADCAST, WM_SETTINGCHANGE, 0,
                         (LPARAM)L"Environment", SMTO_ABORTIFHUNG, 5000, NULL);
 }
@@ -240,7 +327,6 @@ bool ContainsPath(const std::wstring& current, const std::wstring& dir) {
     return false;
 }
 
-// Returns true if the PATH was changed.
 bool AddToPath(const std::wstring& dir) {
     std::wstring current = GetUserPath();
     if (ContainsPath(current, dir)) return false;
@@ -250,7 +336,6 @@ bool AddToPath(const std::wstring& dir) {
     return true;
 }
 
-// Returns true if the PATH was changed.
 bool RemoveFromPath(const std::wstring& dir) {
     std::wstring current = GetUserPath();
     std::wstring norm = Upper(TrimTrailingSlash(dir));
@@ -364,8 +449,6 @@ void DeleteShortcuts() {
     RemoveDirectoryW(folder.c_str());
 }
 
-// Copy the running setup.exe into the install dir so the uninstall entry
-// keeps working after the original setup.exe is gone.
 std::wstring CopySelfIntoInstallDir() {
     wchar_t self[MAX_PATH] = {0};
     GetModuleFileNameW(NULL, self, MAX_PATH);
@@ -405,7 +488,6 @@ void RecursiveDelete(const std::wstring& dir) {
     RemoveDirectoryW(dir.c_str());
 }
 
-// Delete everything under dir except the currently running executable.
 void RecursiveDeleteExceptSelf(const std::wstring& dir) {
     wchar_t self[MAX_PATH] = {0};
     GetModuleFileNameW(NULL, self, MAX_PATH);
@@ -427,9 +509,6 @@ void RecursiveDeleteExceptSelf(const std::wstring& dir) {
     FindClose(h);
 }
 
-// Schedule removal of the (now mostly empty) install dir after this process
-// exits. The running uninstaller itself lives in the install dir, so a
-// detached cmd waits a few seconds for us to exit, then removes the rest.
 void ScheduleInstallDirCleanup() {
     std::wstring installDir = GetInstallDir();
     wchar_t tmp[MAX_PATH];
@@ -459,46 +538,129 @@ void ScheduleInstallDirCleanup() {
     if (pi.hThread) CloseHandle(pi.hThread);
 }
 
-int Install(bool silent) {
+// .NET Framework 4.8 is required by the JTS IDE. It ships with recent Windows
+// 10/11 builds but is NOT present on Windows 7 or older Windows 10 builds, so
+// we detect it and offer to install it (offline installer, ~120 MB download).
+const wchar_t* kNet48Url = L"https://go.microsoft.com/fwlink/?linkid=2088631";
+const wchar_t* kNet48ManualUrl =
+    L"https://dotnet.microsoft.com/download/dotnet-framework/net48";
+
+bool HasNetFramework48() {
+    const wchar_t* sub =
+        L"SOFTWARE\\Microsoft\\NET Framework Setup\\NDP\\v4\\Full";
+    const DWORD kRelease48 = 528040;
+    HKEY key = NULL;
+    DWORD type = 0, size = sizeof(DWORD), release = 0;
+    for (int pass = 0; pass < 2; ++pass) {
+        REGSAM access = KEY_READ;
+        if (pass == 1) access |= KEY_WOW64_64KEY;
+        if (RegOpenKeyExW(HKEY_LOCAL_MACHINE, sub, 0, access, &key) ==
+            ERROR_SUCCESS) {
+            release = 0;
+            size = sizeof(DWORD);
+            RegQueryValueExW(key, L"Release", NULL, &type, (LPBYTE)&release,
+                             &size);
+            RegCloseKey(key);
+            if (release >= kRelease48) return true;
+        }
+    }
+    return false;
+}
+
+bool DownloadNetFramework(const std::wstring& dest) {
+    return SUCCEEDED(URLDownloadToFileW(NULL, kNet48Url, dest.c_str(), 0, NULL));
+}
+
+// Runs the offline .NET Framework 4.8 installer. quiet=true for silent
+// installs; otherwise uses /passive so the user can watch the progress.
+bool RunNetFrameworkInstaller(const std::wstring& path, bool quiet) {
+    std::wstring args = quiet ? L" /quiet /norestart" : L" /passive /norestart";
+    std::wstring cmd = L"\"" + path + L"\"" + args;
+    STARTUPINFOW si = {sizeof(si)};
+    PROCESS_INFORMATION pi = {0};
+    if (!CreateProcessW(NULL, &cmd[0], NULL, NULL, FALSE, 0, NULL, NULL, &si,
+                        &pi))
+        return false;
+    WaitForSingleObject(pi.hProcess, INFINITE);
+    DWORD code = 0;
+    GetExitCodeProcess(pi.hProcess, &code);
+    CloseHandle(pi.hProcess);
+    CloseHandle(pi.hThread);
+    return code == 0;
+}
+
+// Returns true if .NET Framework 4.8 is present or was installed. Called by
+// both the silent and GUI paths before the wizard/install finishes.
+bool EnsureNetFramework(bool silent) {
+    if (HasNetFramework48()) return true;
+
+    if (silent) {
+        wchar_t tmp[MAX_PATH];
+        GetTempPathW(MAX_PATH, tmp);
+        std::wstring dest = std::wstring(tmp) + L"ndp48-x86-x64-allos-enu.exe";
+        DeleteFileW(dest.c_str());
+        if (!DownloadNetFramework(dest)) return false;
+        return RunNetFrameworkInstaller(dest, true);
+    }
+
+    int answer = MessageBoxW(
+        NULL,
+        L"The JTS IDE requires Microsoft .NET Framework 4.8, which was not "
+        L"found on this computer.\r\n\r\n"
+        L"JTS GO will now download and install .NET Framework 4.8 "
+        L"(about 120 MB). You can also install it yourself later from\r\n"
+        L"https://dotnet.microsoft.com/download/dotnet-framework/net48\r\n\r\n"
+        L"Install .NET Framework 4.8 now?",
+        kAppName, MB_YESNO | MB_ICONQUESTION | MB_DEFBUTTON1);
+    if (answer != IDYES) return false;
+
+    HCURSOR prev = SetCursor(LoadCursorW(NULL, IDC_WAIT));
+    wchar_t tmp[MAX_PATH];
+    GetTempPathW(MAX_PATH, tmp);
+    std::wstring dest = std::wstring(tmp) + L"ndp48-x86-x64-allos-enu.exe";
+    DeleteFileW(dest.c_str());
+    bool ok = DownloadNetFramework(dest);
+    if (ok) ok = RunNetFrameworkInstaller(dest, false);
+    SetCursor(prev);
+    if (!ok) {
+        std::wstring msg =
+            std::wstring(L".NET Framework 4.8 could not be installed "
+                         L"automatically.\r\n\r\n"
+                         L"Please install it manually from:\r\n") +
+            kNet48ManualUrl +
+            std::wstring(L"\r\n\r\nThe command-line tools (jts, jtsc, jtsvm) "
+                         L"will still work, but the JTS IDE will not start "
+                         L"until .NET Framework 4.8 is installed.");
+        MessageBoxW(NULL, msg.c_str(), kAppName, MB_OK | MB_ICONWARNING);
+    }
+    return ok;
+}
+
+// Installs into g_installDir. Returns 0 on success, 1 on failure.
+int RunInstall(bool addPath, ProgressFn prog = NULL, void* progCtx = NULL,
+               int* filesOut = NULL) {
     CoInitialize(NULL);
+    int result = 1;
+    if (filesOut) *filesOut = 0;
+
     std::vector<BYTE> payload = LoadPayload();
-    if (payload.empty()) {
-        if (!silent)
-            OutputLine(L"Error: this installer was built without a payload.");
-        return 1;
-    }
-    std::wstring installDir = GetInstallDir();
-    CreateDirectoryW(installDir.c_str(), NULL);
-
-    int files = ExtractPayload(payload, installDir);
-    if (files < 0) {
-        if (!silent) OutputLine(L"Error: failed to extract payload.");
-        return 1;
-    }
-
-    bool pathAdded = AddToPath(GetBinDir());
-    std::wstring uninstaller = CopySelfIntoInstallDir();
-    WriteUninstallEntry(uninstaller);
-    CreateShortcuts();
-
-    if (!silent) {
-        OutputLine(L"");
-        OutputLine(std::wstring(kAppName) + L" " + kVersion + L" installed successfully.");
-        OutputLine(L"  Location : " + installDir);
-        OutputLine(L"  Files    : " + std::to_wstring(files));
-        OutputLine(L"  Commands : jts (run)   jtsc (compile)   jtsvm (bytecode)");
-        OutputLine(L"  IDE      : JTS IDE (Start Menu > JTS GO)");
-        if (pathAdded) {
-            OutputLine(L"  PATH     : " + GetBinDir() + L" added");
-            OutputLine(L"");
-            OutputLine(L"NOTE: Reopen any open terminals so \x27jts\x27 becomes available.");
+    if (!payload.empty()) {
+        CreateDirectoryW(g_installDir.c_str(), NULL);
+        int files = ExtractPayload(payload, g_installDir, prog, progCtx);
+        if (files >= 0) {
+            if (addPath) AddToPath(GetBinDir());
+            std::wstring uninstaller = CopySelfIntoInstallDir();
+            WriteUninstallEntry(uninstaller);
+            CreateShortcuts();
+            if (filesOut) *filesOut = files;
+            result = 0;
         }
     }
     CoUninitialize();
-    return 0;
+    return result;
 }
 
-int Uninstall(bool silent) {
+int Uninstall() {
     CoInitialize(NULL);
     bool removed = RemoveFromPath(GetBinDir());
     DeleteUninstallEntry();
@@ -508,18 +670,11 @@ int Uninstall(bool silent) {
     bool fromInstallDir = IsRunningFromInstallDir();
     if (PathIsDirectoryW(installDir.c_str())) {
         if (fromInstallDir) {
-            // Can't delete the running exe; clean everything else and let a
-            // detached cmd remove the rest after we exit.
             RecursiveDeleteExceptSelf(installDir);
             ScheduleInstallDirCleanup();
         } else {
             RecursiveDelete(installDir);
         }
-    }
-    if (!silent) {
-        OutputLine(std::wstring(kAppName) + L" has been uninstalled.");
-        OutputLine(removed ? L"  Removed PATH entry : true" : L"  Removed PATH entry : false");
-        OutputLine(L"  Removed location   : " + installDir);
     }
     CoUninitialize();
     return 0;
@@ -529,12 +684,297 @@ void PrintHelp() {
     OutputLine(std::wstring(kAppName) + L" " + kVersion + L" Installer");
     OutputLine(L"");
     OutputLine(L"Usage:");
-    OutputLine(L"  JTS-IDE-Setup                Install " + std::wstring(kAppName) + L" + JTS IDE");
-    OutputLine(L"  JTS-IDE-Setup --install       Install (same as no argument)");
-    OutputLine(L"  JTS-IDE-Setup --uninstall     Remove the language and the IDE");
+    OutputLine(L"  JTS-IDE-Setup                Install " + std::wstring(kAppName) + L" + JTS IDE (GUI)");
+    OutputLine(L"  JTS-IDE-Setup --silent       Install without any prompts");
+    OutputLine(L"  JTS-IDE-Setup --uninstall    Remove the language and the IDE");
     OutputLine(L"  JTS-IDE-Setup --uninstall --silent");
     OutputLine(L"                                Remove without any prompts");
     OutputLine(L"  JTS-IDE-Setup --version       Show the version");
+}
+
+// ---- GUI wizard ----
+
+struct InstallArgs {
+    HWND page;
+    HWND bar;
+    std::wstring dir;
+    bool addPath;
+};
+
+void ProgressCb(void* ctx, int done, int total) {
+    InstallArgs* a = static_cast<InstallArgs*>(ctx);
+    if (a->bar) {
+        int pct = total > 0 ? (int)((long long)done * 100 / total) : 0;
+        if (pct > 100) pct = 100;
+        SendMessageW(a->bar, PBM_SETPOS, (WPARAM)pct, 0);
+    }
+}
+
+DWORD WINAPI InstallThreadProc(LPVOID param) {
+    InstallArgs* a = static_cast<InstallArgs*>(param);
+    g_installDir = a->dir;
+    int files = 0;
+    int code = RunInstall(a->addPath, ProgressCb, a, &files);
+    PostMessageW(a->page, kInstallDoneMsg, (WPARAM)code, (LPARAM)files);
+    delete a;
+    return 0;
+}
+
+std::wstring PickDirectory(HWND hwnd, const std::wstring& initial) {
+    wchar_t buf[MAX_PATH] = {0};
+    if (!initial.empty() && initial.size() < MAX_PATH)
+        wcscpy(buf, initial.c_str());
+    BROWSEINFOW bi = {0};
+    bi.hwndOwner = hwnd;
+    bi.pszDisplayName = buf;
+    bi.lpszTitle =
+        L"Choose the folder where JTS GO and the JTS IDE will be installed:";
+    bi.ulFlags = BIF_RETURNONLYFSDIRS | BIF_NEWDIALOGSTYLE;
+    LPITEMIDLIST pidl = SHBrowseForFolderW(&bi);
+    if (pidl) {
+        SHGetPathFromIDListW(pidl, buf);
+        CoTaskMemFree(pidl);
+        return std::wstring(buf);
+    }
+    return L"";
+}
+
+void SetWizButtons(HWND hwnd, DWORD flags) {
+    PropSheet_SetWizButtons(GetParent(hwnd), flags);
+}
+
+std::wstring BuildReadySummary() {
+    std::wstring s = L"JTS GO " + std::wstring(kVersion) + L" will be installed to:\r\n\r\n  " +
+        g_installDir + L"\r\n\r\n";
+    s += g_pathChoice
+        ? L"jts, jtsc and jtsvm will be added to your PATH (user level)."
+        : L"JTS GO commands will NOT be added to your PATH.";
+    s += L"\r\n\r\nA JTS IDE shortcut will be added to the Start Menu.";
+    return s;
+}
+
+// ---- per-page handlers ----
+
+BOOL OnSetActive(HWND hwnd, int page) {
+    switch (page) {
+        case kPageWelcome: {
+            static bool netPrompted = false;
+            if (!netPrompted) {
+                netPrompted = true;
+                EnsureNetFramework(false);
+            }
+            SetWizButtons(hwnd, PSWIZB_NEXT);
+            break;
+        }        case kPageLicense: {
+            if (!GetWindowTextLengthW(GetDlgItem(hwnd, IDC_LICENSE_EDIT))) {
+                std::wstring text = Utf8ToWide(LoadLicenseText());
+                SetWindowTextW(GetDlgItem(hwnd, IDC_LICENSE_EDIT),
+                               text.c_str());
+            }
+            bool accept = IsDlgButtonChecked(hwnd, IDC_ACCEPT) == BST_CHECKED;
+            SetWizButtons(hwnd, accept ? (PSWIZB_BACK | PSWIZB_NEXT)
+                                       : PSWIZB_BACK);
+            break;
+        }
+        case kPageLocation: {
+            wchar_t cur[MAX_PATH] = {0};
+            GetWindowTextW(GetDlgItem(hwnd, IDC_DIR), cur, MAX_PATH);
+            if (cur[0] == L'\0')
+                SetWindowTextW(GetDlgItem(hwnd, IDC_DIR),
+                               GetDefaultInstallDir().c_str());
+            SetWizButtons(hwnd, PSWIZB_BACK | PSWIZB_NEXT);
+            break;
+        }
+        case kPagePath:
+            SetWizButtons(hwnd, PSWIZB_BACK | PSWIZB_NEXT);
+            break;
+        case kPageReady:
+            SetWindowTextW(GetDlgItem(hwnd, IDC_SUMMARY),
+                           BuildReadySummary().c_str());
+            SetWizButtons(hwnd, PSWIZB_BACK | PSWIZB_NEXT);
+            break;
+        case kPageProgress: {
+            SetWizButtons(hwnd, 0);
+            HWND bar = GetDlgItem(hwnd, IDC_PROGRESS_BAR);
+            SendMessageW(bar, PBM_SETRANGE, 0, MAKELPARAM(0, 100));
+            SendMessageW(bar, PBM_SETPOS, 0, 0);
+            SetWindowTextW(GetDlgItem(hwnd, IDC_STATUS),
+                           L"Installing JTS GO...");
+            InstallArgs* a = new InstallArgs();
+            a->page = hwnd;
+            a->bar = bar;
+            a->dir = g_installDir;
+            a->addPath = g_pathChoice;
+            CreateThread(NULL, 0, InstallThreadProc, a, 0, NULL);
+            break;
+        }
+        case kPageDone:
+            SetWizButtons(hwnd, PSWIZB_FINISH);
+            break;
+    }
+    return TRUE;
+}
+
+BOOL OnKillActive(HWND hwnd, int page) {
+    switch (page) {
+        case kPageLicense: {
+            if (!IsDlgButtonChecked(hwnd, IDC_ACCEPT)) {
+                MessageBoxW(hwnd,
+                            L"You must accept the license agreement to "
+                            L"continue installing JTS GO.",
+                            kAppName, MB_OK | MB_ICONWARNING);
+                SetWindowLongPtrW(hwnd, DWLP_MSGRESULT, TRUE);
+                return TRUE;
+            }
+            break;
+        }
+        case kPageLocation: {
+            wchar_t buf[MAX_PATH] = {0};
+            GetWindowTextW(GetDlgItem(hwnd, IDC_DIR), buf, MAX_PATH);
+            std::wstring dir = TrimTrailingSlash(buf);
+            if (dir.empty()) {
+                MessageBoxW(hwnd, L"Please choose an install location.",
+                            kAppName, MB_OK | MB_ICONWARNING);
+                SetWindowLongPtrW(hwnd, DWLP_MSGRESULT, TRUE);
+                return TRUE;
+            }
+            g_installDir = dir;
+            break;
+        }
+        case kPagePath:
+            g_pathChoice =
+                IsDlgButtonChecked(hwnd, IDC_PATH_YES) == BST_CHECKED;
+            break;
+    }
+    return FALSE;
+}
+
+BOOL OnWizFinish(HWND hwnd) {
+    if (IsDlgButtonChecked(hwnd, IDC_LAUNCH) == BST_CHECKED) {
+        std::wstring ideExe = GetIdeDir() + L"\\Jts.Ide.exe";
+        ShellExecuteW(NULL, L"open", ideExe.c_str(), NULL,
+                      GetIdeDir().c_str(), SW_SHOWNORMAL);
+    }
+    return TRUE;
+}
+
+void ShowInstallError(HWND hwnd, int code) {
+    MessageBoxW(hwnd,
+                L"JTS GO could not be installed. The installer may have been "
+                L"built without its payload, or the payload failed to extract.",
+                kAppName, MB_OK | MB_ICONERROR);
+}
+
+INT_PTR CALLBACK PageProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
+    switch (msg) {
+        case WM_INITDIALOG: {
+            LPPROPSHEETPAGEW psp = (LPPROPSHEETPAGEW)lParam;
+            SetWindowLongPtrW(hwnd, GWLP_USERDATA, (LONG_PTR)psp->lParam);
+            return TRUE;
+        }
+        case WM_COMMAND: {
+            int page = (int)GetWindowLongPtrW(hwnd, GWLP_USERDATA);
+            if (HIWORD(wParam) == BN_CLICKED) {
+                if (LOWORD(wParam) == IDC_ACCEPT) {
+                    bool accept =
+                        IsDlgButtonChecked(hwnd, IDC_ACCEPT) == BST_CHECKED;
+                    SetWizButtons(hwnd, accept ? (PSWIZB_BACK | PSWIZB_NEXT)
+                                               : PSWIZB_BACK);
+                } else if (LOWORD(wParam) == IDC_BROWSE) {
+                    wchar_t cur[MAX_PATH] = {0};
+                    GetWindowTextW(GetDlgItem(hwnd, IDC_DIR), cur, MAX_PATH);
+                    std::wstring dir = PickDirectory(hwnd, cur);
+                    if (!dir.empty())
+                        SetWindowTextW(GetDlgItem(hwnd, IDC_DIR), dir.c_str());
+                }
+            }
+            return TRUE;
+        }
+        case WM_NOTIFY: {
+            NMHDR* nm = (NMHDR*)lParam;
+            int page = (int)GetWindowLongPtrW(hwnd, GWLP_USERDATA);
+            switch (nm->code) {
+                case PSN_SETACTIVE:
+                    return OnSetActive(hwnd, page);
+                case PSN_KILLACTIVE:
+                    return OnKillActive(hwnd, page);
+                case PSN_WIZFINISH:
+                    return OnWizFinish(hwnd);
+                case PSN_QUERYCANCEL:
+                    if (page == kPageProgress) {
+                        SetWindowLongPtrW(hwnd, DWLP_MSGRESULT, TRUE);
+                        return TRUE;
+                    }
+                    break;
+            }
+            break;
+        }
+        case WM_APP + 1: {
+            if (wParam != 0) {
+                ShowInstallError(hwnd, (int)wParam);
+            } else {
+                int files = (int)lParam;
+                wchar_t msg[64];
+                wsprintfW(msg, L"Installed %d files.", files);
+                SetWindowTextW(GetDlgItem(hwnd, IDC_STATUS), msg);
+            }
+            SendMessageW(GetParent(hwnd), PSM_SETCURSEL, (WPARAM)kPageDone, 0);
+            return TRUE;
+        }
+    }
+    return FALSE;
+}
+
+void RunInstallWizard() {
+    INITCOMMONCONTROLSEX icc = {sizeof(icc), ICC_WIN95_CLASSES |
+                                              ICC_STANDARD_CLASSES |
+                                              ICC_PROGRESS_CLASS};
+    InitCommonControlsEx(&icc);
+
+    HINSTANCE hInst = GetModuleHandleW(NULL);
+    static const int ids[] = {IDD_WELCOME,    IDD_LICENSE, IDD_LOCATION,
+                              IDD_PATH,       IDD_READY,   IDD_PROGRESS,
+                              IDD_DONE};
+    const int count = sizeof(ids) / sizeof(ids[0]);
+
+    HPROPSHEETPAGE pages[7];
+    PROPSHEETPAGEW psp = {0};
+    psp.dwSize = sizeof(psp);
+    psp.dwFlags = PSP_DEFAULT;
+    psp.hInstance = hInst;
+    for (int i = 0; i < count; ++i) {
+        psp.pszTemplate = MAKEINTRESOURCEW(ids[i]);
+        psp.pfnDlgProc = PageProc;
+        psp.lParam = (LPARAM)i;
+        pages[i] = CreatePropertySheetPageW(&psp);
+    }
+
+    PROPSHEETHEADERW psh = {0};
+    psh.dwSize = sizeof(psh);
+    psh.dwFlags = PSH_WIZARD97 | PSH_USEHICON;
+    psh.hInstance = hInst;
+    psh.hIcon = LoadIconW(hInst, MAKEINTRESOURCEW(IDI_APP));
+    psh.pszCaption = L"JTS GO 2.1.0 Setup";
+    psh.nPages = count;
+    psh.phpage = pages;
+
+    PropertySheetW(&psh);
+}
+
+void RunUninstallGui() {
+    int answer = MessageBoxW(
+        NULL,
+        L"Are you sure you want to remove JTS GO and the JTS IDE from this "
+        L"computer?\r\n\r\nThis will delete the installed files and remove "
+        L"the PATH entry.",
+        kAppName, MB_YESNO | MB_ICONQUESTION | MB_DEFBUTTON2);
+    if (answer == IDYES) {
+        HCURSOR prev = SetCursor(LoadCursorW(NULL, IDC_WAIT));
+        Uninstall();
+        SetCursor(prev);
+        MessageBoxW(NULL, L"JTS GO has been uninstalled.", kAppName,
+                    MB_OK | MB_ICONINFORMATION);
+    }
 }
 
 }  // namespace
@@ -550,17 +990,27 @@ int wmain(int argc, wchar_t** argv) {
         else if (low == L"--help" || low == L"-h" || low == L"-?") help = true;
     }
 
-    if (version) {
-        OutputLine(std::wstring(kAppName) + L" " + kVersion);
+    if (version || help) {
+        if (version) OutputLine(std::wstring(kAppName) + L" " + kVersion);
+        if (help) PrintHelp();
         return 0;
     }
-    if (help) {
-        PrintHelp();
+
+    if (uninstall) {
+        std::wstring loc = ReadInstallLocationFromRegistry();
+        g_installDir = loc.empty() ? GetDefaultInstallDir() : loc;
+        if (silent) return Uninstall();
+        RunUninstallGui();
         return 0;
     }
-    if (uninstall) return Uninstall(silent);
-    return Install(silent);
+
+    // Install
+    if (silent) {
+        g_installDir = GetDefaultInstallDir();
+        EnsureNetFramework(true);
+        return RunInstall(true);
+    }
+    g_installDir = GetDefaultInstallDir();
+    RunInstallWizard();
+    return 0;
 }
-
-
-

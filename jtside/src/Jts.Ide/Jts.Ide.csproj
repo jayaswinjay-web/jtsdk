@@ -9,12 +9,12 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <AssemblyName>Jts.Ide</AssemblyName>
     <RootNamespace>JtsIde</RootNamespace>
-    <ApplicationIcon>..\..\..\assets\installer.ico</ApplicationIcon>
+    <ApplicationIcon>..\..\..\assets\ide.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="AvalonEdit" Version="6.3.1.120" />
-    <Resource Include="..\..\..\assets\installer.ico" />
+    <Resource Include="..\..\..\assets\ide.ico" />
   </ItemGroup>
 
   <ItemGroup>

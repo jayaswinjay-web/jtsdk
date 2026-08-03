@@ -553,7 +553,7 @@ public partial class MainWindow : Window
                 if (r == MessageBoxResult.Yes && !EnsureSaved(doc)) { e.Cancel = true; return; }
             }
         }
-        _repl.Stop();
+        _repl?.Stop();
         base.OnClosing(e);
     }
 }

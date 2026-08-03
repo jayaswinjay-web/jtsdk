@@ -5,7 +5,7 @@
         Width="1200" Height="780"
         WindowStartupLocation="CenterScreen"
         Background="{StaticResource Bg.Window}"
-        Icon="pack://application:,,,/installer.ico">
+        Icon="pack://application:,,,/ide.ico">
   <DockPanel>
 
     <!-- Menu -->
