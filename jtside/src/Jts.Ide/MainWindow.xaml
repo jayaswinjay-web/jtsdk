@@ -129,10 +129,23 @@
 
         <TabControl Grid.Row="2" Name="ConsoleTabs">
           <TabItem Header="Output">
-            <TextBox Name="OutputBox" IsReadOnly="True"
-                     FontFamily="Consolas" FontSize="12"
-                     VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"
-                     TextWrapping="NoWrap" BorderThickness="0"/>
+            <Grid>
+              <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+              </Grid.RowDefinitions>
+              <TextBox Grid.Row="0" Name="OutputBox" IsReadOnly="True"
+                       FontFamily="Consolas" FontSize="12"
+                       VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"
+                       TextWrapping="NoWrap" BorderThickness="0"/>
+              <DockPanel Grid.Row="1" Margin="0,1,0,0">
+                <TextBlock DockPanel.Dock="Left" Text="> " FontFamily="Consolas" FontSize="12"
+                           Foreground="{StaticResource Fg.Muted}" VerticalAlignment="Center"/>
+                <TextBox Name="RunInputBox" Height="24" FontFamily="Consolas" FontSize="12"
+                         VerticalContentAlignment="Center" KeyDown="OnRunInputKeyDown"
+                         IsEnabled="False"/>
+              </DockPanel>
+            </Grid>
           </TabItem>
           <TabItem Header="Errors">
             <ListView Name="ErrorList" FontFamily="Consolas" FontSize="12"

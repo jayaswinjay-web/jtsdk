@@ -45,6 +45,7 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+        SetRunInputEnabled(false);
 
         Title = "JTS IDE " + LanguageInfo.Version;
         Services.NativeTheme.EnableDarkTitleBar(this);
@@ -53,12 +54,12 @@ public partial class MainWindow : Window
         _repl = new ReplSession(Dispatcher);
         _repl.OutputLine += line =>
         {
-            ReplOutputBox.AppendText(line + Environment.NewLine);
+            ReplOutputBox.AppendText(line);
             ReplOutputBox.ScrollToEnd();
         };
         _repl.ErrorLine += line =>
         {
-            ReplOutputBox.AppendText(line + Environment.NewLine);
+            ReplOutputBox.AppendText(line);
             ReplOutputBox.ScrollToEnd();
         };
         _repl.Exited += () =>
@@ -69,7 +70,7 @@ public partial class MainWindow : Window
             StatusText.Text = "Console exited";
         };
 
-        _runner.OutputLine += line => AppendOutput(line, isError: false);
+        _runner.OutputLine += line => AppendRaw(line);
         _runner.ErrorLine += line =>
         {
             _stderrLines.Add(line);
@@ -80,6 +81,7 @@ public partial class MainWindow : Window
             AppendOutput("", isError: false);
             AppendOutput($"[process exited with code {code}]", isError: false);
             StatusText.Text = $"Process exited with code {code}";
+            SetRunInputEnabled(false);
             ShowErrors(_stderrLines);
         };
         _runner.LaunchFailed += msg =>
@@ -242,7 +244,34 @@ public partial class MainWindow : Window
         ClearConsole();
         AppendOutput($"> {_toolchain.JtsExe} \"{doc.FilePath}\"", isError: false);
         StatusText.Text = "Running " + Path.GetFileName(doc.FilePath) + " ...";
+        SetRunInputEnabled(true);
         _runner.Run(_toolchain.JtsExe, "\"" + doc.FilePath + "\"", Path.GetDirectoryName(doc.FilePath)!);
+    }
+
+    private void SetRunInputEnabled(bool enabled)
+    {
+        RunInputBox.IsEnabled = enabled;
+        RunInputBox.Foreground = enabled
+            ? new SolidColorBrush(Color.FromRgb(0xD4, 0xD4, 0xD4))
+            : new SolidColorBrush(Color.FromRgb(0x85, 0x85, 0x85));
+        RunInputBox.Text = enabled
+            ? ""
+            : "Run a program, or open the Console tab, to type input";
+    }
+
+    private void OnRunInputKeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.Key != Key.Enter) return;
+        e.Handled = true;
+        if (!_runner.IsRunning) return;
+        var text = RunInputBox.Text.TrimEnd('\r', '\n');
+        RunInputBox.Clear();
+        if (OutputBox.Text.Length > 0 && !OutputBox.Text.EndsWith("\n", StringComparison.Ordinal))
+        {
+            AppendRaw(Environment.NewLine);
+        }
+        AppendOutput("> " + text, isError: false);
+        _runner.SendLine(text);
     }
 
     private void BuildProgram()
@@ -315,6 +344,13 @@ public partial class MainWindow : Window
     }
 
     // ---------- console ----------
+
+    private void AppendRaw(string text)
+    {
+        if (text.Length == 0) return;
+        OutputBox.AppendText(text);
+        OutputBox.ScrollToEnd();
+    }
 
     private void AppendOutput(string line, bool isError)
     {

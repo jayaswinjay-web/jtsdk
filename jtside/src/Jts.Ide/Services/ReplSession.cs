@@ -45,10 +45,7 @@ public class ReplSession
             _stdin = p.StandardInput;
             _exited = false;
 
-            p.OutputDataReceived += (_, e) =>
-            {
-                if (e.Data != null) Post(() => OutputLine?.Invoke(e.Data));
-            };
+            _ = Pump(p.StandardOutput, s => Post(() => OutputLine?.Invoke(s)));
             p.ErrorDataReceived += (_, e) =>
             {
                 if (e.Data != null) Post(() => ErrorLine?.Invoke(e.Data));
@@ -61,13 +58,30 @@ public class ReplSession
                 _stdin = null;
                 Post(() => Exited?.Invoke());
             };
-            p.BeginOutputReadLine();
             p.BeginErrorReadLine();
             return true;
         }
         catch
         {
             return false;
+        }
+    }
+
+    private static async Task Pump(StreamReader reader, Action<string> deliver)
+    {
+        var buf = new char[4096];
+        try
+        {
+            while (true)
+            {
+                int n = await reader.ReadAsync(buf, 0, buf.Length).ConfigureAwait(false);
+                if (n == 0) break;
+                deliver(new string(buf, 0, n));
+            }
+        }
+        catch
+        {
+            // pipe closed by process exit or Stop()
         }
     }
 
