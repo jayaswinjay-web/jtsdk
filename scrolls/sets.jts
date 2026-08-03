@@ -1,0 +1,100 @@
+# sets scroll - set helpers (wraps builtin set ops)
+func from_list(lst)
+    return set(lst)
+end
+
+func from_string(s)
+    return set(s)
+end
+
+func singleton(item)
+    return set([item])
+end
+
+func union(a, b)
+    return set_union(a, b)
+end
+
+func intersection(a, b)
+    return set_intersection(a, b)
+end
+
+func difference(a, b)
+    return set_difference(a, b)
+end
+
+func symmetric_difference(a, b)
+    u = set_union(a, b)
+    i = set_intersection(a, b)
+    return set_difference(u, i)
+end
+
+func has_item(s, item)
+    return set_contains(s, item)
+end
+
+func add_item(s, item)
+    set_add(s, item)
+    return s
+end
+
+func remove_item(s, item)
+    set_remove(s, item)
+    return s
+end
+
+func size(s)
+    return len(s)
+end
+
+func is_empty(s)
+    return len(s) == 0
+end
+
+func is_subset(a, b)
+    return len(set_intersection(a, b)) == len(a)
+end
+
+func is_superset(a, b)
+    return is_subset(b, a)
+end
+
+func is_disjoint(a, b)
+    return len(set_intersection(a, b)) == 0
+end
+
+func equals(a, b)
+    return len(a) == len(b) and len(set_difference(a, b)) == 0
+end
+
+func has_any(s, lst)
+    for item in lst
+        if set_contains(s, item)
+            return true
+        end
+    end
+    return false
+end
+
+func has_all(s, lst)
+    for item in lst
+        if not set_contains(s, item)
+            return false
+        end
+    end
+    return true
+end
+
+func add_all(s, lst)
+    for item in lst
+        set_add(s, item)
+    end
+    return s
+end
+
+func remove_all(s, lst)
+    for item in lst
+        set_remove(s, item)
+    end
+    return s
+end

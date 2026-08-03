@@ -1,0 +1,357 @@
+# text scroll - text and string utilities
+alpha = "abcdefghijklmnopqrstuvwxyz"
+
+func is_blank(s)
+    return s.trim() == ""
+end
+
+func count_substring(s, sub)
+    n = 0
+    if sub == ""
+        return 0
+    end
+    i = 0
+    while i <= len(s) - len(sub)
+        if s.substring(i, i + len(sub)) == sub
+            n = n + 1
+            i = i + len(sub)
+        else
+            i = i + 1
+        end
+    end
+    return n
+end
+
+func extract_digits(s)
+    out = ""
+    for c in s
+        if c.is_digit()
+            out = out + c
+        end
+    end
+    return out
+end
+
+func split_words(s)
+    out = []
+    cur = ""
+    i = 0
+    while i < len(s)
+        c = s[i]
+        if not c.is_alnum()
+            if cur != ""
+                out.append(cur)
+                cur = ""
+            end
+            i = i + 1
+            continue
+        end
+        if c.is_upper() and len(cur) > 0 and (cur[len(cur) - 1].is_lower() or cur[len(cur) - 1].is_digit())
+            out.append(cur)
+            cur = ""
+        end
+        cur = cur + c
+        i = i + 1
+    end
+    if cur != ""
+        out.append(cur)
+    end
+    return out
+end
+
+func slugify(s)
+    out = ""
+    for c in s.lower()
+        if c.is_alnum()
+            out = out + c
+        else
+            if len(out) > 0 and not out.ends_with("-")
+                out = out + "-"
+            end
+        end
+    end
+    if out.ends_with("-")
+        out = out.substring(0, len(out) - 1)
+    end
+    return out
+end
+
+func snake_case(s)
+    words = split_words(s)
+    out = []
+    for w in words
+        out.append(w.lower())
+    end
+    return "_".join(out)
+end
+
+func kebab_case(s)
+    words = split_words(s)
+    out = []
+    for w in words
+        out.append(w.lower())
+    end
+    return "-".join(out)
+end
+
+func camel_case(s)
+    words = split_words(s)
+    out = ""
+    first = true
+    for w in words
+        word = w.lower()
+        if first
+            out = out + word
+            first = false
+        else
+            out = out + word[0].upper() + word.substring(1, len(word))
+        end
+    end
+    return out
+end
+
+func pascal_case(s)
+    words = split_words(s)
+    out = ""
+    for w in words
+        word = w.lower()
+        out = out + word[0].upper() + word.substring(1, len(word))
+    end
+    return out
+end
+
+func mask(s, keep)
+    n = len(s)
+    if n <= keep
+        return s
+    end
+    out = ""
+    i = 0
+    while i < n - keep
+        out = out + "*"
+        i = i + 1
+    end
+    out = out + s.substring(n - keep, n)
+    return out
+end
+
+func abbreviate(s, n)
+    words = s.split(" ")
+    if len(words) <= n
+        return s
+    end
+    out = []
+    i = 0
+    while i < n
+        out.append(words[i])
+        i = i + 1
+    end
+    return " ".join(out) + "..."
+end
+
+func truncate_words(s, n)
+    words = s.split(" ")
+    if len(words) <= n
+        return s
+    end
+    out = []
+    i = 0
+    while i < n
+        out.append(words[i])
+        i = i + 1
+    end
+    return " ".join(out) + "..."
+end
+
+func pluralize(word, count)
+    if count == 1
+        return word
+    end
+    if word.ends_with("s") or word.ends_with("x") or word.ends_with("z") or word.ends_with("ch") or word.ends_with("sh")
+        return word + "es"
+    end
+    if word.ends_with("y") and len(word) > 1 and not "aeiou".contains(word[len(word) - 2])
+        return word.substring(0, len(word) - 1) + "ies"
+    end
+    return word + "s"
+end
+
+func indent(s, spaces)
+    pad = ""
+    i = 0
+    while i < spaces
+        pad = pad + " "
+        i = i + 1
+    end
+    lines = s.splitlines()
+    out = []
+    for ln in lines
+        out.append(pad + ln)
+    end
+    return "\n".join(out)
+end
+
+func normalize_spaces(s)
+    out = ""
+    prev_space = false
+    for c in s
+        if c == " "
+            if not prev_space and len(out) > 0
+                out = out + " "
+            end
+            prev_space = true
+        else
+            out = out + c
+            prev_space = false
+        end
+    end
+    return out.trim()
+end
+
+func initials(s)
+    words = s.split(" ")
+    out = ""
+    for w in words
+        if w != ""
+            out = out + w[0].upper()
+        end
+    end
+    return out
+end
+
+func rot13(s)
+    out = ""
+    for c in s
+        if c.is_alpha()
+            is_up = c.is_upper()
+            lo = c.lower()
+            idx = alpha.find(lo)
+            shifted = alpha[(idx + 13) % 26]
+            if is_up
+                out = out + shifted.upper()
+            else
+                out = out + shifted
+            end
+        else
+            out = out + c
+        end
+    end
+    return out
+end
+
+func caesar(s, shift)
+    shift = shift % 26
+    if shift < 0
+        shift = shift + 26
+    end
+    out = ""
+    for c in s
+        if c.is_alpha()
+            is_up = c.is_upper()
+            lo = c.lower()
+            idx = alpha.find(lo)
+            shifted = alpha[(idx + shift) % 26]
+            if is_up
+                out = out + shifted.upper()
+            else
+                out = out + shifted
+            end
+        else
+            out = out + c
+        end
+    end
+    return out
+end
+
+func sort_chars(s)
+    arr = []
+    for c in s
+        arr.append(c)
+    end
+    i = 1
+    while i < len(arr)
+        j = i
+        while j > 0 and arr[j] < arr[j - 1]
+            t = arr[j]
+            arr[j] = arr[j - 1]
+            arr[j - 1] = t
+            j = j - 1
+        end
+        i = i + 1
+    end
+    return "".join(arr)
+end
+
+func is_anagram(a, b)
+    return sort_chars(a.lower()) == sort_chars(b.lower())
+end
+
+func is_isogram(s)
+    seen = []
+    for c in s
+        if not c.is_alpha()
+            continue
+        end
+        ch = c.lower()
+        has = false
+        for x in seen
+            if x == ch
+                has = true
+            end
+        end
+        if has
+            return false
+        end
+        seen.append(ch)
+    end
+    return true
+end
+
+func shuffle_chars(s)
+    arr = []
+    for c in s
+        arr.append(c)
+    end
+    shuffle(arr)
+    return "".join(arr)
+end
+
+func reverse_words(s)
+    words = s.split(" ")
+    out = []
+    i = len(words) - 1
+    while i >= 0
+        out.append(words[i])
+        i = i - 1
+    end
+    return " ".join(out)
+end
+
+func contains_any(s, chars)
+    for c in chars
+        if s.contains(c)
+            return true
+        end
+    end
+    return false
+end
+
+func count_vowels(s)
+    n = 0
+    for c in s.lower()
+        if "aeiou".contains(c)
+            n = n + 1
+        end
+    end
+    return n
+end
+
+func count_consonants(s)
+    n = 0
+    for c in s.lower()
+        if c.is_alpha() and not "aeiou".contains(c)
+            n = n + 1
+        end
+    end
+    return n
+end
