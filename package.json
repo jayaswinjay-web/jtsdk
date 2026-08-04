@@ -1,7 +1,7 @@
 {
   "name": "@jaytechsolutions/jts-go",
-  "version": "2.1.8",
-  "description": "JTS GO - The easiest programming language to learn. v2.1.8 with fixed logo rendering in book.",
+  "version": "2.1.9",
+  "description": "JTS GO - The easiest programming language to learn. v2.1.9 with book download, cross-platform install support.",
   "keywords": [
     "programming language",
     "jts",
