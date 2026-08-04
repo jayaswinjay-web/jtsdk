@@ -1,0 +1,480 @@
+<h1 id="ch06">6. Variables and Scope</h1>
+
+<h2>6.1 Creating Variables</h2>
+<p>Variables are created simply by assigning a value with a single <code>=</code>. No keyword such as
+<code>var</code>, <code>let</code>, or <code>int</code> is required, although <code>var</code> and
+<code>list</code> exist as keywords for specific contexts.</p>
+<pre><code>name = "Alice"          # a string variable
+age = 25                # a number variable
+price = 9.99            # a float variable
+is_active = true        # a boolean variable
+result = nil            # a nil variable
+</code></pre>
+
+<h2>6.2 Reassignment</h2>
+<p>A variable can be assigned a new value at any time, and the new value may have a different type:</p>
+<pre><code>x = 10
+print(type(x))      # number
+x = "ten"
+print(type(x))      # string
+x = [1, 2]
+print(type(x))      # list
+</code></pre>
+
+<h2>6.3 Compound Assignment Operators</h2>
+<p>JTS GO supports the classic compound assignment operators. They update a variable in place:</p>
+<pre><code>a = 10
+a += 5     # a = a + 5
+print(a)   # 15
+a -= 3     # a = a - 3
+print(a)   # 12
+a *= 2     # a = a * 2
+print(a)   # 24
+a /= 4     # a = a / 4
+print(a)   # 6
+</code></pre>
+<p>The full set includes <code>+=</code>, <code>-=</code>, <code>*=</code>, <code>/=</code>, <code>//=</code>,
+<code>%=</code>, <code>**=</code>, and the bitwise forms <code>&amp;=</code>, <code>|=</code>, <code>^=</code>,
+<code>&lt;&lt;=</code>, and <code>&gt;&gt;=</code> (Chapter 7).</p>
+
+<h2>6.4 Global Scope</h2>
+<p>Variables created at the top level of a program are global: they are visible everywhere after their definition,
+including inside functions.</p>
+<pre><code>greeting = "Hello"
+
+func greet(name)
+    print(greeting + ", " + name + "!")
+end
+
+greet("Alice")       # Hello, Alice!
+</code></pre>
+
+<h2>6.5 Local Scope</h2>
+<p>Variables created inside a function are local to that function. They do not exist outside it, and they do not
+leak between calls. A local variable can share a name with a global variable; inside the function, the local wins.</p>
+<pre><code>x = 10                     # a global variable
+
+func modify()
+    x = 20                  # creates a NEW local variable x
+    print("Inside: " + x)   # Inside: 20
+end
+
+modify()
+print("Outside: " + x)      # Outside: 10
+</code></pre>
+<pre class="output"><code>Inside: 20
+Outside: 10
+</code></pre>
+
+<div class="tip"><b>Important:</b> assigning to a name inside a function creates a <b>local</b> variable; it does
+not modify a global of the same name. This is a deliberate design choice that keeps functions predictable.
+(If you need shared mutable state, use a list or dict that both scopes can read and mutate.)</div>
+
+<h2>6.6 Variables Created Inside Blocks</h2>
+<p>Variables created inside an <code>if</code>, <code>while</code>, or <code>for</code> block behave like local
+variables of the enclosing scope. In particular, a loop variable assigned inside a loop is still visible after the
+loop:</p>
+<pre><code>for i in 0 to 5
+    last = i
+end
+print(last)      # 4  (visible after the loop)
+</code></pre>
+
+<div class="note"><b>Implementation note:</b> the JTS compiler performs a two-pass analysis of function bodies and
+<em>hoists</em> loop-assigned variables so that every local is declared before it is used. This guarantees that
+assignments inside loops — including implicitly-created loop counters — are always safe and correctly scoped.
+This fix (introduced in Version 2.1) eliminated a whole class of subtle bugs where variables assigned for the
+first time inside a loop could misbehave.</div>
+
+<h2>6.7 Deleting Variables with <code>del</code></h2>
+<p>The <code>del</code> statement removes a variable, a list element, or a dict key:</p>
+<pre><code>x = 10
+del x                      # x no longer exists
+
+lst = [1, 2, 3, 4]
+del lst[1]                 # remove the element at index 1
+print(lst)                 # [1, 3, 4]
+
+dct = {"a": 1, "b": 2, "c": 3}
+del dct["b"]               # remove the key "b"
+print(dct)                 # {c: 3, a: 1}
+print(len(dct))            # 2
+</code></pre>
+<pre class="output"><code>[1, 3, 4]
+{c: 3, a: 1}
+2
+</code></pre>
+
+<h2>6.8 Constants by Convention</h2>
+<p>JTS GO has no built-in constant mechanism; all variables can be reassigned. By convention, programs written in
+the JTS community use uppercase names for values that are meant to stay fixed:</p>
+<pre><code>PI = 3.14159
+APP_NAME = "JTS GO"
+</code></pre>
+
+<h1 id="ch07">7. Operators</h1>
+
+<h2>7.1 Arithmetic Operators</h2>
+<table>
+<tr><th>Operator</th><th>Meaning</th><th>Example</th><th>Result</th></tr>
+<tr><td><code>+</code></td><td>Addition / concatenation</td><td><code>10 + 3</code></td><td><code>13</code></td></tr>
+<tr><td><code>-</code></td><td>Subtraction</td><td><code>10 - 3</code></td><td><code>7</code></td></tr>
+<tr><td><code>*</code></td><td>Multiplication</td><td><code>10 * 3</code></td><td><code>30</code></td></tr>
+<tr><td><code>/</code></td><td>Division</td><td><code>10 / 3</code></td><td><code>3.33333</code></td></tr>
+<tr><td><code>%</code></td><td>Modulo (remainder)</td><td><code>10 % 3</code></td><td><code>1</code></td></tr>
+<tr><td><code>//</code></td><td>Floor division</td><td><code>10 // 3</code></td><td><code>3</code></td></tr>
+<tr><td><code>**</code></td><td>Exponentiation</td><td><code>2 ** 10</code></td><td><code>1024</code></td></tr>
+<tr><td><code>-x</code></td><td>Unary negation</td><td><code>-5</code></td><td><code>-5</code></td></tr>
+</table>
+
+<h3>Modulo with negative numbers</h3>
+<p>The modulo operator returns a result with the sign of the dividend. Some algorithms want a non-negative result;
+the <code>dates</code> scroll ships a <code>mod</code> helper for that purpose (Chapter 34).</p>
+<pre><code>print(10 % 3)      # 1
+print(-10 % 3)     # -1
+print(10 % -3)     # 1
+</code></pre>
+
+<h2>7.2 Comparison Operators</h2>
+<p>Comparisons always produce a boolean (<code>true</code> or <code>false</code>):</p>
+<table>
+<tr><th>Operator</th><th>Meaning</th><th>Example</th><th>Result</th></tr>
+<tr><td><code>==</code></td><td>Equal to</td><td><code>5 == 5</code></td><td><code>true</code></td></tr>
+<tr><td><code>!=</code></td><td>Not equal to</td><td><code>5 != 3</code></td><td><code>true</code></td></tr>
+<tr><td><code>&gt;</code></td><td>Greater than</td><td><code>5 &gt; 3</code></td><td><code>true</code></td></tr>
+<tr><td><code>&lt;</code></td><td>Less than</td><td><code>5 &lt; 3</code></td><td><code>false</code></td></tr>
+<tr><td><code>&gt;=</code></td><td>Greater than or equal</td><td><code>5 &gt;= 5</code></td><td><code>true</code></td></tr>
+<tr><td><code>&lt;=</code></td><td>Less than or equal</td><td><code>5 &lt;= 3</code></td><td><code>false</code></td></tr>
+</table>
+<p>Strings compare lexicographically (alphabetically):</p>
+<pre><code>print("apple" &lt; "banana")    # true
+print("a" &lt; "A")             # false  (uppercase sorts first)
+</code></pre>
+
+<h2>7.3 Logical Operators</h2>
+<table>
+<tr><th>Operator</th><th>Meaning</th><th>Example</th><th>Result</th></tr>
+<tr><td><code>and</code></td><td>True if both sides are truthy</td><td><code>true and false</code></td><td><code>false</code></td></tr>
+<tr><td><code>or</code></td><td>True if either side is truthy</td><td><code>true or false</code></td><td><code>true</code></td></tr>
+<tr><td><code>not</code></td><td>Inverts a boolean</td><td><code>not true</code></td><td><code>false</code></td></tr>
+</table>
+<pre><code>age = 25
+has_id = true
+
+if age >= 18 and has_id
+    print("Entry allowed")
+end
+
+if age < 13 or age > 65
+    print("Discount applies")
+end
+
+is_raining = false
+if not is_raining
+    print("No umbrella needed")
+end
+</code></pre>
+
+<h2>7.4 Membership: <code>in</code></h2>
+<p>The <code>in</code> operator tests membership. It works on strings (is a character present), lists, dicts (is a
+key present), and sets:</p>
+<pre><code>print("e" in "hello")        # true
+print("z" in "hello")        # false
+print(2 in [1, 2, 3])        # true
+print("b" in {"a": 1, "b": 2})   # true  (key membership)
+print(9 in {1, 2, 3})        # false
+</code></pre>
+
+<h2>7.5 Identity: <code>is</code></h2>
+<p>The <code>is</code> operator compares values for identity. For simple values (numbers, strings, booleans) it
+behaves like equality; it is also used with <code>nil</code>:</p>
+<pre><code>print(1 is 1)        # true
+print(1 is 2)        # false
+print("a" is "a")    # true
+print(nil is nil)    # true
+</code></pre>
+
+<h2>7.6 Bitwise Operators</h2>
+<p>JTS GO includes the full set of bitwise operators from C and Java. They operate on the binary representations of
+integers.</p>
+<pre><code>print(5 &amp; 3)      # 1    (bitwise AND: 101 & 011 = 001)
+print(5 | 3)      # 7    (bitwise OR:  101 | 011 = 111)
+print(5 ^ 3)      # 6    (bitwise XOR: 101 ^ 011 = 110)
+print(~5)         # -6   (bitwise NOT: two's complement)
+print(1 &lt;&lt; 4)     # 16   (left shift)
+print(256 &gt;&gt; 2)  # 64   (right shift)
+</code></pre>
+<pre class="output"><code>1
+7
+6
+-6
+16
+64
+</code></pre>
+<p>Compound bitwise assignments update a variable in place:</p>
+<pre><code>a = 6
+a |= 1       # 7
+b = 7
+b &amp;= 3       # 3
+c = 5
+c ^= 3       # 6
+d = 2
+d &lt;&lt;= 3      # 16
+e = 64
+e &gt;&gt;= 2      # 16
+print(a, b, c, d, e)   # [7, 3, 6, 16, 16]  (multi-argument print)
+</code></pre>
+
+<div class="tip"><b>Why bitwise operators matter:</b> the <code>numbers</code> scroll uses bitwise tests for
+<code>is_power_of_two</code> (a number is a power of two exactly when <code>n &amp; (n - 1) == 0</code>), and
+bit shifts are the fastest way to multiply or divide by powers of two.</div>
+
+<h2>7.7 Operator Precedence</h2>
+<p>From highest to lowest binding:</p>
+<table>
+<tr><th>Precedence</th><th>Operators</th></tr>
+<tr><td>1 (highest)</td><td><code>**</code>, unary <code>-</code>, <code>~</code>, <code>not</code></td></tr>
+<tr><td>2</td><td><code>*</code> <code>/</code> <code>//</code> <code>%</code></td></tr>
+<tr><td>3</td><td><code>+</code> <code>-</code></td></tr>
+<tr><td>4</td><td><code>&lt;&lt;</code> <code>&gt;&gt;</code></td></tr>
+<tr><td>5</td><td><code>&amp;</code></td></tr>
+<tr><td>6</td><td><code>^</code></td></tr>
+<tr><td>7</td><td><code>|</code></td></tr>
+<tr><td>8</td><td><code>&lt;</code> <code>&lt;=</code> <code>&gt;</code> <code>&gt;=</code></td></tr>
+<tr><td>9</td><td><code>==</code> <code>!=</code> <code>is</code> <code>in</code></td></tr>
+<tr><td>10</td><td><code>and</code></td></tr>
+<tr><td>11 (lowest)</td><td><code>or</code></td></tr>
+</table>
+<p>When in doubt, use parentheses — they are cheap and make intent explicit:</p>
+<pre><code>total = (price + tax) * quantity
+</code></pre>
+
+<h1 id="ch08">8. Control Flow</h1>
+
+<h2>8.1 The <code>if</code> Family</h2>
+
+<h3>Basic if</h3>
+<pre><code>temperature = 75
+if temperature > 80
+    print("It's hot outside!")
+end
+</code></pre>
+<p>Because the condition is false, nothing prints. The body of an <code>if</code> runs only when the condition is
+truthy (Chapter 5.8).</p>
+
+<h3>if / else</h3>
+<pre><code>temperature = 75
+if temperature > 80
+    print("It's hot outside!")
+else
+    print("It's nice outside!")
+end
+</code></pre>
+<pre class="output"><code>It's nice outside!
+</code></pre>
+
+<h3>Chained conditions with <code>else if</code> / <code>elif</code></h3>
+<p>Both <code>else if</code> and <code>elif</code> are accepted. Conditions are evaluated top to bottom; the first
+true branch runs and the rest are skipped.</p>
+<pre><code>score = 85
+
+if score >= 90
+    print("Grade: A")
+elif score >= 80
+    print("Grade: B")
+elif score >= 70
+    print("Grade: C")
+elif score >= 60
+    print("Grade: D")
+else
+    print("Grade: F")
+end
+</code></pre>
+<pre class="output"><code>Grade: B
+</code></pre>
+
+<h3>Nested if</h3>
+<pre><code>age = 25
+has_ticket = true
+
+if age >= 18
+    if has_ticket
+        print("Entry allowed")
+    else
+        print("Need a ticket")
+    end
+else
+    print("Must be 18 or older")
+end
+</code></pre>
+
+<h2>8.2 The <code>while</code> Loop</h2>
+<p>A <code>while</code> loop repeats its body as long as the condition is truthy. Make sure the condition eventually
+becomes false, or the loop never ends.</p>
+<pre><code>count = 0
+while count < 5
+    print(count)
+    count = count + 1
+end
+</code></pre>
+<pre class="output"><code>0
+1
+2
+3
+4
+</code></pre>
+
+<h3>Countdown</h3>
+<pre><code>n = 5
+while n > 0
+    print(n)
+    n = n - 1
+end
+print("Liftoff!")
+</code></pre>
+<pre class="output"><code>5
+4
+3
+2
+1
+Liftoff!
+</code></pre>
+
+<div class="warn"><b>Infinite loops:</b> the body below never ends — the condition <code>true</code> never becomes
+false. Do not run it without a way to interrupt your program.
+<pre><code># while true
+#     print("stuck!")
+# end
+</code></pre></div>
+
+<h2>8.3 The <code>for</code> Loop</h2>
+<p>The <code>for</code> loop iterates over a numeric range. The syntax is:</p>
+<pre><code>for VARIABLE in START to END
+    ...
+end
+</code></pre>
+<ul>
+<li><code>START</code> is inclusive — the loop begins there.</li>
+<li><code>END</code> is <b>exclusive</b> — the loop stops before it.</li>
+<li>To loop from 0 to <code>n</code> inclusive, write <code>for i in 0 to n + 1</code>.</li>
+</ul>
+<pre><code>for i in 0 to 5
+    print(i)
+end
+</code></pre>
+<pre class="output"><code>0
+1
+2
+3
+4
+</code></pre>
+
+<h3>Multiplication table</h3>
+<pre><code>for i in 1 to 11
+    print("5 x " + i + " = " + (5 * i))
+end
+</code></pre>
+<pre class="output"><code>5 x 1 = 5
+5 x 2 = 10
+5 x 3 = 15
+5 x 4 = 20
+5 x 5 = 25
+5 x 6 = 30
+5 x 7 = 35
+5 x 8 = 40
+5 x 9 = 45
+5 x 10 = 50
+</code></pre>
+
+<h3>Summing a range</h3>
+<pre><code>total = 0
+for i in 1 to 101
+    total = total + i
+end
+print("Sum of 1 to 100: " + total)
+</code></pre>
+<pre class="output"><code>Sum of 1 to 100: 5050
+</code></pre>
+
+<h3>Iterating over lists, dicts, and sets</h3>
+<p>The <code>for ... in</code> form also iterates over collections (Chapter 11).</p>
+<pre><code>fruits = ["apple", "banana", "cherry"]
+for fruit in fruits
+    print(fruit)
+end
+</code></pre>
+<pre class="output"><code>apple
+banana
+cherry
+</code></pre>
+
+<h3>The <code>range()</code> function</h3>
+<p>The built-in <code>range()</code> produces a list of numbers and is a convenient alternative to
+<code>for ... to</code>:</p>
+<pre><code>print(range(5))        # [0, 1, 2, 3, 4]
+print(range(2, 6))     # [2, 3, 4, 5]
+for x in range(3)
+    print("x = " + x)
+end
+</code></pre>
+
+<h2>8.4 <code>break</code> and <code>continue</code></h2>
+<ul>
+<li><code>break</code> immediately exits the innermost loop.</li>
+<li><code>continue</code> skips the rest of the current iteration and moves to the next one.</li>
+</ul>
+<pre><code>i = 0
+while i < 10
+    i = i + 1
+    if i == 3
+        continue          # skip printing 3
+    end
+    if i == 7
+        break             # stop at 7
+    end
+    print(i)
+end
+</code></pre>
+<pre class="output"><code>1
+2
+4
+5
+6
+</code></pre>
+
+<h2>8.5 Combining Control Flow</h2>
+<p>All constructs nest freely. This example finds even numbers and categorizes them:</p>
+<pre><code>for i in 1 to 21
+    if i % 2 == 0
+        if i <= 10
+            print(i + " is a small even number")
+        else
+            print(i + " is a large even number")
+        end
+    end
+end
+</code></pre>
+
+<h2>8.6 <code>assert</code></h2>
+<p><code>assert</code> checks that a condition is true; if it is false, the program stops with an error. An optional
+message can follow the condition after a comma.</p>
+<pre><code>assert 1 + 1 == 2
+assert 5 > 3, "five should be bigger than three"
+print("asserts ok")
+</code></pre>
+<pre class="output"><code>asserts ok
+</code></pre>
+<p>Asserts are ideal for validating assumptions and for lightweight testing (Chapter 42).</p>
+
+<h2>8.7 Summary of Statement Forms</h2>
+<table>
+<tr><th>Construct</th><th>Syntax</th><th>Terminator</th></tr>
+<tr><td>If</td><td><code>if condition</code></td><td><code>end</code></td></tr>
+<tr><td>Else if</td><td><code>elif condition</code></td><td><code>end</code></td></tr>
+<tr><td>Else</td><td><code>else</code></td><td><code>end</code></td></tr>
+<tr><td>While</td><td><code>while condition</code></td><td><code>end</code></td></tr>
+<tr><td>For over range</td><td><code>for i in start to end</code></td><td><code>end</code></td></tr>
+<tr><td>For over collection</td><td><code>for x in collection</code></td><td><code>end</code></td></tr>
+<tr><td>Delete</td><td><code>del name</code></td><td>—</td></tr>
+<tr><td>Assert</td><td><code>assert condition, message</code></td><td>—</td></tr>
+</table>

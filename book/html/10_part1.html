@@ -1,0 +1,227 @@
+<h1 id="ch01">1. Introduction to JTS GO</h1>
+
+<h2>1.1 What is JTS GO?</h2>
+<p>JTS GO is a high-level, dynamically typed, general-purpose programming language developed by Jay Tech Solutions.
+It combines the readability of modern scripting languages with the speed of a compiled bytecode virtual machine.
+Programs written in JTS GO are compiled to bytecode and executed on the JTS Virtual Machine (JTS VM), giving you
+the productivity of an interpreted language and the structure of a compiled one.</p>
+
+<table>
+<tr><th>Design Goal</th><th>How JTS GO Achieves It</th></tr>
+<tr><td>Easy to learn</td><td>Python-inspired, indentation-based syntax with plain-English keywords</td></tr>
+<tr><td>Fast execution</td><td>Source is compiled to bytecode, then run on a high-performance virtual machine</td></tr>
+<tr><td>Object oriented</td><td>Classes, methods, inheritance, and the <code>self</code> keyword</td></tr>
+<tr><td>Built-in ML/AI</td><td>Tensors, matrices, <code>sigmoid</code>, <code>relu</code>, and mean squared error</td></tr>
+<tr><td>Web development</td><td>Built-in HTTP server and HTTP request functions</td></tr>
+<tr><td>Zero boilerplate</td><td>No imports required for the core language; no type declarations</td></tr>
+</table>
+
+<h2>1.2 A First Impression</h2>
+<p>Here is a complete JTS GO program:</p>
+<pre><code># hello.jts — your first program
+print("Hello, World!")
+print("Welcome to JTS GO!")
+</code></pre>
+<pre class="output"><code>Hello, World!
+Welcome to JTS GO!
+</code></pre>
+<p>That is the entire program. There are no package declarations, no <code>public static void main</code>, no
+compiler directives — just one line that prints a message. This is the philosophy of JTS GO: remove everything
+that is not essential, and keep what matters.</p>
+
+<h2>1.3 The Design Philosophy</h2>
+<ul>
+<li><b>Clarity over cleverness.</b> A JTS GO program reads like English. Keywords are full words:
+<code>func</code>, <code>if</code>, <code>while</code>, <code>class</code>, <code>return</code>.</li>
+<li><b>Indentation is structure.</b> Code blocks are shown by indentation and closed with the keyword
+<code>end</code>. There are no braces to balance and no semicolons to forget.</li>
+<li><b>Dynamic typing.</b> Variables take on whatever type they are assigned. The same variable can hold a
+number, a string, a list, or a class instance over the course of a program.</li>
+<li><b>Batteries included.</b> The core language ships with dozens of built-in functions — from string handling to
+machine learning — plus a standard library of <i>scrolls</i> that add statistics, text processing, file utilities,
+and date/time helpers.</li>
+<li><b>One language, many domains.</b> The same language that teaches a beginner to print <code>Hello, World!</code>
+is used in this book to build an HTTP web server and to train a multi-layer neural network.</li>
+</ul>
+
+<h2>1.4 The JTS Toolchain</h2>
+<p>JTS GO uses a compile-then-run model. The flow is:</p>
+<pre><code>.jts source  →  compiler (jtsc)  →  .jbc bytecode  →  virtual machine (jtsvm)  →  output
+</code></pre>
+<p>For convenience, the single <code>jts</code> command performs both steps. This means your source files are checked
+for errors at compile time, and the resulting bytecode runs quickly and deterministically.</p>
+
+<table>
+<tr><th>Command</th><th>Purpose</th></tr>
+<tr><td><code>jts file.jts</code></td><td>Compile and run a program in one step</td></tr>
+<tr><td><code>jtsc file.jts</code></td><td>Compile to bytecode only (produces a <code>.jbc</code> file)</td></tr>
+<tr><td><code>jtsvm file.jbc</code></td><td>Run a pre-compiled bytecode file</td></tr>
+<tr><td><code>jts --update</code></td><td>Update JTS GO to the latest version</td></tr>
+</table>
+
+<h2>1.5 What This Book Covers</h2>
+<ol>
+<li><b>Part I — Getting Started:</b> installation, tools, and your first programs.</li>
+<li><b>Part II — Language Fundamentals:</b> syntax, types, variables, operators, control flow, functions,
+object-oriented programming, collections, strings, and error handling.</li>
+<li><b>Part III — Built-in Functions:</b> a complete, documented reference for every built-in function.</li>
+<li><b>Part IV — The Standard Library (Scrolls):</b> the scroll system and all fourteen standard scrolls.</li>
+<li><b>Part V — Advanced Topics:</b> machine learning, web development, debugging, and best practices.</li>
+<li><b>Part VI — Appendices:</b> keyword reference, operator reference, and quick reference tables.</li>
+</ol>
+
+<h2>1.6 About the Examples</h2>
+<p>Every code example in this book was executed with the official JTS GO interpreter, Version 2.1. When an example
+produces output, the output is shown immediately after the code in a shaded box labelled with a dark background.
+Example outputs are therefore trustworthy — if you run the same code on the same version, you will see the same
+results, except where the behavior depends on the current date, time, time zone, or random values.</p>
+
+<div class="tip"><b>Tip:</b> The fastest way to learn JTS GO is to type each example yourself and then modify it.
+The language rewards experimentation: there is no boilerplate standing between you and a working program.</div>
+
+<h1 id="ch02">2. Installation and Setup</h1>
+
+<h2>2.1 System Requirements</h2>
+<table>
+<tr><th>Requirement</th><th>Minimum</th></tr>
+<tr><td>Operating system</td><td>Windows 10+, macOS 10.15+, or Linux (Ubuntu 18.04+)</td></tr>
+<tr><td>Node.js</td><td>v14.0 or higher (only needed for the npm installation method)</td></tr>
+<tr><td>Disk space</td><td>About 50 MB</td></tr>
+<tr><td>RAM</td><td>256 MB minimum</td></tr>
+</table>
+
+<h2>2.2 Installation with npm (Recommended)</h2>
+<p>The easiest way to install JTS GO is through the Node Package Manager:</p>
+<pre><code>npm install -g @jaytechsolutions/jts-go
+</code></pre>
+<p>This installs three commands globally: <code>jts</code>, <code>jtsc</code>, and <code>jtsvm</code>.
+Verify the installation by printing the version:</p>
+<pre><code>jts --version
+</code></pre>
+
+<h2>2.3 Manual Installation</h2>
+<p>If you prefer not to use npm, download the latest release archive from the JTS GO GitHub releases page and
+extract it to a folder such as <code>C:\jtsdk</code> on Windows or <code>/usr/local/jtsdk</code> on macOS/Linux.
+Then add the <code>bin</code> folder inside it to your system <code>PATH</code>.</p>
+
+<p><b>Windows (PowerShell, as Administrator):</b></p>
+<pre><code>$currentPath = [Environment]::GetEnvironmentVariable("Path", "User")
+[Environment]::SetEnvironmentVariable("Path", "$currentPath;C:\jtsdk\bin", "User")
+</code></pre>
+
+<p><b>macOS / Linux:</b></p>
+<pre><code>export PATH="$PATH:/usr/local/jtsdk/bin"
+</code></pre>
+
+<h2>2.4 What Gets Installed</h2>
+<p>Installing the JTS SDK gives you this layout:</p>
+<pre><code>jtsdk/
+├── bin/              # CLI executables (jts, jtsc, jtsvm)
+├── docs/             # Language documentation
+├── examples/         # Example programs
+├── scrolls/          # The standard library (text, stats, seq, numbers, ...)
+├── LICENSE
+└── README.md
+</code></pre>
+<p>The <code>scrolls</code> folder deserves special attention. It contains the JTS GO standard library as
+plain, readable <code>.jts</code> source files. Because scrolls are ordinary JTS GO code, you can read every
+standard-library function and even copy its implementation into your own programs. Chapter 25 explains the scroll
+system in detail.</p>
+
+<h2>2.5 The JTS IDE</h2>
+<p>Jay Tech Solutions also ships a free desktop IDE for JTS GO. The IDE provides a source editor, syntax
+highlighting, one-click run, and a built-in console so that you can develop, test, and run programs without leaving
+a single window. The IDE installer is distributed together with the SDK.</p>
+
+<div class="note"><b>Note:</b> None of the examples in this book require the IDE. Everything can be typed in any
+plain-text editor and run from a command line. Use whatever editor is comfortable for you.</div>
+
+<h2>2.6 Troubleshooting Installation</h2>
+<table>
+<tr><th>Symptom</th><th>Fix</th></tr>
+<tr><td><code>'jts' is not recognized</code></td><td>The <code>bin</code> folder is not on <code>PATH</code>.
+Add it, or run the full path to the executable.</td></tr>
+<tr><td>npm permission errors</td><td>Run the npm command from a terminal with administrator privileges, or configure a
+user-level global prefix.</td></tr>
+<tr><td><code>Cannot find module</code> during npm install</td><td>Update npm and Node.js to current versions, then retry.</td></tr>
+<tr><td>The interpreter runs but scrolls are missing</td><td>Scrolls are loaded from the <code>scrolls</code> folder.
+Make sure it sits next to the interpreter, or set the <code>JTS_SCROLLS</code> environment variable to its location.</td></tr>
+</table>
+
+<h1 id="ch03">3. Your First Programs</h1>
+
+<h2>3.1 Hello, World</h2>
+<p>Create a file named <code>hello.jts</code> containing:</p>
+<pre><code>print("Hello, World!")
+print("Welcome to JTS GO!")
+</code></pre>
+<p>Run it from the command line:</p>
+<pre><code>jts hello.jts
+</code></pre>
+<pre class="output"><code>Hello, World!
+Welcome to JTS GO!
+</code></pre>
+<p>Congratulations — you have written and executed your first JTS GO program. Two things happened: the compiler
+translated your source into bytecode, and the virtual machine executed that bytecode.</p>
+
+<h2>3.2 Printing Many Kinds of Values</h2>
+<p><code>print</code> accepts any value. Numbers, booleans, and <code>nil</code> are all printed naturally:</p>
+<pre><code>print(42)
+print(3.14159)
+print(true)
+print(false)
+print(nil)
+</code></pre>
+<pre class="output"><code>42
+3.14159
+true
+false
+nil
+</code></pre>
+
+<h2>3.3 Reading User Input</h2>
+<p>The <code>input</code> function reads a line of text from the user. It accepts an optional prompt:</p>
+<pre><code>name = input("What is your name? ")
+print("Hello, " + name + "!")
+</code></pre>
+<p>If the user types <code>Alice</code>, the output is:</p>
+<pre class="output"><code>What is your name? Alice
+Hello, Alice!
+</code></pre>
+
+<div class="note"><b>Note:</b> <code>input</code> always returns a string. If you need a number, you can convert it
+with <code>number()</code> or <code>int()</code> (Chapters 14 and 15).</div>
+
+<h2>3.4 A Simple Calculator</h2>
+<pre><code># A friendly calculator
+a = input("Enter first number: ")
+b = input("Enter second number: ")
+
+print("You entered: " + a + " and " + b)
+print("Their sum is: " + (number(a) + number(b)))
+</code></pre>
+<p>This example introduces three ideas we will study in depth: variables, string concatenation with the
+<code>+</code> operator, and the <code>number()</code> conversion function.</p>
+
+<h2>3.5 Separating Compilation from Execution</h2>
+<p>You normally run everything with <code>jts</code>, but the toolchain can also be used in two explicit steps.
+This is useful when you want to distribute a program without its source code:</p>
+<pre><code># Step 1 — compile
+jtsc hello.jts          # produces hello.jbc
+
+# Step 2 — run
+jtsvm hello.jbc
+</code></pre>
+
+<h2>3.6 The Building Blocks Ahead</h2>
+<p>Every language has a small set of fundamental ideas. For JTS GO those ideas are:</p>
+<ul>
+<li><b>Comments</b> — text the compiler ignores (Chapter 4).</li>
+<li><b>Values and types</b> — numbers, strings, booleans, <code>nil</code>, lists, dicts, and sets (Chapters 5 and 11).</li>
+<li><b>Variables</b> — named storage for values (Chapter 6).</li>
+<li><b>Operators</b> — the vocabulary of expressions (Chapter 7).</li>
+<li><b>Statements</b> — <code>if</code>, <code>while</code>, and <code>for</code> that control what runs and when (Chapter 8).</li>
+<li><b>Functions</b> — reusable blocks of code (Chapter 9).</li>
+<li><b>Classes</b> — blueprints for objects (Chapter 10).</li>
+</ul>
+<p>Chapter 4 begins at the very beginning: the syntax and lexical structure of the language.</p>

@@ -1,0 +1,233 @@
+<h1 id="appa">Appendix A. Keywords</h1>
+
+<p>JTS GO has a compact set of reserved words. Identifiers cannot use them. This list is the complete set,
+extracted from the language's scanner.</p>
+
+<table>
+<tr><th>Keyword</th><th>Purpose</th><th>Chapter</th></tr>
+<tr><td><code>and</code></td><td>Logical conjunction</td><td>7</td></tr>
+<tr><td><code>append</code></td><td>Add an element to a list</td><td>17</td></tr>
+<tr><td><code>assert</code></td><td>Runtime check</td><td>8</td></tr>
+<tr><td><code>bool</code></td><td>Type name (boolean)</td><td>5</td></tr>
+<tr><td><code>bring</code></td><td>Load a scroll (module)</td><td>25</td></tr>
+<tr><td><code>break</code></td><td>Exit a loop</td><td>8</td></tr>
+<tr><td><code>catch</code></td><td>Handle a thrown value</td><td>13</td></tr>
+<tr><td><code>class</code></td><td>Declare a class</td><td>10</td></tr>
+<tr><td><code>continue</code></td><td>Skip to the next iteration</td><td>8</td></tr>
+<tr><td><code>del</code></td><td>Delete a list element</td><td>17</td></tr>
+<tr><td><code>elif</code></td><td>Else-if branch</td><td>8</td></tr>
+<tr><td><code>else</code></td><td>Fallback branch</td><td>8</td></tr>
+<tr><td><code>end</code></td><td>Close any block</td><td>4</td></tr>
+<tr><td><code>extends</code></td><td>Inherit from a class</td><td>10</td></tr>
+<tr><td><code>false</code></td><td>Boolean literal</td><td>5</td></tr>
+<tr><td><code>finally</code></td><td>Always-run block after try</td><td>13</td></tr>
+<tr><td><code>float</code></td><td>Type name (floating point)</td><td>5</td></tr>
+<tr><td><code>for</code></td><td>Iterate over a range or list</td><td>8</td></tr>
+<tr><td><code>func</code></td><td>Declare a function</td><td>9</td></tr>
+<tr><td><code>http</code></td><td>Web/server namespace</td><td>23</td></tr>
+<tr><td><code>if</code></td><td>Conditional branch</td><td>8</td></tr>
+<tr><td><code>import</code></td><td>Import a file</td><td>25</td></tr>
+<tr><td><code>in</code></td><td>Membership test; loop variable binder</td><td>7</td></tr>
+<tr><td><code>input</code></td><td>Read a line from the user</td><td>14</td></tr>
+<tr><td><code>int</code></td><td>Type name; convert to integer</td><td>5</td></tr>
+<tr><td><code>is</code></td><td>Identity / type test</td><td>7</td></tr>
+<tr><td><code>len</code></td><td>Length of a value</td><td>14</td></tr>
+<tr><td><code>list</code></td><td>Type name; convert to list</td><td>5</td></tr>
+<tr><td><code>matrix</code></td><td>Create a matrix</td><td>24</td></tr>
+<tr><td><code>model</code></td><td>AI model construct</td><td>24</td></tr>
+<tr><td><code>new</code></td><td>Instantiate an object</td><td>10</td></tr>
+<tr><td><code>nil</code></td><td>Null literal</td><td>5</td></tr>
+<tr><td><code>not</code></td><td>Logical negation</td><td>7</td></tr>
+<tr><td><code>number</code></td><td>Type name; convert to number</td><td>5</td></tr>
+<tr><td><code>or</code></td><td>Logical disjunction</td><td>7</td></tr>
+<tr><td><code>predict</code></td><td>AI prediction construct</td><td>24</td></tr>
+<tr><td><code>print</code></td><td>Write to the console</td><td>14</td></tr>
+<tr><td><code>request</code></td><td>HTTP request construct</td><td>23</td></tr>
+<tr><td><code>response</code></td><td>HTTP response construct</td><td>23</td></tr>
+<tr><td><code>return</code></td><td>Return from a function</td><td>9</td></tr>
+<tr><td><code>self</code></td><td>The current object</td><td>10</td></tr>
+<tr><td><code>server</code></td><td>Web server construct</td><td>23</td></tr>
+<tr><td><code>set</code></td><td>Type name; convert to set</td><td>5</td></tr>
+<tr><td><code>string</code></td><td>Type name; convert to string</td><td>5</td></tr>
+<tr><td><code>super</code></td><td>The parent class</td><td>10</td></tr>
+<tr><td><code>tensor</code></td><td>Create a tensor</td><td>24</td></tr>
+<tr><td><code>throw</code></td><td>Raise an error value</td><td>13</td></tr>
+<tr><td><code>to</code></td><td>Range loop syntax <code>for x in 0 to n</code></td><td>8</td></tr>
+<tr><td><code>true</code></td><td>Boolean literal</td><td>5</td></tr>
+<tr><td><code>try</code></td><td>Begin a protected block</td><td>13</td></tr>
+<tr><td><code>type</code></td><td>Type of a value</td><td>14</td></tr>
+<tr><td><code>var</code></td><td>Declare a variable</td><td>6</td></tr>
+<tr><td><code>while</code></td><td>Loop while a condition holds</td><td>8</td></tr>
+<tr><td><code>yield</code></td><td>Produce a value from a generator</td><td>9</td></tr>
+</table>
+
+<div class="note"><b>Note:</b> many of these keywords are also ordinary built-in function names (for example
+<code>print</code>, <code>len</code>, and <code>input</code>), so "keyword" and "built-in" overlap in JTS GO.
+You can always recognize them by their syntax role: <code>if</code> introduces a block, <code>print</code> is a
+callable.</div>
+
+<h1 id="appb">Appendix B. Operator Precedence</h1>
+
+<p>From lowest to highest precedence. Operators on the same row associate left-to-right. Higher rows bind more
+tightly.</p>
+
+<table>
+<tr><th>Precedence</th><th>Operators</th><th>Associativity</th></tr>
+<tr><td>Assignment</td><td><code>=</code></td><td>right</td></tr>
+<tr><td>Logical or</td><td><code>or</code></td><td>left</td></tr>
+<tr><td>Logical and</td><td><code>and</code></td><td>left</td></tr>
+<tr><td>Equality</td><td><code>==</code> <code>!=</code></td><td>left</td></tr>
+<tr><td>Comparison</td><td><code>&lt;</code> <code>&gt;</code> <code>&lt;=</code> <code>&gt;=</code></td><td>left</td></tr>
+<tr><td>Bitwise or</td><td><code>|</code></td><td>left</td></tr>
+<tr><td>Bitwise xor</td><td><code>^</code></td><td>left</td></tr>
+<tr><td>Bitwise and</td><td><code>&amp;</code></td><td>left</td></tr>
+<tr><td>Shift</td><td><code>&lt;&lt;</code> <code>&gt;&gt;</code></td><td>left</td></tr>
+<tr><td>Term</td><td><code>+</code> <code>-</code></td><td>left</td></tr>
+<tr><td>Factor</td><td><code>*</code> <code>/</code> <code>//</code> <code>%</code></td><td>left</td></tr>
+<tr><td>Unary</td><td><code>-x</code> <code>not x</code></td><td>right</td></tr>
+<tr><td>Call</td><td><code>f(x)</code> <code>x[i]</code> <code>o.m()</code></td><td>left</td></tr>
+<tr><td>Primary</td><td>literals, identifiers, <code>(expr)</code></td><td>—</td></tr>
+</table>
+
+<div class="tip"><b>Tip:</b> when in doubt, add parentheses. <code>(a + b) * c</code> never surprises the next
+reader, and the interpreter follows the same rules the table states.</div>
+
+<h1 id="appc">Appendix C. Built-in Quick Reference</h1>
+
+<p>A complete index of the core built-ins described in Part III, with their signatures. Chapter references point
+to the full documentation and examples.</p>
+
+<h2>C.1 Console and I/O</h2>
+<table>
+<tr><th>Built-in</th><th>Description</th><th>See</th></tr>
+<tr><td><code>print(...)</code></td><td>Print values to the console</td><td>14</td></tr>
+<tr><td><code>input(prompt?)</code></td><td>Read a line of text</td><td>14</td></tr>
+<tr><td><code>args()</code></td><td>Command-line arguments</td><td>20</td></tr>
+<tr><td><code>cwd()</code></td><td>Current working directory</td><td>20</td></tr>
+<tr><td><code>env(name)</code></td><td>Environment variable value</td><td>20</td></tr>
+<tr><td><code>exit(code?)</code></td><td>Terminate the program</td><td>20</td></tr>
+</table>
+
+<h2>C.2 Values and Types</h2>
+<table>
+<tr><th>Built-in</th><th>Description</th><th>See</th></tr>
+<tr><td><code>type(x)</code></td><td>Type name as a string</td><td>14</td></tr>
+<tr><td><code>len(x)</code> / <code>length(x)</code></td><td>Length of a list, string, dict, or set</td><td>14</td></tr>
+<tr><td><code>str(x)</code> / <code>string(x)</code></td><td>Convert to a string</td><td>14</td></tr>
+<tr><td><code>number(x)</code> / <code>float(x)</code></td><td>Convert to a number</td><td>14</td></tr>
+<tr><td><code>int(x)</code></td><td>Convert to an integer (truncating)</td><td>14</td></tr>
+<tr><td><code>bool(x)</code></td><td>Convert to a boolean</td><td>14</td></tr>
+</table>
+
+<h2>C.3 Math</h2>
+<table>
+<tr><th>Built-in</th><th>Description</th><th>See</th></tr>
+<tr><td><code>math(op, x)</code></td><td>sin, cos, tan, sqrt, abs, log, exp, pow, floor, ceil, round</td><td>15</td></tr>
+<tr><td><code>min(a, b)</code> / <code>min(...)</code></td><td>Smallest value</td><td>15</td></tr>
+<tr><td><code>max(a, b)</code> / <code>max(...)</code></td><td>Largest value</td><td>15</td></tr>
+<tr><td><code>sum(list)</code></td><td>Total of a list</td><td>15</td></tr>
+<tr><td><code>range(start?, end?)</code></td><td>Build a list of integers</td><td>15</td></tr>
+</table>
+
+<h2>C.4 Strings</h2>
+<table>
+<tr><th>Built-in</th><th>Description</th><th>See</th></tr>
+<tr><td><code>upper</code> / <code>lower</code></td><td>Change case</td><td>16</td></tr>
+<tr><td><code>trim</code>, <code>ltrim</code>, <code>rtrim</code></td><td>Remove surrounding whitespace</td><td>16</td></tr>
+<tr><td><code>pad_left</code> / <code>pad_right</code></td><td>Pad to a width</td><td>16</td></tr>
+<tr><td><code>contains</code>, <code>starts_with</code>, <code>ends_with</code></td><td>Search</td><td>16</td></tr>
+<tr><td><code>find</code>, <code>index</code></td><td>Position of a sub-string</td><td>16</td></tr>
+<tr><td><code>is_digit</code>, <code>is_alpha</code>, <code>is_alnum</code>, <code>is_upper</code>, <code>is_lower</code></td><td>Character tests</td><td>16</td></tr>
+<tr><td><code>split</code>, <code>splitlines</code></td><td>Break into pieces</td><td>16</td></tr>
+<tr><td><code>join(sep, list)</code></td><td>Combine pieces</td><td>16</td></tr>
+<tr><td><code>substring(start, end?)</code></td><td>Slice a string</td><td>16</td></tr>
+<tr><td><code>replace</code></td><td>Swap sub-strings</td><td>16</td></tr>
+<tr><td><code>format(template, args...)</code></td><td>Interpolate values</td><td>16</td></tr>
+</table>
+
+<h2>C.5 Lists</h2>
+<table>
+<tr><th>Built-in</th><th>Description</th><th>See</th></tr>
+<tr><td><code>append(list, x)</code></td><td>Add to the end</td><td>17</td></tr>
+<tr><td><code>insert(list, i, x)</code></td><td>Insert at a position</td><td>17</td></tr>
+<tr><td><code>extend(list, xs)</code></td><td>Append many</td><td>17</td></tr>
+<tr><td><code>remove(list, x)</code> / <code>pop(list)</code></td><td>Remove by value / by index</td><td>17</td></tr>
+<tr><td><code>sort(list)</code>, <code>reverse(list)</code></td><td>Re-arrange in place</td><td>17</td></tr>
+<tr><td><code>copy(list)</code>, <code>clear(list)</code></td><td>Duplicate / empty</td><td>17</td></tr>
+<tr><td><code>index(list, x)</code>, <code>count(list, x)</code></td><td>Search helpers</td><td>17</td></tr>
+</table>
+
+<h2>C.6 Dicts and Sets</h2>
+<table>
+<tr><th>Built-in</th><th>Description</th><th>See</th></tr>
+<tr><td><code>get(d, k, default?)</code>, <code>has(d, k)</code></td><td>Read and test keys</td><td>18</td></tr>
+<tr><td><code>update(d, dict)</code>, <code>keys(d)</code>, <code>values(d)</code>, <code>items(d)</code></td><td>Mutate and enumerate</td><td>18</td></tr>
+<tr><td><code>set(x)</code></td><td>Build a set from a list or string</td><td>18</td></tr>
+<tr><td><code>set_add</code>, <code>set_remove</code>, <code>set_contains</code></td><td>Set membership and mutation</td><td>18</td></tr>
+<tr><td><code>set_union</code>, <code>set_intersection</code>, <code>set_difference</code></td><td>Set algebra</td><td>18</td></tr>
+</table>
+
+<h2>C.7 Random</h2>
+<table>
+<tr><th>Built-in</th><th>Description</th><th>See</th></tr>
+<tr><td><code>rand()</code></td><td>Float in <code>[0, 1)</code></td><td>19</td></tr>
+<tr><td><code>randint(a, b)</code></td><td>Integer in <code>[a, b]</code></td><td>19</td></tr>
+<tr><td><code>seed(n)</code></td><td>Reproducible sequences</td><td>19</td></tr>
+<tr><td><code>shuffle(list)</code></td><td>Random re-ordering</td><td>19</td></tr>
+</table>
+
+<h2>C.8 Files and OS</h2>
+<table>
+<tr><th>Built-in</th><th>Description</th><th>See</th></tr>
+<tr><td><code>read_file(path)</code>, <code>write_file(path, text)</code></td><td>Text file I/O</td><td>20</td></tr>
+<tr><td><code>file_exists(path)</code></td><td>Test for a file</td><td>20</td></tr>
+<tr><td><code>import_file(path)</code></td><td>Run another script</td><td>20</td></tr>
+</table>
+
+<h2>C.9 JSON</h2>
+<table>
+<tr><th>Built-in</th><th>Description</th><th>See</th></tr>
+<tr><td><code>json_parse(text)</code></td><td>Decode JSON into values</td><td>21</td></tr>
+<tr><td><code>json_stringify(value)</code></td><td>Encode values as JSON</td><td>21</td></tr>
+</table>
+
+<h2>C.10 Time and Web</h2>
+<table>
+<tr><th>Built-in</th><th>Description</th><th>See</th></tr>
+<tr><td><code>now()</code>, <code>sleep(secs)</code></td><td>Current time; pause</td><td>22</td></tr>
+<tr><td><code>strftime(pattern, ts?)</code></td><td>Format a timestamp</td><td>22</td></tr>
+<tr><td><code>http_server(port, html?)</code>, <code>http_start(srv)</code></td><td>Serve a web page</td><td>23</td></tr>
+<tr><td><code>http_request(url)</code></td><td>Fetch a resource</td><td>23</td></tr>
+</table>
+
+<h2>C.11 Machine Learning</h2>
+<table>
+<tr><th>Built-in</th><th>Description</th><th>See</th></tr>
+<tr><td><code>tensor(list)</code>, <code>matrix(list)</code></td><td>Create tensors and matrices</td><td>24</td></tr>
+<tr><td><code>matmul(a, b)</code></td><td>Matrix multiplication</td><td>24</td></tr>
+<tr><td><code>sigmoid(x)</code>, <code>relu(x)</code></td><td>Activation functions</td><td>24</td></tr>
+<tr><td><code>mse(preds, targets)</code></td><td>Mean squared error</td><td>24</td></tr>
+</table>
+
+<h1 id="appd">Appendix D. Scroll Function Index</h1>
+
+<p>Every function exported by the fourteen standard scrolls (Part IV). Namespaced access is
+<code>scroll.function</code>; flat access works as well.</p>
+
+<table>
+<tr><th>Scroll</th><th>Functions</th></tr>
+<tr><td><code>text</code></td><td>is_blank, count_substring, extract_digits, split_words, slugify, snake_case, kebab_case, camel_case, pascal_case, mask, abbreviate, truncate_words, pluralize, indent, normalize_spaces, initials, rot13, caesar, sort_chars, is_anagram, is_isogram, shuffle_chars, reverse_words, contains_any, count_vowels, count_consonants</td></tr>
+<tr><td><code>strings</code></td><td>reverse, is_palindrome, count_words, repeat, truncate, capitalize_words, strip_vowels, remove_spaces, words, has_letter, titleize</td></tr>
+<tr><td><code>stats</code></td><td>mean, median, mode, weighted_mean, geometric_mean, harmonic_mean, trim_mean, population_variance, sample_variance, variance, population_stdev, sample_stdev, stdev, range_stat, midrange, mean_absolute_deviation, percentile, quartile1, quartile3, interquartile_range, zscore, standardize, normalize, covariance, correlation</td></tr>
+<tr><td><code>seq</code></td><td>head, tail, init, last_item, take, drop, nth, zip, enumerate, interleave, sliding_window, consecutive_pairs, product, frequency, repeat_times, cycle, accumulate, differences, intersperse, shuffle_copy</td></tr>
+<tr><td><code>lists</code></td><td>flatten, unique, reversed, chunk, rotate, median, first, last, sum_squares, count_occurrences</td></tr>
+<tr><td><code>numbers</code></td><td>is_numeric, is_integer, is_whole, digit_count, digits, from_digits, reverse_digits, to_binary, to_octal, to_hex, from_base, from_binary, from_octal, from_hex, percent, percent_change, round_to, ordinal, with_commas, is_power_of_two, count_bits</td></tr>
+<tr><td><code>math</code></td><td>log2, log10, hypot, degrees, radians, sign, clamp, lerp, is_even, is_odd, factorial, gcd, lcm, is_prime, avg, midpoint, digit_sum</td></tr>
+<tr><td><code>fs</code></td><td>exists, read, write, append_text, read_lines, write_lines, count_lines, first_line, last_line, file_size, is_empty_file, basename, dirname, ext, join_path, with_extension, copy_text, word_count</td></tr>
+<tr><td><code>dates</code></td><td>unix, today, time_str, stamp, fmt, date_parts, add_seconds, add_minutes, add_hours, add_days, add_weeks, add_months, add_years, seconds_between, minutes_between, hours_between, days_between, mod, day_of_week, day_name, day_name_full, month_name, month_name_full, is_weekend, is_weekday, start_of_day, end_of_day, start_of_hour, start_of_minute, is_leap_year, month_days, day_of_year, iso_week, human_duration</td></tr>
+<tr><td><code>sets</code></td><td>from_list, from_string, singleton, union, intersection, difference, symmetric_difference, has_item, add_item, remove_item, size, is_empty, is_subset, is_superset, is_disjoint, equals, has_any, has_all, add_all, remove_all</td></tr>
+<tr><td><code>json</code></td><td>parse, stringify, load, save, pretty</td></tr>
+<tr><td><code>os</code></td><td>get_env, current_dir, program_args, file_read, file_write</td></tr>
+<tr><td><code>random</code></td><td>random, int_between, choice, choices, sample, coin_flip</td></tr>
+<tr><td><code>time</code></td><td>sleep_ms, epoch, stamp, stamp_utc, today, clock_time</td></tr>
+</table>

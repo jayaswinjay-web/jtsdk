@@ -1,0 +1,210 @@
+<h1 id="ch35">35. The <code>sets</code> Scroll</h1>
+
+<p>The <code>sets</code> scroll provides friendly helpers around the built-in set operations from Chapter 18:
+construction, algebra, membership tests, and batch mutation.</p>
+
+<pre><code>bring sets
+</code></pre>
+
+<h2>35.1 Construction</h2>
+<pre><code>print(sets.from_list([1, 2, 2, 3]))       # {1, 2, 3}
+print(sets.from_string("hello"))          # {e, h, l, o}
+print(sets.singleton(7))                  # {7}   (works where {7} alone fails — see 4.x)
+</code></pre>
+
+<h2>35.2 Set Algebra</h2>
+<pre><code>a = sets.from_list([1, 2, 3])
+b = sets.from_list([3, 4, 5])
+
+print(sets.union(a, b))              # {1, 2, 3, 4, 5}
+print(sets.intersection(a, b))       # {3}
+print(sets.difference(a, b))         # {1, 2}
+print(sets.symmetric_difference(a, b))   # {1, 2, 4, 5}
+</code></pre>
+
+<h2>35.3 Membership and Size</h2>
+<pre><code>s = sets.from_list([1, 2, 3])
+print(sets.has_item(s, 2))    # true
+print(sets.size(s))           # 3
+print(sets.is_empty(sets.from_list([])))   # true
+</code></pre>
+
+<h2>35.4 Relation Tests</h2>
+<pre><code>a = sets.from_list([1, 2])
+b = sets.from_list([1, 2, 3])
+c = sets.from_list([4, 5])
+
+print(sets.is_subset(a, b))    # true
+print(sets.is_superset(b, a))  # true
+print(sets.is_disjoint(a, c))  # true
+print(sets.equals(a, sets.from_list([2, 1])))   # true
+</code></pre>
+
+<h2>35.5 Batch Testing and Mutation</h2>
+<pre><code>s = sets.from_list([1, 2, 3])
+print(sets.has_any(s, [9, 2]))     # true
+print(sets.has_all(s, [1, 3]))     # true
+print(sets.add_all(s, [4, 5]))     # {1, 2, 3, 4, 5}
+print(sets.remove_all(s, [2, 3]))  # {1, 4, 5}
+</code></pre>
+
+<h2>35.6 <code>sets.add_item</code> and <code>sets.remove_item</code></h2>
+<p>These mutate the set in place and return it, so they can be chained:</p>
+<pre><code>s = sets.from_list([1])
+sets.add_item(s, 2)
+sets.remove_item(s, 1)
+print(s)     # {2}
+</code></pre>
+
+<h1 id="ch36">36. The <code>json</code> Scroll</h1>
+
+<p>The <code>json</code> scroll wraps the JSON built-ins (Chapter 21) with short names and file helpers.</p>
+
+<pre><code>bring json
+</code></pre>
+
+<h2>36.1 <code>json.parse</code> and <code>json.stringify</code></h2>
+<pre><code>data = json.parse("{\"name\": \"Ada\", \"scores\": [9, 8, 10]}")
+print(data["name"])                 # Ada
+print(data["scores"][0])            # 9
+
+print(json.stringify({"ok": true, "n": 42}))    # {"ok":true,"n":42}
+</code></pre>
+
+<h2>36.2 <code>json.pretty</code></h2>
+<p>Alias of <code>stringify</code>, available for readability when you want to signal intent.</p>
+<pre><code>print(json.pretty([1, "two", false, nil]))    # [1,"two",false,null]
+</code></pre>
+
+<h2>36.3 <code>json.load</code> and <code>json.save</code> — persistence</h2>
+<p>The pair makes saving and restoring program state a two-line task:</p>
+<pre><code>bring json
+
+config = { "theme": "dark", "volume": 0.7 }
+json.save("config.json", config)
+
+loaded = json.load("config.json")
+print(loaded["theme"])     # dark
+print(loaded["volume"])    # 0.7
+</code></pre>
+
+<div class="tip"><b>Tip:</b> <code>json.save</code> is the recommended way to persist application data. Combined
+with the <code>fs</code> scroll's helpers, you have a complete file-storage stack.</div>
+
+<h1 id="ch37">37. The <code>os</code> Scroll</h1>
+
+<p>The <code>os</code> scroll gives environment, directory, argument, and file helpers under one namespace.</p>
+
+<pre><code>bring os
+</code></pre>
+
+<h2>37.1 Environment</h2>
+<pre><code>print(os.get_env("PATH"))      # the PATH value, or nil
+print(os.current_dir())        # the working directory
+print(os.program_args())       # the command-line arguments
+</code></pre>
+
+<h2>37.2 Files</h2>
+<pre><code>print(os.file_write("note.txt", "hello\n"))    # true
+print(os.file_read("note.txt"))                # hello\n
+</code></pre>
+
+<h1 id="ch38">38. The <code>random</code> Scroll</h1>
+
+<p>The <code>random</code> scroll wraps the random built-ins (Chapter 19) with higher-level sampling helpers.</p>
+
+<pre><code>bring random
+</code></pre>
+
+<h2>38.1 Basics</h2>
+<pre><code>print(random.random())         # a float in [0, 1)
+print(random.int_between(1, 6))    # an integer in [1, 6]
+print(random.coin_flip())      # true or false
+</code></pre>
+
+<h2>38.2 Picking From a List</h2>
+<pre><code>deck = ["king", "queen", "jack", "ace"]
+print(random.choice(deck))           # one random element
+print(random.choice([]))             # nil (empty list is safe)
+print(random.choices(deck, 2))       # two elements, replacement allowed
+print(random.sample(deck, 2))        # two elements, no duplicates
+</code></pre>
+
+<div class="note"><b>Note:</b> <code>choices</code> may return repeats; <code>sample</code> shuffles a copy and
+takes distinct elements.</div>
+
+<h2>38.3 A Dice Roller</h2>
+<pre><code>bring random
+
+func roll_dice(n)
+    results = []
+    i = 0
+    while i < n
+        results.append(random.int_between(1, 6))
+        i = i + 1
+    end
+    return results
+end
+
+print(roll_dice(3))
+</code></pre>
+<pre class="output"><code>[5, 2, 6]        (a typical run; your values will differ)
+</code></pre>
+
+<h2>38.4 Reproducible Experiments</h2>
+<p>Like the built-in <code>rand</code>, the scroll helpers respect <code>seed</code>. Setting the same seed produces
+the same sequence, which is essential when testing programs that use randomness:</p>
+<pre><code>bring random
+seed(7)
+print(random.choice(["a", "b", "c"]))   # e.g. c
+seed(7)
+print(random.choice(["a", "b", "c"]))   # c again — identical
+</code></pre>
+
+<h1 id="ch39">39. The <code>time</code> Scroll</h1>
+
+<p>The <code>time</code> scroll provides simple, named wrappers for the time built-ins (Chapter 22): stamps,
+epochs, and sleeping.</p>
+
+<pre><code>bring time
+</code></pre>
+
+<h2>39.1 Timestamps</h2>
+<pre><code>print(time.today())        # YYYY-MM-DD
+print(time.clock_time())   # HH:MM:SS
+print(time.stamp())        # YYYY-MM-DD HH:MM:SS
+print(time.stamp_utc())    # YYYY-MM-DDTHH:MM:SSZ (UTC)
+print(time.epoch())        # epoch seconds
+</code></pre>
+<pre class="output"><code>2026-08-04
+14:32:07
+2026-08-04 14:32:07
+2026-08-04T14:32:07Z
+1788510727
+</code></pre>
+<p>(Values shown are examples; the actual output depends on the current moment.)</p>
+
+<h2>39.2 Sleeping</h2>
+<pre><code>print("waiting...")
+time.sleep_ms(250)
+print("done")          # printed about a quarter-second later
+</code></pre>
+<p><code>time.sleep_ms</code> accepts milliseconds, which is more convenient than the built-in <code>sleep</code>'s
+seconds.</p>
+
+<h2>39.3 A Simple Stopwatch</h2>
+<pre><code>bring time
+
+start = now()
+count = 0
+while count < 100000
+    count = count + 1
+end
+elapsed = now() - start
+
+print("counted in " + time.clock_time())
+print("elapsed ms: " + str(elapsed * 1000))
+</code></pre>
+<pre class="output"><code>counted in 14:33:02
+elapsed ms: 1.5        (approximate — depends on your machine)
+</code></pre>

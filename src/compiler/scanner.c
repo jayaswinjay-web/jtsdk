@@ -233,9 +233,9 @@ static TokenType identifier_type(Scanner* scanner) {
                     case 'e':
                         if (scanner->current - scanner->start > 2) {
                             if (scanner->start[2] == 'q')
-                                return check_keyword(scanner, 3, 7, "uest", TOKEN_REQUEST);
+                                return check_keyword(scanner, 3, 4, "uest", TOKEN_REQUEST);
                             if (scanner->start[2] == 's')
-                                return check_keyword(scanner, 3, 6, "ponse", TOKEN_RESPONSE);
+                                return check_keyword(scanner, 3, 5, "ponse", TOKEN_RESPONSE);
                         }
                         return check_keyword(scanner, 1, 5, "eturn", TOKEN_RETURN);
                 }

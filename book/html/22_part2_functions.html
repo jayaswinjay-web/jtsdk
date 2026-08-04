@@ -1,0 +1,767 @@
+<h1 id="ch09">9. Functions</h1>
+
+<h2>9.1 Defining a Function</h2>
+<p>Functions are defined with the <code>func</code> keyword, a name, optional parameters, a body, and
+<code>end</code>.</p>
+<pre><code>func greet()
+    print("Hello from JTS GO!")
+end
+
+greet()    # Hello from JTS GO!
+</code></pre>
+
+<h2>9.2 Parameters</h2>
+<p>Parameters are local variables that receive values at call time. Separate multiple parameters with commas.</p>
+<pre><code>func say_hello(name)
+    print("Hello, " + name + "!")
+end
+
+func add(a, b)
+    return a + b
+end
+
+say_hello("Alice")          # Hello, Alice!
+result = add(3, 4)
+print("3 + 4 = " + result)  # 3 + 4 = 7
+</code></pre>
+
+<h2>9.3 Return Values</h2>
+<p>Use <code>return</code> to send a value back. A function can return different values depending on its logic:</p>
+<pre><code>func absolute(n)
+    if n < 0
+        return -n
+    else
+        return n
+    end
+end
+
+print(absolute(-7))    # 7
+print(absolute(7))     # 7
+</code></pre>
+<p>If a function reaches the end without a <code>return</code>, it returns <code>nil</code>:</p>
+<pre><code>func say_hi()
+    print("Hi!")
+end
+
+result = say_hi()
+print(result)    # nil  (the "Hi!" was printed as a side effect)
+</code></pre>
+
+<h2>9.4 Functions Calling Functions</h2>
+<p>Complex behavior is built from small functions that call one another:</p>
+<pre><code>func square(x)
+    return x * x
+end
+
+func sum_of_squares(a, b)
+    return square(a) + square(b)
+end
+
+print("3^2 + 4^2 = " + sum_of_squares(3, 4))    # 3^2 + 4^2 = 25
+</code></pre>
+
+<h2>9.5 Recursion</h2>
+<p>A function may call itself. Recursion is the natural way to express problems that decompose into smaller
+versions of themselves.</p>
+
+<h3>Factorial</h3>
+<pre><code>func factorial(n)
+    if n <= 1
+        return 1
+    else
+        return n * factorial(n - 1)
+    end
+end
+
+print(factorial(5))     # 120
+print(factorial(10))    # 3628800
+</code></pre>
+<p>Trace how <code>factorial(5)</code> unwinds:</p>
+<pre><code>factorial(5) = 5 * factorial(4)
+             = 5 * 4 * factorial(3)
+             = 5 * 4 * 3 * factorial(2)
+             = 5 * 4 * 3 * 2 * factorial(1)
+             = 5 * 4 * 3 * 2 * 1
+             = 120
+</code></pre>
+
+<h3>Fibonacci</h3>
+<pre><code>func fibonacci(n)
+    if n <= 1
+        return n
+    end
+    return fibonacci(n - 1) + fibonacci(n - 2)
+end
+
+for i in 0 to 12
+    print("fib(" + i + ") = " + fibonacci(i))
+end
+</code></pre>
+<pre class="output"><code>fib(0) = 0
+fib(1) = 1
+fib(2) = 1
+fib(3) = 2
+fib(4) = 3
+fib(5) = 5
+fib(6) = 8
+fib(7) = 13
+fib(8) = 21
+fib(9) = 34
+fib(10) = 55
+fib(11) = 89
+</code></pre>
+
+<h3>Countdown</h3>
+<pre><code>func countdown(n)
+    if n <= 0
+        print("Go!")
+    else
+        print(n)
+        countdown(n - 1)
+    end
+end
+
+countdown(5)
+</code></pre>
+<pre class="output"><code>5
+4
+3
+2
+1
+Go!
+</code></pre>
+
+<h2>9.6 Scope Rules (Recap)</h2>
+<p>Variables created inside a function are local. Variables created at the top level are global and readable from
+anywhere. Assigning a name inside a function creates a local (Chapter 6).</p>
+<pre><code>greeting = "Hello"              # global
+
+func greet(name)
+    local_message = "Hi"        # local — invisible outside
+    print(greeting + ", " + name + "!")
+end
+
+greet("Alice")                   # Hello, Alice!
+# print(local_message)          # Error — no such variable here
+</code></pre>
+
+<h2>9.7 Closures</h2>
+<p>A function defined <i>inside</i> another function can capture the surrounding function's variables and
+parameters. Such a function is called a closure, and it remembers its environment even after the outer function has
+returned.</p>
+<pre><code>func make_adder(x)
+    func add(y)
+        return x + y
+    end
+    return add
+end
+
+add5 = make_adder(5)
+print(add5(10))      # 15
+print(add5(100))     # 105
+</code></pre>
+<p>Each call to the factory creates an independent closure with its own captured state. State can also be shared
+through a mutable object such as a list:</p>
+<pre><code>func make_counter()
+    state = []
+    func increment()
+        state.append(len(state))
+        return len(state)
+    end
+    return increment
+end
+
+c1 = make_counter()
+print(c1())    # 1
+print(c1())    # 2
+print(c1())    # 3
+c2 = make_counter()
+print(c2())    # 1   (independent counter)
+print(c1())    # 4   (c1 still remembers its own state)
+</code></pre>
+<p>Closures nest to any depth and can capture parameters:</p>
+<pre><code>func multiplier(factor)
+    func mul(n)
+        return factor * n
+    end
+    return mul
+end
+
+double = multiplier(2)
+triple_m = multiplier(3)
+print(double(21))      # 42
+print(triple_m(14))    # 42
+</code></pre>
+
+<h2>9.8 Generators with <code>yield</code></h2>
+<p>A function that contains <code>yield</code> becomes a generator. Calling it returns a generator object instead
+of running the body. Each call to the built-in <code>next()</code> runs the body up to the next <code>yield</code>
+and returns the yielded value, suspending execution until the next call.</p>
+<pre><code>func naturals(n)
+    i = 0
+    while i < n
+        yield i
+        i = i + 1
+    end
+end
+
+g = naturals(3)
+print(next(g))    # 0
+print(next(g))    # 1
+print(next(g))    # 2
+</code></pre>
+<pre class="output"><code>0
+1
+2
+</code></pre>
+<p>Generators are ideal for lazily producing sequences that would be wasteful to materialize all at once.</p>
+
+<h2>9.9 Practical Function Patterns</h2>
+
+<h3>Even / odd helpers</h3>
+<pre><code>func is_even(n)
+    return n % 2 == 0
+end
+
+func is_odd(n)
+    return not is_even(n)
+end
+
+for i in 0 to 10
+    if is_even(i)
+        print(i + " is even")
+    else
+        print(i + " is odd")
+    end
+end
+</code></pre>
+
+<h3>Power by repeated multiplication</h3>
+<pre><code>func power(base, exp)
+    result = 1
+    i = 0
+    while i < exp
+        result = result * base
+        i = i + 1
+    end
+    return result
+end
+
+print(power(2, 10))    # 1024
+print(power(5, 3))     # 125
+</code></pre>
+
+<h2>9.10 Summary</h2>
+<table>
+<tr><th>Feature</th><th>Syntax</th></tr>
+<tr><td>Define</td><td><code>func name(params) ... end</code></td></tr>
+<tr><td>Return</td><td><code>return expression</code></td></tr>
+<tr><td>Call</td><td><code>name(arguments)</code></td></tr>
+<tr><td>Recursion</td><td>A function calls itself</td></tr>
+<tr><td>Closure</td><td>An inner function captures the enclosing scope</td></tr>
+<tr><td>Generator</td><td><code>yield value</code> inside a function; drive with <code>next(g)</code></td></tr>
+</table>
+
+<h1 id="ch10">10. Object-Oriented Programming</h1>
+
+<h2>10.1 Classes and Instances</h2>
+<p>JTS GO supports classes, methods, and inheritance. A class is a blueprint; an instance is an object created from
+it. The constructor is the <code>init</code> method, and instances are created with <code>new</code>.</p>
+<pre><code>class Animal
+    func init(self, name)
+        self.name = name
+    end
+end
+
+a = new Animal("Cat")
+print(a.name)    # Cat
+</code></pre>
+
+<h2>10.2 The <code>self</code> Keyword</h2>
+<p>Every method takes <code>self</code> as its first parameter. Inside a method, <code>self</code> refers to the
+object the method was called on. Fields are simply attributes stored on <code>self</code> with
+<code>self.field = value</code>.</p>
+<pre><code>class Animal
+    func init(self, name)
+        self.name = name
+    end
+
+    func speak(self)
+        print(self.name + " says hello!")
+    end
+
+    func greet(self, other)
+        print(self.name + " greets " + other + "!")
+    end
+end
+
+a = new Animal("Cat")
+a.speak()          # Cat says hello!
+a.greet("Dog")     # Cat greets Dog!
+print(a.name)      # Cat
+</code></pre>
+
+<h2>10.3 Inheritance with <code>extends</code></h2>
+<p>A class can inherit from another with <code>extends</code>. The subclass receives all methods and fields of the
+parent, and can add its own. Instances are created with <code>new</code> using the subclass name.</p>
+<pre><code>class Animal
+    func init(self, name)
+        self.name = name
+    end
+
+    func speak(self)
+        print(self.name + " makes a sound")
+    end
+end
+
+class Dog extends Animal
+    func bark(self)
+        print(self.name + " barks!")
+    end
+end
+
+d = new Dog("Rex")
+d.speak()          # Rex makes a sound   (inherited method)
+d.bark()           # Rex barks!          (own method)
+print(d.name)      # Rex
+</code></pre>
+
+<div class="note"><b>Note:</b> the <code>super</code> keyword exists in the language for advanced cases, and the
+<code>extends</code> keyword declares the parent class. Chapter 10.5 shows a complete example.</div>
+
+<h2>10.4 Fields Are Open</h2>
+<p>Objects are flexible: you can add or read fields on an instance at any time.</p>
+<pre><code>class Point
+    func init(self, x, y)
+        self.x = x
+        self.y = y
+    end
+end
+
+p = new Point(3, 4)
+print(p.x)        # 3
+p.label = "origin-relative"    # add a brand-new field
+print(p.label)
+</code></pre>
+
+<h2>10.5 A Complete OOP Example</h2>
+<p>This example models a bank account with inheritance and method calls:</p>
+<pre><code>class Account
+    func init(self, owner)
+        self.owner = owner
+        self.balance = 0
+    end
+
+    func deposit(self, amount)
+        self.balance = self.balance + amount
+    end
+
+    func withdraw(self, amount)
+        if amount <= self.balance
+            self.balance = self.balance - amount
+        else
+            print("Insufficient funds")
+        end
+    end
+
+    func report(self)
+        print(self.owner + " has $" + self.balance)
+    end
+end
+
+class SavingsAccount extends Account
+    func add_interest(self, rate)
+        self.balance = self.balance + self.balance * rate
+    end
+end
+
+acc = new SavingsAccount("Alice")
+acc.deposit(100)
+acc.deposit(50)
+acc.withdraw(30)
+acc.add_interest(0.05)
+acc.report()
+</code></pre>
+<pre class="output"><code>Alice has $126
+</code></pre>
+
+<h2>10.6 When to Use Classes</h2>
+<ul>
+<li>When data and behavior travel together (a <code>Dog</code> with a <code>name</code> and a <code>bark()</code>).</li>
+<li>When you want multiple objects with the same shape but independent state.</li>
+<li>When inheritance expresses a natural hierarchy (<code>SavingsAccount</code> is an <code>Account</code>).</li>
+</ul>
+<p>For simple groupings of data, a dict (Chapter 11) is often enough. Prefer the simplest tool that fits.</p>
+
+<h1 id="ch11">11. Collections: Lists, Dicts, and Sets</h1>
+
+<h2>11.1 Lists</h2>
+<p>A list is an ordered collection of values. Lists are written with square brackets, hold any mixture of types,
+and support indexing from 0 (negative indices count from the end).</p>
+<pre><code>lst = [10, 20, 30]
+print(lst[0])        # 10
+print(lst[-1])       # 30
+print(len(lst))      # 3
+
+mixed = ["a", 42, true, nil, [1, 2]]
+print(len(mixed))    # 5
+</code></pre>
+
+<h3>Building lists</h3>
+<pre><code>empty = []
+squares = [1, 4, 9, 16]
+repeated = [0] * 3   # ??? — see note below
+</code></pre>
+<div class="note"><b>Note:</b> list multiplication is not a core operator in JTS GO. To repeat a list, use the
+<code>seq</code> scroll's <code>repeat_times</code> (Chapter 29) or a loop.</div>
+
+<h3>Adding, removing, sorting</h3>
+<p>Methods are called directly on the list. The same operations also exist as global functions.</p>
+<pre><code>lst = [3, 1, 2]
+
+lst.append(4)       # add to the end          -> [3, 1, 2, 4]
+lst.sort()          # sort ascending          -> [1, 2, 3, 4]
+print(lst)          # [1, 2, 3, 4]
+
+lst.remove(2)       # remove first occurrence of the value
+print(lst)          # [1, 3, 4]
+
+lst.pop()           # remove and return the last element
+print(lst)          # [1, 3]
+
+lst.insert(1, 9)    # insert at an index
+print(lst)          # [1, 9, 3]
+
+lst.extend([7, 8])  # append all elements of another list
+print(lst)          # [1, 9, 3, 7, 8]
+
+lst.reverse()
+print(lst)          # [8, 7, 3, 9, 1]
+</code></pre>
+<pre class="output"><code>[1, 2, 3, 4]
+[1, 3, 4]
+[1, 3]
+[1, 9, 3]
+[1, 9, 3, 7, 8]
+[8, 7, 3, 9, 1]
+</code></pre>
+<p>Global equivalents: <code>append(lst, x)</code>, <code>insert(lst, i, x)</code>,
+<code>extend(lst, other)</code>. Both styles work; pick one and be consistent.</p>
+
+<h3>Copying, clearing, finding</h3>
+<pre><code>original = [1, 2, 3]
+copy = original.copy()     # an independent copy
+print(copy)                # [1, 2, 3]
+
+print([1, 2, 1, 2].index(2))   # 1   (first index of value 2)
+print([1, 2, 1, 2].count(1))   # 2   (how many times 1 appears)
+</code></pre>
+<div class="note"><b>Note:</b> <code>list</code> is a keyword (it denotes the list type in certain contexts), so
+avoid naming a variable <code>list</code>. Use <code>lst</code>, <code>items</code>, or <code>data</code>.</div>
+
+<h3>Iterating over a list</h3>
+<pre><code>fruits = ["apple", "banana", "cherry"]
+for fruit in fruits
+    print(fruit)
+end
+</code></pre>
+
+<h3>Comprehensions</h3>
+<p>List comprehensions build a list from an expression, an iteration, and an optional filter:</p>
+<pre><code>squares = [x * x for x in range(1, 6)]
+print(squares)                 # [1, 4, 9, 16, 25]
+
+evens = [x for x in range(10) if x % 2 == 0]
+print(evens)                   # [0, 2, 4, 6, 8]
+
+names = ["alice", "bob", "carol"]
+print([n.upper() for n in names])    # [ALICE, BOB, CAROL]
+
+neg = [-3, -1, 0, 2, 4]
+print([x for x in neg if x > 0])     # [2, 4]
+
+nested = [[a for a in range(b)] for b in range(1, 4)]
+print(nested)                        # [[0], [0, 1], [0, 1, 2]]
+</code></pre>
+<pre class="output"><code>[1, 4, 9, 16, 25]
+[0, 2, 4, 6, 8]
+[ALICE, BOB, CAROL]
+[2, 4]
+[[0], [0, 1], [0, 1, 2]]
+</code></pre>
+
+<h2>11.2 Dicts</h2>
+<p>A dict (dictionary) maps string keys to values. Literal keys can be written with quotes
+(<code>{"name": "JTS"}</code>) or without (<code>{name: "JTS"}</code>).</p>
+<pre><code>d = {"name": "JTS", "year": 2026, "active": true}
+print(d["name"])      # JTS
+print(d["year"])      # 2026
+</code></pre>
+
+<h3>Reading keys safely</h3>
+<pre><code>d = {"a": 1, "b": 2}
+print(d.get("a"))           # 1
+print(d.get("missing"))     # nil
+print(d.get("missing", 99)) # 99   (a default value)
+print(d.has("b"))           # true
+print(d.has("z"))           # false
+</code></pre>
+
+<h3>Adding and updating keys</h3>
+<p>Add or merge keys with <code>update</code>. Unlike lists, dicts cannot be modified with subscript assignment
+(<code>d["k"] = v</code> is an error); use <code>update</code> instead.</p>
+<pre><code>d = {"a": 1, "b": 2}
+d.update({"c": 3})          # method form
+print(d.has("c"))           # true
+update(d, {"z": 26})        # global form
+print(d.get("z"))           # 26
+print(d)                    # {c: 3, a: 1, b: 2, z: 26}
+</code></pre>
+
+<div class="warn"><b>Gotcha:</b> a printed dict does <b>not</b> show keys in insertion order — the display order is
+not guaranteed. Never rely on dict ordering. (Note also that <code>del d["b"]</code> from Chapter 6 works for
+deleting keys.)</div>
+
+<h3>Viewing contents</h3>
+<pre><code>d = {"a": 1, "b": 2}
+print(d.keys())      # [a, b]
+print(d.values())    # [1, 2]
+print(d.items())     # [[a, 1], [b, 2]]
+
+for k in d.keys()
+    print(k + " = " + d[k])
+end
+</code></pre>
+
+<h3>Membership and deletion</h3>
+<pre><code>d = {"a": 1, "b": 2}
+print("a" in d)      # true   (key membership)
+del d["a"]
+print(d.has("a"))    # false
+</code></pre>
+
+<h3>Iterating a dict's keys</h3>
+<pre><code>d = {"name": "JTS", "year": 2026}
+for key in d.keys()
+    print(key)
+end
+</code></pre>
+
+<h2>11.3 Sets</h2>
+<p>A set is an unordered collection of unique values. Set literals use braces with two or more elements. Use the
+<code>set</code> function to build a set from a list or string, or to create a single-element set.</p>
+<pre><code>s = {1, 2, 3, 2, 1}       # duplicates are discarded
+print(s)                   # {1, 2, 3}
+print(len(s))              # 3
+
+t = set([4, 5, 6])
+print(t)                   # {4, 5, 6}
+
+single = set([1])
+print(single)              # {1}
+
+chars = set("abc")
+print(chars)               # {a, b, c}
+</code></pre>
+
+<h3>Set algebra operators</h3>
+<pre><code>s = {1, 2, 3}
+t = set([4, 5, 6])
+
+print(s | t)                       # union        -> {1, 2, 3, 4, 5, 6}
+print(s & set([2, 3, 4]))          # intersection -> {2, 3}
+print(s - set([1]))                # difference   -> {2, 3}
+print(s ^ set([2, 7]))             # symmetric difference -> {1, 3, 7}
+</code></pre>
+<pre class="output"><code>{1, 2, 3, 4, 5, 6}
+{2, 3}
+{2, 3}
+{1, 3, 7}
+</code></pre>
+
+<h3>Set functions</h3>
+<pre><code>s = {1, 2, 3}
+set_add(s, 7)
+print(7 in s)            # true
+print(set_contains(s, 7)) # true
+set_remove(s, 3)
+print(3 in s)            # false
+print(len(s))            # 3
+</code></pre>
+
+<h3>Iterating a set</h3>
+<pre><code>for item in {1, 2, 3}
+    print("item: " + item)
+end
+</code></pre>
+
+<h2>11.4 Choosing the Right Collection</h2>
+<table>
+<tr><th>Need</th><th>Use</th></tr>
+<tr><td>Ordered values, indexed by position</td><td>List</td></tr>
+<tr><td>Look up values by string key</td><td>Dict</td></tr>
+<tr><td>Unique values, fast membership tests, set algebra</td><td>Set</td></tr>
+<tr><td>Records / structured data that travels together</td><td>Dict, or a class instance</td></tr>
+</table>
+
+<h1 id="ch12">12. Strings in Depth</h1>
+
+<h2>12.1 Creating Strings</h2>
+<pre><code>greeting = "Hello, World!"
+empty = ""
+</code></pre>
+
+<h2>12.2 Length, Indexing, and Slicing</h2>
+<pre><code>s = "Hello"
+print(len(s))        # 5
+print(s[0])          # H
+print(s[4])          # o
+print(s[-1])         # o
+
+print(s.substring(1, 3))     # el     (start inclusive, end exclusive)
+print(s.substring(0, 5))     # Hello
+print(s.substring(2))        # llo    (from index 2 to the end)
+</code></pre>
+<pre class="output"><code>5
+H
+o
+o
+el
+Hello
+llo
+</code></pre>
+<p><code>substring(start, end)</code> treats <code>end</code> as <b>exclusive</b> — exactly like Java's
+<code>substring</code>. With one argument, it runs from <code>start</code> to the end of the string.</p>
+
+<div class="warn"><b>Gotcha:</b> because the end index is exclusive, "all but the last character" is
+<code>s.substring(0, len(s) - 1)</code> and "from index 1 onward" is <code>s.substring(1)</code>.</div>
+
+<h2>12.3 Case Conversion and Inspection</h2>
+<pre><code>s = "Hello World"
+print(s.upper())        # HELLO WORLD
+print(s.lower())        # hello world
+print(s.capitalize())   # Hello world      (first letter only)
+print(s.title())        # Hello World      (every word capitalized)
+print(s.swapcase())     # hELLO wORLD
+</code></pre>
+
+<h3>Predicates</h3>
+<pre><code>print("123".is_digit())    # true
+print("abc".is_alpha())    # true
+print("a1".is_alnum())     # true
+print(" ".is_space())      # true
+print("ABC".is_upper())    # true
+print("abc".is_lower())    # true
+</code></pre>
+
+<h2>12.4 Trimming and Padding</h2>
+<pre><code>print("  hi  ".trim())     # hi
+print("  x  ".lstrip())    # "x  "
+print("  x  ".rstrip())    # "  x"
+
+print("7".zfill(3))        # 007
+print("hi".ljust(5))       # "hi   "
+print("hi".rjust(5))       # "   hi"
+print("hi".center(6))      # "  hi  "
+</code></pre>
+
+<h2>12.5 Searching and Substitution</h2>
+<pre><code>s = "Hello World"
+print(s.contains("World"))       # true
+print(s.contains("world"))       # false   (case-sensitive)
+print(s.starts_with("Hello"))    # true
+print(s.ends_with("World"))      # true
+print(s.find("o"))               # 4       (first index of the substring)
+print(s.replace("World", "JTS")) # Hello JTS
+</code></pre>
+
+<h2>12.6 Splitting and Joining</h2>
+<p><code>split</code> divides a string on a delimiter and returns a list. <code>join</code> assembles a list into a
+string; it expects the <b>separator first</b>, either as a global call or as a method on the separator string.</p>
+<pre><code>print("a,b,c".split(","))        # [a, b, c]
+print("a\nb\nc".splitlines())    # [a, b, c]
+print(join("-", ["a", "b", "c"]))  # a-b-c
+print("-".join(["a", "b", "c"]))   # a-b-c   (equivalent)
+</code></pre>
+
+<h2>12.7 Counting and Formatting</h2>
+<pre><code>s = "hello"
+print(s.count("l"))      # 2
+print(s.find("l"))       # 2
+
+name = "JTS"
+print("name={0},age={1}".format(name, 30))   # name=JTS,age=30
+</code></pre>
+
+<h2>12.8 Iterating Characters</h2>
+<pre><code>word = "hello"
+for c in word
+    print(c)
+end
+</code></pre>
+
+<h2>12.9 String Utilities in the Standard Library</h2>
+<p>For heavier string work — slugs, casing conversions, ciphers, word counts — the <code>text</code> and
+<code>strings</code> scrolls provide ready-made functions. They are documented in Chapters 26 and 27.</p>
+
+<h1 id="ch13">13. Error Handling</h1>
+
+<h2>13.1 <code>throw</code> and <code>catch</code></h2>
+<p>JTS GO uses an exception model with <code>try</code>, <code>catch</code>, and <code>throw</code>. You can throw
+any value (usually a descriptive string), and a <code>catch</code> clause receives it.</p>
+<pre><code>try
+    throw "Something went wrong!"
+catch e
+    print("Caught: " + e)
+end
+</code></pre>
+<pre class="output"><code>Caught: Something went wrong!
+</code></pre>
+
+<h2>13.2 <code>finally</code></h2>
+<p>A <code>finally</code> block runs whether or not an exception was thrown. It is the right place for cleanup that
+must always happen — closing files, resetting state, and so on.</p>
+<pre><code>try
+    throw "failure"
+catch e
+    print("caught " + e)
+finally
+    print("cleanup always runs")
+end
+</code></pre>
+<pre class="output"><code>caught failure
+cleanup always runs
+</code></pre>
+
+<h2>13.3 Catching Only What You Need</h2>
+<p>A common pattern is to attempt an operation and fall back on a sensible default when it fails:</p>
+<pre><code>func safe_read(path)
+    try
+        return read_file(path)
+    catch e
+        return ""
+    end
+end
+
+content = safe_read("maybe_missing.txt")
+print("content is: '" + content + "'")
+</code></pre>
+
+<h2>13.4 Runtime Errors</h2>
+<p>When the virtual machine hits an invalid operation — calling a non-function, indexing out of bounds, passing the
+wrong number of arguments — it reports a runtime error with the source line, for example:</p>
+<pre><code>JTS GO: Can only call functions.
+[line 12] in script
+Runtime error.
+</code></pre>
+<p>These messages name the operation and the line number, which points you straight to the offending statement.
+A <code>try/catch</code> cannot always intercept internal VM errors, so the first line of defence is correct code;
+the second is <code>assert</code> and careful validation.</p>
+
+<h2>13.5 Defensive Programming Checklist</h2>
+<ul>
+<li>Validate inputs before using them (<code>type()</code>, <code>len()</code>, <code>has()</code>).</li>
+<li>Use <code>d.get(key, default)</code> instead of assuming a key exists.</li>
+<li>Use <code>try/catch</code> around operations that can legitimately fail (file I/O).</li>
+<li>Use <code>assert</code> to document invariants that must always hold.</li>
+</ul>

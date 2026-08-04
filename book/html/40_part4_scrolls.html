@@ -1,0 +1,107 @@
+<h1 id="ch25">25. The Scroll System</h1>
+
+<h2>25.1 What Is a Scroll?</h2>
+<p>A <i>scroll</i> is a JTS GO source file that acts as a library module. Scrolls are plain <code>.jts</code>
+files — which means the entire standard library is readable, editable, and copyable JTS GO source code. The name
+evokes an ancient library: each scroll holds knowledge, and <code>bring</code>ing it makes that knowledge
+available to your program.</p>
+
+<h2>25.2 Bringing a Scroll: <code>bring</code></h2>
+<p>To use a standard-library scroll, write <code>bring name</code> near the top of your program. The scroll's
+functions become available under a namespace with the same name:</p>
+<pre><code>bring math
+bring strings
+
+print(math.factorial(5))            # 120
+print(strings.is_palindrome("racecar"))   # true
+</code></pre>
+<p>Scroll globals also leak into the program's flat namespace, so <code>math.factorial(5)</code> and
+<code>factorial(5)</code> are both valid after <code>bring math</code>:</p>
+<pre><code>bring math
+print(math.pi)        # 3.14159   (namespaced)
+print(pi)             # 3.14159   (flat)
+</code></pre>
+
+<h2>25.3 Sub-Scrolls and Nested Namespaces</h2>
+<p>Scrolls can be organised into nested namespaces:</p>
+<pre><code>bring testmath.stats
+
+print(testmath.stats.mean([1, 2, 3, 4, 5]))    # 3
+</code></pre>
+
+<h2>25.4 How Scrolls Resolve</h2>
+<p>When the interpreter encounters <code>bring name</code>, it looks for a file named <code>name.jts</code>
+(and sub-scroll paths such as <code>name/stats.jts</code>) in this order:</p>
+<ol>
+<li>The directory containing your program.</li>
+<li>The installed SDK directory.</li>
+<li>The current working directory, looking inside a <code>scrolls/</code> subfolder.</li>
+</ol>
+<p>If the scrolls folder is somewhere unusual, set the <code>JTS_SCROLLS</code> environment variable to its
+location.</p>
+
+<div class="tip"><b>Tip:</b> this resolution order means you can override any standard scroll by placing your own
+file of the same name next to your program — a simple but powerful way to customize the library.</div>
+
+<h2>25.5 Bringing Is Idempotent</h2>
+<p>Bringing the same scroll twice does not double-execute it:</p>
+<pre><code>bring math
+bring math          # safe — no-op the second time
+print("OK")
+</code></pre>
+
+<h2>25.6 Writing Your Own Scroll</h2>
+<p>A scroll is just a file of definitions. Create <code>geometry.jts</code>:</p>
+<pre><code># geometry.jts — a custom scroll
+pi = 3.141592653589793
+
+func circle_area(r)
+    return pi * r * r
+end
+
+func rectangle_area(w, h)
+    return w * h
+end
+</code></pre>
+<p>Now use it from any program:</p>
+<pre><code>bring geometry
+
+print(geometry.circle_area(2))        # 12.5664
+print(rectangle_area(3, 4))           # 12     (flat access)
+</code></pre>
+
+<h2>25.7 Importing a File: <code>import</code></h2>
+<p>The <code>import</code> keyword loads and executes another JTS GO file, making its global
+definitions available to the current program. Unlike <code>bring</code>, which resolves bare
+names from the scroll search path, <code>import</code> takes a quoted path and is equivalent to
+calling the built-in <code>import_file(path)</code> function (Chapter 20.3):</p>
+<pre><code>import "helpers.jts"       # runs helpers.jts — its globals are now visible
+print(double(5))           # 10   (defined inside helpers.jts)
+</code></pre>
+<p>Use <code>import</code> when you want to load a project-local file by path. Use
+<code>bring</code> when you want to load a standard-library scroll by name.</p>
+
+<h2>25.8 The Standard Scrolls</h2>
+<p>Version 2.1 ships fourteen standard scrolls. The remainder of Part IV documents each one with examples and
+verified output.</p>
+<table>
+<tr><th>Scroll</th><th>Focus</th><th>Chapter</th></tr>
+<tr><td><code>text</code></td><td>Text utilities: slugs, case conversions, ciphers, word tools</td><td>26</td></tr>
+<tr><td><code>strings</code></td><td>Core string helpers: reverse, palindrome, repetition</td><td>27</td></tr>
+<tr><td><code>stats</code></td><td>Statistics: mean, median, variance, correlation</td><td>28</td></tr>
+<tr><td><code>seq</code></td><td>Sequence operations: head, tail, zip, windows, frequencies</td><td>29</td></tr>
+<tr><td><code>lists</code></td><td>List helpers: flatten, unique, chunk, rotate</td><td>30</td></tr>
+<tr><td><code>numbers</code></td><td>Number utilities: digit tools, bases, ordinals, formatting</td><td>31</td></tr>
+<tr><td><code>math</code></td><td>Constants and mathematical helpers</td><td>32</td></tr>
+<tr><td><code>fs</code></td><td>File-system helpers built on the file built-ins</td><td>33</td></tr>
+<tr><td><code>dates</code></td><td>Date and time helpers</td><td>34</td></tr>
+<tr><td><code>sets</code></td><td>Set helpers wrapping the built-in set operations</td><td>35</td></tr>
+<tr><td><code>json</code></td><td>JSON wrappers around the JSON built-ins</td><td>36</td></tr>
+<tr><td><code>os</code></td><td>Operating-system helpers</td><td>37</td></tr>
+<tr><td><code>random</code></td><td>Random helpers: choice, sample, coin flips</td><td>38</td></tr>
+<tr><td><code>time</code></td><td>Time helpers: stamps, epochs, today's date</td><td>39</td></tr>
+</table>
+
+<div class="note"><b>Note:</b> because scrolls are ordinary JTS GO source, everything in the following chapters can
+be verified by opening the scroll file itself and reading the implementation. Understanding a scroll's source is an
+excellent way to improve your own JTS GO.</div>

@@ -1,0 +1,343 @@
+<h1 id="ch18">18. Dict and Set Built-in Functions</h1>
+
+<h2>18.1 Dict Methods</h2>
+<p>Dict methods are called on the dict value. They take the dict as an implicit receiver.</p>
+
+<h3><code>d.get(key, default?)</code></h3>
+<p>Returns the value for a key, or a default (by default <code>nil</code>) when the key is missing.</p>
+<pre><code>d = {"a": 1, "b": 2}
+print(d.get("a"))            # 1
+print(d.get("missing"))      # nil
+print(d.get("missing", 99))  # 99
+</code></pre>
+
+<h3><code>d.has(key)</code></h3>
+<pre><code>d = {"a": 1}
+print(d.has("a"))    # true
+print(d.has("z"))    # false
+</code></pre>
+
+<h3><code>d.update(other)</code></h3>
+<p>Merges another dict into <code>d</code>. This is the way to add or replace keys (subscript assignment is not
+supported for dicts).</p>
+<pre><code>d = {"a": 1}
+d.update({"b": 2, "c": 3})
+print(d.has("c"))    # true
+print(d.get("b"))    # 2
+</code></pre>
+
+<h3><code>d.keys()</code>, <code>d.values()</code>, <code>d.items()</code></h3>
+<pre><code>d = {"a": 1, "b": 2}
+print(d.keys())       # [a, b]
+print(d.values())     # [1, 2]
+print(d.items())      # [[a, 1], [b, 2]]
+</code></pre>
+<p><code>items()</code> returns a list of <code>[key, value]</code> pairs — perfect for iteration:</p>
+<pre><code>d = {"x": 10, "y": 20}
+for pair in d.items()
+    print(pair[0] + " -> " + pair[1])
+end
+</code></pre>
+
+<h2>18.2 Set Functions</h2>
+<p>Sets can be built with <code>set(...)</code>, manipulated with the <code>set_*</code> functions, and combined
+with the operators <code>|</code>, <code>&amp;</code>, <code>-</code>, and <code>^</code>.</p>
+
+<h3>Creating sets</h3>
+<pre><code>s1 = {1, 2, 3}          # set literal (two or more elements)
+s2 = set([4, 5, 6])     # set from a list
+s3 = set("abc")         # set from a string -> {a, b, c}
+s4 = set([1])           # single-element set (a one-element brace is invalid)
+</code></pre>
+
+<h3>Membership and editing</h3>
+<pre><code>s = {1, 2, 3}
+print(2 in s)                # true
+print(set_contains(s, 2))    # true
+
+set_add(s, 7)                # adds 7 (a no-op if already present)
+print(7 in s)                # true
+
+set_remove(s, 3)             # removes 3
+print(3 in s)                # false
+
+print(len(s))                # 3
+</code></pre>
+
+<h3>Set algebra</h3>
+<pre><code>a = {1, 2, 3}
+b = set([2, 3, 4])
+
+print(set_union(a, b))          # {1, 2, 3, 4}
+print(set_intersection(a, b))   # {2, 3}
+print(set_difference(a, b))     # {1}
+</code></pre>
+<p>Each <code>set_*</code> function has an operator equivalent: <code>a | b</code>, <code>a &amp; b</code>,
+<code>a - b</code>, <code>a ^ b</code>.</p>
+
+<h1 id="ch19">19. Random Numbers</h1>
+
+<h2>19.1 <code>rand()</code></h2>
+<p>Returns a random number in the interval <code>[0, 1)</code> (greater than or equal to 0, less than 1).</p>
+<pre><code>print(rand() >= 0 and rand() < 1)   # true
+print(rand())                        # some value in [0, 1)
+</code></pre>
+
+<h2>19.2 <code>randint(a, b)</code></h2>
+<p>Returns a random integer between <code>a</code> and <code>b</code>, <b>inclusive</b> on both ends.</p>
+<pre><code>print(randint(1, 6))    # a random die roll: 1, 2, 3, 4, 5, or 6
+</code></pre>
+
+<h2>19.3 <code>seed(n)</code></h2>
+<p>Seeds the random generator. Using the same seed reproduces the same sequence — invaluable for testing and for
+reproducible machine-learning runs.</p>
+<pre><code>seed(42)
+print(rand())
+print(rand())
+
+seed(42)                # reseed
+print(rand())           # identical to the first value above
+print(rand())           # identical to the second value above
+</code></pre>
+
+<h2>19.4 <code>shuffle(list)</code></h2>
+<p>Randomly reorders a list <b>in place</b>. Note that <code>shuffle</code> is a positional function — call it as
+<code>shuffle(lst)</code>, not <code>lst.shuffle()</code>.</p>
+<pre><code>lst = [1, 2, 3, 4, 5]
+shuffle(lst)
+print(lst)    # some random ordering of 1..5
+</code></pre>
+<div class="warn"><b>Gotcha:</b> because <code>shuffle</code> modifies its argument, use <code>lst.copy()</code>
+first if you need to keep the original order — exactly what the <code>seq</code> scroll does in
+<code>shuffle_copy</code> (Chapter 29).</div>
+
+<h2>19.5 A Dice Roller</h2>
+<pre><code>func roll_dice(sides, times)
+    out = []
+    for i in 0 to times
+        out.append(randint(1, sides))
+    end
+    return out
+end
+
+print(roll_dice(6, 5))    # e.g. [4, 1, 6, 3, 5]
+</code></pre>
+
+<h1 id="ch20">20. File and OS Functions</h1>
+
+<h2>20.1 <code>read_file(path)</code> and <code>write_file(path, content)</code></h2>
+<p><code>read_file</code> returns the entire contents of a text file as a string. <code>write_file</code> writes a
+string to a file, replacing whatever was there.</p>
+<pre><code>write_file("notes.txt", "Hello from JTS GO!")
+content = read_file("notes.txt")
+print(content)                     # Hello from JTS GO!
+</code></pre>
+
+<h2>20.2 <code>file_exists(path)</code></h2>
+<pre><code>print(file_exists("notes.txt"))    # true
+print(file_exists("nope.txt"))     # false
+</code></pre>
+
+<h2>20.3 <code>import_file(path)</code></h2>
+<p>Loads and executes another <code>.jts</code> file at the current position. This is the low-level mechanism the
+scroll system is built on (Chapter 25).</p>
+<pre><code>import_file("helpers.jts")    # runs helpers.jts, making its globals available
+</code></pre>
+
+<h2>20.4 Environment and Process</h2>
+<pre><code>print(cwd())                   # the current working directory
+print(len(env("PATH")))        # the length of the PATH environment variable
+print(args())                  # a list of command-line arguments
+exit(0)                        # terminate the program with exit code 0
+</code></pre>
+<ul>
+<li><code>env(name)</code> — value of an environment variable.</li>
+<li><code>cwd()</code> — current working directory.</li>
+<li><code>args()</code> — command-line arguments as a list.</li>
+<li><code>exit(code?)</code> — terminate the program immediately.</li>
+</ul>
+
+<h2>20.5 Reading a Whole File, Line by Line</h2>
+<pre><code>write_file("data.txt", "alpha\nbeta\ngamma\n")
+lines = read_file("data.txt").splitlines()
+for line in lines
+    if line == ""
+        continue
+    end
+    print("line: " + line)
+end
+</code></pre>
+<p>For convenience, the <code>fs</code> scroll wraps all of this (Chapter 33).</p>
+
+<h1 id="ch21">21. JSON</h1>
+
+<h2>21.1 <code>json_parse(text)</code></h2>
+<p>Parses a JSON string into JTS GO values: JSON objects become dicts, arrays become lists, and numbers, strings,
+booleans, and <code>null</code> map to their natural equivalents.</p>
+<pre><code>parsed = json_parse('{"name": "JTS", "year": 2026, "tags": ["a", "b"], "ok": true}')
+print(parsed["name"])       # JTS
+print(parsed["year"])       # 2026
+print(parsed["tags"])       # [a, b]
+print(parsed["ok"])         # true
+</code></pre>
+
+<h2>21.2 <code>json_stringify(value)</code></h2>
+<p>Converts a JTS GO value into a JSON string. Dicts, lists, numbers, strings, booleans, and <code>nil</code> are
+all supported.</p>
+<pre><code>print(json_stringify({"a": 1, "b": [2, 3]}))    # {"a":1,"b":[2,3]}
+print(json_stringify([1, "two", false, nil]))   # [1,"two",false,null]
+</code></pre>
+
+<h2>21.3 Round Trip</h2>
+<pre><code>config = {"name": "server", "port": 8080, "debug": true}
+text = json_stringify(config)
+print(text)
+
+config_again = json_parse(text)
+print(config_again["name"])    # server
+print(config_again["port"])    # 8080
+</code></pre>
+<p>The <code>json</code> scroll wraps these functions for convenience (Chapter 36).</p>
+
+<h1 id="ch22">22. Time and Dates</h1>
+
+<h2>22.1 <code>now()</code></h2>
+<p>Returns the current time as Unix epoch seconds — the number of seconds since 1970-01-01 00:00:00 UTC.</p>
+<pre><code>print(now())    # e.g. 1777892400
+</code></pre>
+
+<h2>22.2 <code>sleep(seconds)</code></h2>
+<p>Pauses the program for the given number of seconds. Fractions are allowed.</p>
+<pre><code>print("before")
+sleep(1.0)              # wait 1 second
+print("after")
+</code></pre>
+
+<h2>22.3 <code>strftime(pattern, timestamp?)</code></h2>
+<p>Formats a timestamp (default: the current time) according to a <code>strftime</code>-style pattern. This is the
+same pattern language used by the C standard library and Python's <code>strftime</code>.</p>
+<pre><code>print(strftime("%Y-%m-%d"))            # current date, e.g. 2026-08-04
+print(strftime("%H:%M:%S"))            # current time, e.g. 14:30:00
+print(strftime("%Y-%m-%d %H:%M:%S"))   # combined stamp
+print(strftime("%A, %d %B %Y"))        # e.g. Tuesday, 04 August 2026
+</code></pre>
+<p>Common conversion specifiers:</p>
+<table>
+<tr><th>Specifier</th><th>Meaning</th><th>Example</th></tr>
+<tr><td><code>%Y</code></td><td>Year with century</td><td><code>2026</code></td></tr>
+<tr><td><code>%y</code></td><td>Year without century</td><td><code>26</code></td></tr>
+<tr><td><code>%m</code></td><td>Month (01–12)</td><td><code>08</code></td></tr>
+<tr><td><code>%d</code></td><td>Day of month (01–31)</td><td><code>04</code></td></tr>
+<tr><td><code>%H</code></td><td>Hour, 24-hour (00–23)</td><td><code>14</code></td></tr>
+<tr><td><code>%M</code></td><td>Minute (00–59)</td><td><code>30</code></td></tr>
+<tr><td><code>%S</code></td><td>Second (00–59)</td><td><code>00</code></td></tr>
+<tr><td><code>%a</code> / <code>%A</code></td><td>Weekday, abbreviated / full</td><td><code>Tue</code> / <code>Tuesday</code></td></tr>
+<tr><td><code>%b</code> / <code>%B</code></td><td>Month, abbreviated / full</td><td><code>Aug</code> / <code>August</code></td></tr>
+<tr><td><code>%j</code></td><td>Day of year (001–366)</td><td><code>216</code></td></tr>
+<tr><td><code>%w</code></td><td>Weekday as number (0 = Sunday)</td><td><code>2</code></td></tr>
+<tr><td><code>%s</code></td><td>Unix epoch seconds</td><td><code>1777892400</code></td></tr>
+</table>
+
+<div class="warn"><b>Platform note:</b> <code>%u</code> (ISO weekday) and <code>%V</code> (ISO week) are not
+available in the Windows C runtime. The <code>dates</code> scroll computes ISO week numbers itself (Chapter 34).</div>
+
+<h2>22.4 Working with Epoch Arithmetic</h2>
+<p>Because timestamps are plain numbers, date math is straightforward: add 86,400 to move forward one day.</p>
+<pre><code>ts = now()
+tomorrow = ts + 86400
+print(strftime("%Y-%m-%d", ts))        # today
+print(strftime("%Y-%m-%d", tomorrow))  # tomorrow
+</code></pre>
+
+<h1 id="ch23">23. Web Development</h1>
+
+<h2>23.1 Serving a Web Page: <code>http_server(port, html)</code> and <code>http_start(server)</code></h2>
+<p>JTS GO can serve a complete website with two function calls. <code>http_server</code> creates a server for the
+given port and response body; <code>http_start</code> starts listening (blocking) and serves until interrupted.</p>
+<pre><code>html = "<h1>Hello from JTS GO!</h1><p>Served by the JTS web server.</p>"
+srv = http_server(8080, html)
+print("Open http://localhost:8080 in your browser")
+http_start(srv)
+</code></pre>
+<p>If no response body is given, the server returns a default <code>JTS GO Server</code> page.</p>
+
+<h2>23.2 Fetching Web Content: <code>http_request(url)</code></h2>
+<p><code>http_request</code> performs a GET request and returns the response body as a string. Both
+<code>http://</code> and <code>https://</code> URLs are supported.</p>
+<pre><code>body = http_request("http://example.com")
+print(len(body))    # length of the fetched page
+</code></pre>
+
+<h2>23.3 A Complete Example: A Portfolio Page</h2>
+<p>Chapter 41 builds a full multi-section website in JTS GO. The key idea is simple: build the HTML as a string
+(concatenating parts is fine), then serve it.</p>
+<pre><code>part1 = "<html><head><title>JTS GO</title></head><body>"
+part2 = "<h1>Welcome</h1><p>Built with JTS GO.</p>"
+part3 = "</body></html>"
+
+html = part1 + part2 + part3
+srv = http_server(8080, html)
+http_start(srv)
+</code></pre>
+
+<h1 id="ch24">24. Machine Learning and Tensors</h1>
+
+<p>JTS GO embeds a small but genuine AI toolkit: matrices, tensor data, activation functions, and loss functions.
+This makes it possible to build and train neural networks without any external libraries (Chapter 40 trains a real
+network on the XOR problem).</p>
+
+<h2>24.1 <code>tensor(nested_list)</code></h2>
+<p>Wraps nested list data into a tensor object used for numeric computation.</p>
+<pre><code>t = tensor([[1, 2, 3], [4, 5, 6]])
+print(t)   # a tensor representation of the 2x3 data
+</code></pre>
+
+<h2>24.2 <code>matrix(nested_list)</code></h2>
+<p>Creates a matrix with the given rows. Matrices support matrix multiplication and are the workhorse of linear
+algebra.</p>
+<pre><code>m = matrix([[1, 2], [3, 4]])
+print(m)
+</code></pre>
+
+<h2>24.3 <code>matmul(a, b)</code></h2>
+<p>Multiplies two matrices. The number of columns of <code>a</code> must equal the number of rows of
+<code>b</code>; otherwise an error is reported.</p>
+<pre><code>m1 = matrix([[1, 2], [3, 4]])
+m2 = matrix([[5, 6], [7, 8]])
+print(matmul(m1, m2))
+</code></pre>
+<pre class="output"><code>[[19, 22], [43, 50]]
+</code></pre>
+
+<h2>24.4 <code>sigmoid(x)</code></h2>
+<p>The logistic function <code>1 / (1 + e^-x)</code>. It squashes any number into the range <code>(0, 1)</code> and
+is the classic activation function for output layers.</p>
+<pre><code>print(sigmoid(0))      # 0.5
+print(sigmoid(3))      # 0.952574
+print(sigmoid(-3))     # 0.0474259
+</code></pre>
+
+<h2>24.5 <code>relu(x)</code></h2>
+<p>The rectified linear unit: <code>max(0, x)</code>. It is the most widely used activation for hidden layers.</p>
+<pre><code>print(relu(2))     # 2
+print(relu(0))     # 0
+print(relu(-5))    # 0
+</code></pre>
+
+<h2>24.6 <code>mse(predicted, actual)</code></h2>
+<p>Mean squared error: the average of the squared differences between two same-length lists. It measures how far a
+model's predictions are from the true values — lower is better.</p>
+<pre><code>print(mse([1, 2, 3], [1.1, 2.2, 3.1]))
+</code></pre>
+<pre class="output"><code>0.0333333
+</code></pre>
+
+<h2>24.7 Putting It Together</h2>
+<p>Three lines of JTS GO can already describe a tiny prediction pipeline:</p>
+<pre><code>m1 = matrix([[1, 2], [3, 4]])
+m2 = matrix([[5, 6], [7, 8]])
+print(matmul(m1, m2))   # [[19, 22], [43, 50]]
+print(sigmoid(0))       # 0.5
+print(relu(-5))         # 0
+print(mse([1, 2, 3], [1.1, 2.2, 3.1]))   # 0.0333333
+</code></pre>

@@ -1,0 +1,425 @@
+<h1 id="ch40">40. Machine Learning with JTS GO</h1>
+
+<p>JTS GO ships machine-learning primitives as built-ins: <code>tensor</code>, <code>matrix</code>,
+<code>matmul</code>, <code>sigmoid</code>, <code>relu</code>, and <code>mse</code> (Chapters 15 and 24). This
+chapter puts them together to train a real neural network: a 2-3-1 multi-layer perceptron that learns the XOR
+function, the classic "hello world" of machine learning.</p>
+
+<h2>40.1 The XOR Problem</h2>
+<p>XOR is not linearly separable: you cannot draw a single straight line that separates true from false outputs.
+A single-layer perceptron cannot learn it; a network with one hidden layer can. The dataset is tiny:</p>
+<table>
+<tr><th>Input A</th><th>Input B</th><th>XOR output</th></tr>
+<tr><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>0</td><td>1</td><td>1</td></tr>
+<tr><td>1</td><td>0</td><td>1</td></tr>
+<tr><td>1</td><td>1</td><td>0</td></tr>
+</table>
+
+<h2>40.2 Network Architecture</h2>
+<ul>
+<li><b>Input layer:</b> 2 neurons (the two bits).</li>
+<li><b>Hidden layer:</b> 3 neurons, each with a sigmoid activation.</li>
+<li><b>Output layer:</b> 1 neuron with a sigmoid activation, producing a value in <code>[0, 1]</code>.</li>
+</ul>
+<p>Each layer has an extra row of weights for the <i>bias</i> — an input that is always 1, giving each neuron a
+constant offset it can learn. The weight matrices are <code>w1</code> (3×3) and <code>w2</code> (4×1).</p>
+
+<h2>40.3 Random Initialization</h2>
+<p>Weights start as small random values near zero. The <code>for r in 0 to rows</code> loop form was introduced in
+Chapter 8:</p>
+<pre><code>func init_layer(rows, cols)
+    layer = []
+    for r in 0 to rows
+        row = []
+        for c in 0 to cols
+            append(row, rand() - 0.5)
+        end
+        append(layer, row)
+    end
+    return layer
+end
+
+w1 = init_layer(3, 3)   # inputs+1 rows, 3 hidden neurons
+w2 = init_layer(4, 1)   # hidden+1 rows, 1 output neuron
+</code></pre>
+
+<h2>40.4 The Forward Pass</h2>
+<p>Each hidden neuron computes a weighted sum of the inputs plus its bias, then applies <code>sigmoid</code>. The
+output neuron does the same using the hidden activations:</p>
+<pre><code>func forward(x)
+    a1 = []
+    for j in 0 to n_hidden
+        z = w1[n_in][j]
+        for i in 0 to n_in
+            z = z + x[i] * w1[i][j]
+        end
+        append(a1, sigmoid(z))
+    end
+
+    z = w2[n_hidden][0]
+    for j in 0 to n_hidden
+        z = z + a1[j] * w2[j][0]
+    end
+    out = sigmoid(z)
+    return [out, a1]
+end
+</code></pre>
+
+<h2>40.5 The Backward Pass (Gradient Descent)</h2>
+<p>For each training sample, the network computes its output, measures the error, and nudges every weight against
+the gradient of that error. The derivative of the sigmoid <code>s</code> is <code>s(1-s)</code>, which is why
+<code>d_out = diff * out * (1 - out)</code> appears in the code:</p>
+<pre><code>diff = out - t
+d_out = diff * out * (1 - out)
+
+w2[n_hidden][0] = w2[n_hidden][0] - lr * d_out
+for j in 0 to n_hidden
+    w2[j][0] = w2[j][0] - lr * d_out * a1[j]
+end
+</code></pre>
+<p>The hidden layer's weight updates chain the gradient backward through the output layer:</p>
+<pre><code>for j in 0 to n_hidden
+    dz1 = d_a1[j] * a1[j] * (1 - a1[j])
+    w1[n_in][j] = w1[n_in][j] - lr * dz1
+    for i in 0 to n_in
+        w1[i][j] = w1[i][j] - lr * dz1 * x[i]
+    end
+end
+</code></pre>
+<p>The learning rate <code>lr = 1.0</code> controls how large each step is. Too large, and training diverges; too
+small, and it crawls. A common debugging technique is printing the loss every few hundred epochs:</p>
+<pre><code>if e % 500 == 0
+    print("epoch " + e + "   loss " + round(total_loss / 4 * 1000) / 1000)
+end
+</code></pre>
+
+<h2>40.6 Complete Program and Verified Output</h2>
+<pre><code># A 2-3-1 multi-layer perceptron trained on XOR with gradient descent.
+inputs  = [[0, 0], [0, 1], [1, 0], [1, 1]]
+targets = [[0], [1], [1], [0]]
+
+n_in = 2
+n_hidden = 3
+n_out = 1
+lr = 1.0
+n_samples = len(inputs)
+
+func init_layer(rows, cols)
+    layer = []
+    for r in 0 to rows
+        row = []
+        for c in 0 to cols
+            append(row, rand() - 0.5)
+        end
+        append(layer, row)
+    end
+    return layer
+end
+
+w1 = init_layer(n_in + 1, n_hidden)
+w2 = init_layer(n_hidden + 1, n_out)
+
+func forward(x)
+    a1 = []
+    for j in 0 to n_hidden
+        z = w1[n_in][j]
+        for i in 0 to n_in
+            z = z + x[i] * w1[i][j]
+        end
+        append(a1, sigmoid(z))
+    end
+    z = w2[n_hidden][0]
+    for j in 0 to n_hidden
+        z = z + a1[j] * w2[j][0]
+    end
+    out = sigmoid(z)
+    return [out, a1]
+end
+
+func train(epochs)
+    for e in 0 to epochs
+        total_loss = 0
+        for s in 0 to n_samples
+            x = inputs[s]
+            t = targets[s][0]
+            f = forward(x)
+            out = f[0]
+            a1 = f[1]
+            diff = out - t
+            total_loss = total_loss + diff * diff
+            d_out = diff * out * (1 - out)
+            d_a1 = []
+            for j in 0 to n_hidden
+                append(d_a1, d_out * w2[j][0])
+            end
+            w2[n_hidden][0] = w2[n_hidden][0] - lr * d_out
+            for j in 0 to n_hidden
+                w2[j][0] = w2[j][0] - lr * d_out * a1[j]
+            end
+            for j in 0 to n_hidden
+                dz1 = d_a1[j] * a1[j] * (1 - a1[j])
+                w1[n_in][j] = w1[n_in][j] - lr * dz1
+                for i in 0 to n_in
+                    w1[i][j] = w1[i][j] - lr * dz1 * x[i]
+                end
+            end
+        end
+        if e % 500 == 0
+            print("epoch " + e + "   loss " + round(total_loss / 4 * 1000) / 1000)
+        end
+    end
+end
+
+train(5000)
+
+print("--- Trained network on XOR ---")
+preds = []
+for s in 0 to n_samples
+    out = forward(inputs[s])[0]
+    append(preds, out)
+    print(str(inputs[s]) + "  ->  " + round(out * 1000) / 1000 + "   (target " + targets[s][0] + ")")
+end
+
+target_list = [0, 1, 1, 0]
+print("final MSE: " + round(mse(preds, target_list) * 1000) / 1000)
+</code></pre>
+<p>The output below was captured from a real run of this program. Because the initial weights are random, your
+loss values will differ slightly, but the trajectory — a loss falling from about 0.28 toward 0 and predictions
+approaching the XOR targets — will be the same.</p>
+<pre class="output"><code>epoch 0   loss 0.285
+epoch 500   loss 0.169
+epoch 1000   loss 0.138
+epoch 1500   loss 0.135
+epoch 2000   loss 0.135
+epoch 2500   loss 0.134
+epoch 3000   loss 0.134
+epoch 3500   loss 0.134
+epoch 4000   loss 0.133
+epoch 4500   loss 0.007
+--- Trained network on XOR ---
+[0, 0]  ->  0.034   (target 0)
+[0, 1]  ->  0.963   (target 1)
+[1, 0]  ->  0.946   (target 1)
+[1, 1]  ->  0.061   (target 0)
+final MSE: 0.002
+</code></pre>
+
+<h2>40.7 Making Training Reproducible</h2>
+<p>Call <code>seed(n)</code> at the top of the program to lock in the random sequence (Chapter 19). With a fixed
+seed you get identical weights, identical loss curves, and identical predictions every run — invaluable when you
+compare hyperparameters:</p>
+<pre><code>seed(1)            # reproducible training run
+train(5000)
+</code></pre>
+
+<h2>40.8 Interpreting the Results</h2>
+<p>A network that has learned XOR produces outputs near 0 for <code>[0,0]</code> and <code>[1,1]</code>, and near 1
+for <code>[0,1]</code> and <code>[1,0]</code>. The final MSE of about 0.002 means the average squared error is
+small — the network is effectively solving the problem. The same pattern generalizes to larger networks: more
+hidden neurons, more layers, and richer activation functions all follow the machinery shown here.</p>
+
+<h1 id="ch41">41. Web Development with JTS GO</h1>
+
+<p>JTS GO includes a built-in HTTP server, so a web page can be served directly from a <code>.jts</code> program
+with no external dependencies. This chapter builds a complete single-page website using the same techniques the
+official JTS GO site uses.</p>
+
+<h2>41.1 The Server Built-ins</h2>
+<p>Three built-ins cover everything (Chapter 23):</p>
+<table>
+<tr><th>Built-in</th><th>Purpose</th></tr>
+<tr><td><code>http_server(port, html)</code></td><td>Creates a server object bound to a port, serving the given HTML.</td></tr>
+<tr><td><code>http_start(srv)</code></td><td>Starts the server; the program stays alive serving requests.</td></tr>
+<tr><td><code>http_request(url)</code></td><td>Makes an outbound HTTP request and returns the response.</td></tr>
+</table>
+
+<h2>41.2 Building a Page From Parts</h2>
+<p>Real pages mix static markup with values computed at runtime. The cleanest approach is to build the HTML string
+in pieces and join them — exactly how the official site works:</p>
+<pre><code>head = "<!DOCTYPE html> <html> <head> <title>JTS GO</title> <style> " +
+       "body { font-family: Segoe UI, sans-serif; background: #0a0a1a; color: #e0e0e0; } " +
+       ".hero { text-align: center; padding: 80px 20px; } " +
+       ".hero h1 { color: #00ff88; font-size: 3em; } " +
+       ".card { background: #16213e; border-radius: 12px; padding: 25px; } " +
+       "</style> </head> <body> "
+
+hero = "<div class='hero'> <h1>JTS GO</h1> <p>Web apps in your language.</p> </div> "
+
+time_card = "<div class='card'> <h3>Current time</h3> <p>" + time.today() + " " + time.clock_time() + "</p> </div> "
+
+footer = "<footer> Made with JTS GO </footer> </body> </html>"
+
+html = head + hero + time_card + footer
+
+srv = http_server(8080, html)
+print("Serving at http://localhost:8080")
+http_start(srv)
+</code></pre>
+<p>Notice how the "Current time" card embeds values computed by the <code>time</code> scroll (Chapter 39): because
+the page is assembled by running code, its content can be dynamic.</p>
+
+<h2>41.3 The Official Site Pattern</h2>
+<p>The repository's <code>tests/website.jts</code> example assembles a full marketing site from seven string parts
+(<code>part1</code> through <code>part7</code>):</p>
+<pre><code>html = part1 + part2 + part3 + part4 + part5 + part6 + part7
+print("Starting JTS GO website on port 8080...")
+srv = http_server(8080, html)
+http_start(srv)
+</code></pre>
+<p>Each part holds one page section: the document head and styles, the hero banner, a features grid, a code
+example, an ML demo, an install box, and the footer. Concatenating keeps each string short and readable.</p>
+
+<h2>41.4 Running the Server</h2>
+<pre><code>jts tests/website.jts
+</code></pre>
+<pre class="output"><code>Starting JTS GO website on port 8080...
+Open http://localhost:8080 in your browser
+</code></pre>
+<p>Leave the program running and open the URL. The server keeps serving until you stop the program
+(Ctrl+C).</p>
+
+<div class="warn"><b>Note:</b> <code>http_server</code> binds the local port and serves the provided HTML
+string. It is designed for development and demonstration; for production deployments you would normally put a
+reverse proxy in front.</div>
+
+<h2>41.5 Client Requests: <code>http_request</code></h2>
+<p>In the opposite direction, <code>http_request(url)</code> fetches a resource and returns its content:</p>
+<pre><code>data = http_request("https://example.com/")
+print(len(data))       # the number of characters returned
+</code></pre>
+<p>This turns JTS GO into a scripting tool for REST APIs, web scraping, and automated health checks. Combine it
+with <code>json.parse</code> (Chapter 21) to consume JSON APIs:</p>
+<pre><code>bring json
+resp = http_request("https://api.example.com/status")
+print(json.parse(resp))
+</code></pre>
+
+<h1 id="ch42">42. Debugging and Best Practices</h1>
+
+<p>This chapter collects the habits and techniques that separate working programs from programs that merely
+exist. Every topic builds on material from earlier chapters.</p>
+
+<h2>42.1 The Debug Loop</h2>
+<p>Bugs are inevitable; the trick is finding them quickly. JTS GO's error messages name the line and the file:</p>
+<pre><code>print(1 / 0)
+</code></pre>
+<pre class="output"><code>STDERR: Division by zero.
+[line 1] in script
+Runtime error.
+</code></pre>
+<p>Use the line number to jump straight to the offending statement, then simplify: reproduce the problem in the
+smallest possible program, print the intermediate values, and fix one thing at a time.</p>
+
+<h2>42.2 Reading Stack Traces</h2>
+<p>When an error occurs inside a function, JTS GO reports the call chain:</p>
+<pre><code>func inner(x)
+    return 10 / x
+end
+func outer()
+    return inner(0)
+end
+print(outer())
+</code></pre>
+<pre class="output"><code>STDERR: Division by zero.
+[line 2] in inner()
+[line 5] in outer()
+[line 7] in script
+Runtime error.
+</code></pre>
+<p>Read traces from the top: the deepest frame is where the error happened, and each line below is the caller that
+invoked it. The bottom line, <code>in script</code>, is the top-level program.</p>
+
+<h2>42.3 Debugging With <code>print</code></h2>
+<p>The oldest tool is still the best. Print values at the boundary between suspicious code and the rest of the
+program:</p>
+<pre><code>func area(w, h)
+    print("area: w=" + w + " h=" + h)
+    return w * h
+end
+</code></pre>
+<p>Once you confirm the inputs, remove the print. If you forget, the <code>assert</code> built-in (Chapter 8) can
+carry the check permanently:</p>
+<pre><code>func area(w, h)
+    assert(w > 0 and h > 0, "dimensions must be positive")
+    return w * h
+end
+</code></pre>
+
+<h2>42.4 Gotchas to Watch For</h2>
+<p>JTS GO deliberately differs from other languages in a few places. Knowing these will save hours:</p>
+<table>
+<tr><th>Gotcha</th><th>Detail</th><th>See</th></tr>
+<tr><td>Empty lists are truthy</td><td><code>if []</code> is true; check <code>len(lst) == 0</code> instead</td><td>5.x</td></tr>
+<tr><td>Dict subscript assignment fails</td><td><code>d["k"] = v</code> is a runtime error; use <code>d.update()</code> or <code>update(d, ...)</code></td><td>11.x</td></tr>
+<tr><td>Single-element set literal</td><td><code>{1}</code> is a compile error (parsed as a dict key); use <code>set([1])</code></td><td>4.x</td></tr>
+<tr><td>Block-close keywords</td><td>Every <code>if</code>/<code>for</code>/<code>while</code>/<code>func</code>/<code>class</code> ends with <code>end</code></td><td>4.x</td></tr>
+<tr><td>Division by zero</td><td>Raises an error; guard with a check before dividing</td><td>7.x</td></tr>
+<tr><td>Integer division floors</td><td><code>-10 // 3</code> is <code>-4</code>, not <code>-3</code></td><td>7.x</td></tr>
+</table>
+
+<h2>42.5 Code Organization</h2>
+<ul>
+<li><b>Keep functions small.</b> A function that does one thing is easy to test and reuse.</li>
+<li><b>Name things honestly.</b> <code>score</code> beats <code>s</code>; <code>total_price</code> beats
+<code>tp</code>.</li>
+<li><b>Put reusable code in scrolls.</b> Anything used by more than one program belongs in a
+<code>.jts</code> library file that you <code>bring</code> (Chapter 25).</li>
+<li><b>Validate input early.</b> Check <code>len()</code> before indexing, test division guards before dividing,
+and validate JSON before indexing keys.</li>
+<li><b>Prefer return values over globals.</b> Passing data in and out of functions keeps behavior predictable
+(Chapter 6).</li>
+</ul>
+
+<h2>42.6 Testing With <code>assert</code></h2>
+<p>A tiny assertion harness can catch regressions. Save it as your own scroll and reuse it:</p>
+<pre><code># testing.jts — a minimal test harness
+func check(desc, got, expected)
+    if got == expected
+        print("PASS  " + desc)
+    else
+        print("FAIL  " + desc + "  (got " + str(got) + ", expected " + str(expected) + ")")
+    end
+end
+</code></pre>
+<pre><code>bring testing
+
+check("factorial(5)", factorial(5), 120)
+check("gcd(12, 18)", gcd(12, 18), 6)
+</code></pre>
+<pre class="output"><code>PASS  factorial(5)
+PASS  gcd(12, 18)
+</code></pre>
+
+<h2>42.7 Performance Notes</h2>
+<ul>
+<li><b>Precompute loop bounds.</b> Store <code>len(lst)</code> in a variable when iterating by index; it avoids
+repeated calls.</li>
+<li><b>Reuse strings with <code>join</code>.</b> Building a string with <code>+</code> in a hot loop is slower than
+collecting parts and joining once.</li>
+<li><b>Prefer built-ins.</b> The VM's native functions (<code>sort</code>, <code>append</code>, <code>set_union</code>,
+and friends) are far faster than hand-written loops.</li>
+<li><b>Understand complexity.</b> A nested loop over a list is O(n²); the set built-ins give O(1) membership.
+Choose the data structure that fits (Chapter 11).</li>
+</ul>
+
+<h2>42.8 A Checklist Before You Finish</h2>
+<ol>
+<li>Do all blocks have their matching <code>end</code>?</li>
+<li>Are every variable's possible values covered (empty lists, zero, negative numbers, nil)?</li>
+<li>Does every function return on all paths?</li>
+<li>Are side effects (file writes, global mutation) intentional?</li>
+<li>Does the program run cleanly from a fresh directory, with the scrolls it needs available?</li>
+</ol>
+
+<h2>42.9 Further Learning</h2>
+<p>The fastest way to grow is to read the interpreter itself:</p>
+<ul>
+<li><code>scrolls/*.jts</code> — the entire standard library is readable JTS GO source; study how each function is
+written.</li>
+<li><code>tests/*.jts</code> — the language's own test suite doubles as a catalogue of idiomatic programs.</li>
+<li><code>examples/*.jts</code> — complete programs including the neural network of Chapter 40.</li>
+</ul>
+<p>And when you are ready to look inside the machine, the <code>src/compiler</code> and <code>src/vm</code>
+directories of the JTS GO source tree hold the scanner, parser, bytecode, and virtual machine that execute every
+program in this book.</p>

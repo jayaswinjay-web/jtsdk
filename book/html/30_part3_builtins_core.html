@@ -1,0 +1,356 @@
+<h1 id="ch14">14. Core Built-in Functions</h1>
+
+<p>JTS GO ships with a set of built-in functions that are always available — no imports required. This chapter
+documents the core ones. The complete function table is listed in Appendix C.</p>
+
+<h2>14.1 <code>print(value, ...)</code></h2>
+<p>Writes a value to the console followed by a newline. <code>print</code> accepts any value — strings, numbers,
+booleans, <code>nil</code>, lists, dicts, sets, and instances — and prints its natural representation.</p>
+<pre><code>print("Hello, World!")
+print(42)
+print(3.14)
+print(true)
+print(nil)
+print([1, 2, 3])
+print(10 + 5)          # prints the result of an expression: 15
+print(len("JTS"))      # prints the result of a function call: 3
+</code></pre>
+<pre class="output"><code>Hello, World!
+42
+3.14
+true
+nil
+[1, 2, 3]
+15
+3
+</code></pre>
+<p>When given several arguments, <code>print</code> displays them as a list:</p>
+<pre><code>print("a", "b", "c")    # [a, b, c]
+</code></pre>
+<div class="tip"><b>Tip:</b> to build formatted messages, use string concatenation instead of multiple arguments:
+<code>print("Age: " + age)</code> prints <code>Age: 25</code> rather than a list.</div>
+
+<h2>14.2 <code>input(prompt?)</code></h2>
+<p>Reads a line of text from the user. The optional prompt is displayed first. The return value is always a
+string.</p>
+<pre><code>name = input("What is your name? ")
+print("Hello, " + name + "!")
+</code></pre>
+<p>Because the result is a string, numeric input must be converted before arithmetic (Chapter 14.6).</p>
+
+<h2>14.3 <code>len(value)</code></h2>
+<p>Returns the length of a string (number of characters), a list (number of elements), a dict (number of keys), or
+a set (number of elements).</p>
+<pre><code>print(len("JTS"))        # 3
+print(len([1, 2, 3]))    # 3
+print(len({"a": 1}))     # 1
+print(len({1, 2, 3}))    # 3
+</code></pre>
+
+<h2>14.4 <code>type(value)</code></h2>
+<p>Returns the type of a value as a string. The possible results are <code>number</code>, <code>string</code>,
+<code>boolean</code>, <code>nil</code>, <code>list</code>, <code>dict</code>, <code>set</code>,
+<code>function</code>, and the class name of instances.</p>
+<pre><code>print(type(42))           # number
+print(type("hi"))         # string
+print(type(true))         # boolean
+print(type(nil))          # nil
+print(type([1]))          # list
+print(type({"a": 1}))     # dict
+print(type({1, 2}))       # set
+print(type(func f() end)) # function  (a function literal)
+</code></pre>
+<p>Comparing the result to a literal is the standard way to branch on type:</p>
+<pre><code>if type(value) == "string"
+    print("It's a string!")
+end
+</code></pre>
+
+<h2>14.5 <code>str(value)</code> and <code>number(value)</code></h2>
+<p><code>str()</code> converts a value to its string representation. <code>number()</code> attempts to convert a
+string to a number.</p>
+<pre><code>print(str(123))           # 123
+print(str(true))          # true
+print(number("42"))       # 42
+print(number("3.5"))      # 3.5
+</code></pre>
+<p><code>str()</code> is what <code>print</code> uses internally, and it is also useful for building lists of text
+from numbers:</p>
+<pre><code>out = []
+for i in 0 to 4
+    out.append(str(i))
+end
+print(out)                # [0, 1, 2, 3, 4]
+</code></pre>
+
+<h2>14.6 <code>int(value)</code>, <code>float(value)</code>, <code>bool(value)</code></h2>
+<p>These conversions are precise tools:</p>
+<ul>
+<li><code>int(x)</code> converts to an integer, truncating any fractional part.</li>
+<li><code>float(x)</code> converts to a floating-point number.</li>
+<li><code>bool(x)</code> converts a value to a boolean following truthiness rules (Chapter 5.8).</li>
+</ul>
+<pre><code>print(int("42"))        # 42
+print(int(3.99))        # 3    (truncates toward zero)
+print(int("3.7"))       # 3
+print(float("3.5"))     # 3.5
+print(float(2))         # 2
+print(bool("x"))        # true
+print(bool(""))         # false
+print(bool(0))          # false
+print(bool(1))          # true
+</code></pre>
+<p>Reading a number from the user, then, looks like:</p>
+<pre><code>age = input("How old are you? ")
+age_num = number(age)
+if age_num >= 18
+    print("Adult")
+else
+    print("Minor")
+end
+</code></pre>
+
+<h2>14.7 <code>append(list, value)</code> and <code>length(value)</code></h2>
+<p><code>append</code> adds a value to the end of a list. It can be called as a global function or as a method on
+the list. <code>length</code> is a global synonym for the length of a string or collection.</p>
+<pre><code>lst = []
+append(lst, "first")
+lst.append("second")
+print(lst)               # [first, second]
+print(length("hello"))   # 5
+</code></pre>
+
+<h2>14.8 <code>format(template, args...)</code></h2>
+<p><code>format</code> substitutes numbered placeholders <code>{0}</code>, <code>{1}</code>, ... with arguments:</p>
+<pre><code>name = "JTS"
+version = "2.1"
+print(format("{} is v{}", name, version))   # JTS is v2.1
+print(format("name={0},age={1}", name, 30)) # name=JTS,age=30
+</code></pre>
+<p>It can also be invoked as a method on the template string:</p>
+<pre><code>print("{} + {} = {}".format(1, 2, 3))       # 1 + 2 = 3
+</code></pre>
+
+<h1 id="ch15">15. Math Built-in Functions</h1>
+
+<h2>15.1 Arithmetic that Operates by Name: <code>math(op, x)</code></h2>
+<p>The generic <code>math</code> function applies a named mathematical operation to a number. Valid operation names
+are <code>"sin"</code>, <code>"cos"</code>, <code>"tan"</code>, <code>"sqrt"</code>, <code>"abs"</code>,
+<code>"log"</code>, <code>"exp"</code>, <code>"pow"</code>, <code>"floor"</code>, <code>"ceil"</code>, and
+<code>"round"</code>.</p>
+<pre><code>print(math("sqrt", 16))    # 4
+print(math("abs", -9))     # 9
+print(math("floor", 3.9))  # 3
+print(math("ceil", 3.1))   # 4
+</code></pre>
+<p>Most of these operations also have dedicated functions, which are usually clearer to read.</p>
+
+<h2>15.2 Dedicated Math Functions</h2>
+<table>
+<tr><th>Function</th><th>Returns</th><th>Example</th><th>Result</th></tr>
+<tr><td><code>sqrt(x)</code></td><td>Square root</td><td><code>sqrt(16)</code></td><td><code>4</code></td></tr>
+<tr><td><code>sin(x)</code></td><td>Sine (radians)</td><td><code>sin(0)</code></td><td><code>0</code></td></tr>
+<tr><td><code>cos(x)</code></td><td>Cosine (radians)</td><td><code>cos(0)</code></td><td><code>1</code></td></tr>
+<tr><td><code>tan(x)</code></td><td>Tangent (radians)</td><td><code>tan(0)</code></td><td><code>0</code></td></tr>
+<tr><td><code>log(x)</code></td><td>Natural logarithm</td><td><code>log(1)</code></td><td><code>0</code></td></tr>
+<tr><td><code>exp(x)</code></td><td><code>e</code> raised to x</td><td><code>exp(0)</code></td><td><code>1</code></td></tr>
+<tr><td><code>abs(x)</code></td><td>Absolute value</td><td><code>abs(-5)</code></td><td><code>5</code></td></tr>
+<tr><td><code>pow(a, b)</code></td><td><code>a</code> to the power <code>b</code></td><td><code>pow(2, 10)</code></td><td><code>1024</code></td></tr>
+<tr><td><code>round(x, d?)</code></td><td>Rounds x; optional decimal places</td><td><code>round(3.14159, 2)</code></td><td><code>3.14</code></td></tr>
+<tr><td><code>floor(x)</code></td><td>Rounds down</td><td><code>floor(3.9)</code></td><td><code>3</code></td></tr>
+<tr><td><code>ceil(x)</code></td><td>Rounds up</td><td><code>ceil(3.1)</code></td><td><code>4</code></td></tr>
+</table>
+<pre><code>print(sqrt(16))          # 4
+print(abs(-5))           # 5
+print(min(3, 1, 2))      # 1
+print(max(3, 1, 2))      # 3
+print(sum([1, 2, 3]))    # 6
+print(pow(2, 10))        # 1024
+print(round(3.14159))    # 3
+print(round(3.14159, 2)) # 3.14
+print(floor(3.9))        # 3
+print(ceil(3.1))         # 4
+print(sin(0))            # 0
+print(cos(0))            # 1
+print(log(1))            # 0
+print(exp(0))            # 1
+</code></pre>
+<pre class="output"><code>4
+5
+1
+3
+6
+1024
+3
+3.14
+3
+4
+0
+1
+0
+1
+</code></pre>
+
+<h2>15.3 <code>min(...)</code>, <code>max(...)</code>, <code>sum(list)</code></h2>
+<ul>
+<li><code>min(a, b, c, ...)</code> — smallest of the arguments.</li>
+<li><code>max(a, b, c, ...)</code> — largest of the arguments.</li>
+<li><code>sum(list)</code> — total of all elements in a list.</li>
+</ul>
+<pre><code>print(min(5, 2, 9))      # 2
+print(max(5, 2, 9))      # 9
+print(sum([1, 2, 3, 4])) # 10
+</code></pre>
+<p>These three are the building blocks of the statistics scroll (Chapter 28).</p>
+
+<h2>15.4 <code>range(start?, end?, step?)</code></h2>
+<p><code>range</code> builds a list of numbers. With one argument it produces <code>0 ... n-1</code>; with two it
+runs from <code>start</code> to <code>end - 1</code>.</p>
+<pre><code>print(range(5))          # [0, 1, 2, 3, 4]
+print(range(2, 6))       # [2, 3, 4, 5]
+for i in range(3)
+    print(i)             # 0, 1, 2
+end
+</code></pre>
+
+<h2>15.5 Random Numbers</h2>
+<p>The random family is documented in Chapter 19.</p>
+
+<h1 id="ch16">16. String Built-in Functions</h1>
+
+<p>JTS GO's string functions are called as methods on string values. They are pure — they never modify the string
+itself; they return a new string.</p>
+
+<h2>16.1 Case Conversion</h2>
+<pre><code>s = "Hello World"
+print(s.upper())        # HELLO WORLD
+print(s.lower())        # hello world
+print(s.capitalize())   # Hello world    (first character only)
+print(s.title())        # Hello World    (capitalizes every word)
+print(s.swapcase())     # hELLO wORLD
+</code></pre>
+
+<h2>16.2 Trimming and Padding</h2>
+<pre><code>print("  hi  ".trim())     # hi
+print("  x  ".lstrip())    # "x  "     (left only)
+print("  x  ".rstrip())    # "  x"     (right only)
+
+print("7".zfill(3))        # 007
+print("hi".ljust(5))       # "hi   "   (pad right)
+print("hi".rjust(5))       # "   hi"   (pad left)
+print("hi".center(6))      # "  hi  "  (pad both sides)
+</code></pre>
+
+<h2>16.3 Searching</h2>
+<pre><code>s = "Hello World"
+print(s.contains("World"))      # true
+print(s.starts_with("Hello"))   # true
+print(s.ends_with("World"))     # true
+print(s.find("o"))              # 4    (first index of the substring)
+print(s.count("l"))             # 3    (occurrences)
+</code></pre>
+<p>All of these are case-sensitive.</p>
+
+<h2>16.4 Character Tests</h2>
+<pre><code>print("123".is_digit())    # true
+print("abc".is_alpha())    # true
+print("a1".is_alnum())     # true
+print(" ".is_space())      # true
+print("ABC".is_upper())    # true
+print("abc".is_lower())    # true
+</code></pre>
+<p>These predicates are used heavily by the <code>text</code> scroll to classify characters while scanning.</p>
+
+<h2>16.5 Splitting</h2>
+<pre><code>print("a,b,c".split(","))        # [a, b, c]
+print("a b c".split(" "))        # [a, b, c]
+print("a\nb\nc".splitlines())    # [a, b, c]
+</code></pre>
+<div class="warn"><b>Gotcha:</b> <code>splitlines()</code> keeps a trailing empty element for text that ends with a
+newline. The <code>fs</code> scroll's <code>read_lines</code> strips this automatically (Chapter 33).</div>
+
+<h2>16.6 Joining</h2>
+<p><code>join</code> combines a list into a string with a separator between elements. The separator comes
+<b>first</b>, either as the argument of a global call or as the receiver of a method call.</p>
+<pre><code>print(join("-", ["a", "b", "c"]))   # a-b-c
+print("-".join(["a", "b", "c"]))    # a-b-c
+</code></pre>
+
+<h2>16.7 Extracting Substrings</h2>
+<pre><code>s = "Hello"
+print(s.substring(1, 3))     # el     (start inclusive, end exclusive)
+print(s.substring(1))        # ello   (to the end)
+print(s.replace("Hello", "Hi"))    # Hi
+</code></pre>
+
+<h2>16.8 <code>format</code> on Strings</h2>
+<pre><code>print("{} and {}".format(1, 2))        # 1 and 2
+print("name={0},age={1}".format("A", 30))  # name=A,age=30
+</code></pre>
+
+<h1 id="ch17">17. List Built-in Functions</h1>
+
+<p>List functions are available both as methods on a list and as global functions taking the list first. Methods
+modify the list in place (they are not pure).</p>
+
+<h2>17.1 Growth: <code>append</code>, <code>insert</code>, <code>extend</code></h2>
+<pre><code>lst = [1, 2, 3]
+lst.append(4)               # add to the end
+print(lst)                  # [1, 2, 3, 4]
+
+lst.insert(1, 9)            # insert 9 at index 1
+print(lst)                  # [1, 9, 2, 3, 4]
+
+lst.extend([7, 8])          # append every element of the other list
+print(lst)                  # [1, 9, 2, 3, 4, 7, 8]
+</code></pre>
+<p>Global forms: <code>append(lst, 4)</code>, <code>insert(lst, 1, 9)</code>, <code>extend(lst, [7, 8])</code>.</p>
+
+<h2>17.2 Shrinkage: <code>remove</code>, <code>pop</code>, <code>clear</code></h2>
+<pre><code>lst = [1, 2, 3, 4]
+lst.remove(2)               # remove the first occurrence of the value 2
+print(lst)                  # [1, 3, 4]
+
+last = lst.pop()            # remove and return the last element
+print(last)                 # 4
+print(lst)                  # [1, 3]
+
+lst.clear()                 # remove everything
+print(lst)                  # []
+</code></pre>
+
+<h2>17.3 Ordering: <code>sort</code>, <code>reverse</code></h2>
+<pre><code>lst = [3, 1, 2]
+lst.sort()
+print(lst)                  # [1, 2, 3]
+
+lst.reverse()
+print(lst)                  # [3, 2, 1]
+</code></pre>
+
+<h2>17.4 Information: <code>index</code>, <code>count</code>, <code>len</code></h2>
+<pre><code>print([1, 2, 1, 2].index(2))    # 1   (first index of value 2)
+print([1, 2, 1, 2].count(1))    # 2   (how many times 1 appears)
+print(len([1, 2, 3]))           # 3
+</code></pre>
+
+<h2>17.5 Copies: <code>copy</code></h2>
+<pre><code>original = [1, 2, 3]
+shallow = original.copy()      # an independent list
+shallow.append(4)
+print(original)                # [1, 2, 3]  (unchanged)
+print(shallow)                 # [1, 2, 3, 4]
+</code></pre>
+<div class="note"><b>Note:</b> <code>copy()</code> copies the list itself. Elements that are themselves lists are
+shared, not copied recursively. For a fully independent copy, build one element at a time.</div>
+
+<h2>17.6 Indexing and Deletion</h2>
+<pre><code>lst = [10, 20, 30]
+print(lst[0])        # 10
+print(lst[-1])       # 30
+lst[0] = 99          # replace an element
+print(lst)           # [99, 20, 30]
+del lst[1]           # delete an element
+print(lst)           # [99, 30]
+</code></pre>
+<p>Unlike dicts (Chapter 11), lists <i>can</i> be modified with subscript assignment.</p>

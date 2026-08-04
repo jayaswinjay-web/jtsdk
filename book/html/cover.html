@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+@page { size: 210mm 297mm; margin: 0; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    width: 210mm; height: 297mm;
+    background: linear-gradient(160deg, #0a1628 0%, #0f2240 40%, #0c1a33 70%, #081428 100%);
+    color: #fff;
+    font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    overflow: hidden;
+    position: relative;
+}
+
+/* Network pattern background */
+.network {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    opacity: 0.18;
+}
+.network svg { width: 100%; height: 100%; }
+
+/* Content wrapper */
+.content {
+    position: relative;
+    z-index: 2;
+    padding: 28mm 24mm 20mm 24mm;
+    height: 297mm;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Logo badge */
+.logo-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4mm;
+    border: 1.5px solid rgba(126,184,208,0.6);
+    border-radius: 3.5mm;
+    padding: 3mm 7mm;
+    background: rgba(126,184,208,0.08);
+    width: fit-content;
+    margin-bottom: 10mm;
+}
+.logo-badge img {
+    height: 9mm;
+    width: auto;
+}
+.brandline {
+    font-size: 9pt;
+    letter-spacing: 6px;
+    color: #7f95b5;
+    font-weight: 600;
+    margin-top: 2mm;
+}
+
+/* Title block */
+.title-block {
+    margin-top: 4mm;
+}
+.title-block h1 {
+    font-size: 36pt;
+    font-weight: 800;
+    line-height: 1.15;
+    color: #fff;
+    margin: 0;
+}
+.title-block h1 .accent {
+    color: #7eb8d0;
+}
+.subtitle {
+    font-size: 14pt;
+    color: #b0c4de;
+    margin-top: 5mm;
+    line-height: 1.4;
+}
+
+/* Badges */
+.edition-badge {
+    display: inline-block;
+    background: rgba(126,184,208,0.15);
+    border: 1.2px solid rgba(126,184,208,0.5);
+    color: #7eb8d0;
+    font-size: 9pt;
+    font-weight: 700;
+    letter-spacing: 2px;
+    padding: 2.5mm 7mm;
+    border-radius: 5mm;
+    margin-top: 7mm;
+}
+.version-text {
+    font-size: 11pt;
+    color: #8fa8c8;
+    margin-top: 4mm;
+    font-weight: 600;
+}
+
+/* Features */
+.features {
+    margin-top: 6mm;
+    font-size: 9pt;
+    color: #8fa8c8;
+    line-height: 2;
+    letter-spacing: 0.5px;
+}
+
+/* Bottom section */
+.bottom-section {
+    margin-top: auto;
+}
+.author {
+    font-size: 18pt;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: 1px;
+}
+.author-title {
+    font-size: 10pt;
+    color: #7f95b5;
+    margin-top: 2mm;
+    letter-spacing: 1px;
+}
+.copyright {
+    font-size: 8.5pt;
+    color: #5a7a9a;
+    margin-top: 6mm;
+    letter-spacing: 0.5px;
+}
+</style>
+</head>
+<body>
+
+<!-- Network pattern SVG -->
+<div class="network">
+<svg viewBox="0 0 800 1200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Nodes -->
+  <circle cx="120" cy="650" r="3" fill="#7eb8d0"/>
+  <circle cx="250" cy="580" r="2.5" fill="#7eb8d0"/>
+  <circle cx="380" cy="620" r="3" fill="#7eb8d0"/>
+  <circle cx="500" cy="560" r="2" fill="#7eb8d0"/>
+  <circle cx="620" cy="610" r="3" fill="#7eb8d0"/>
+  <circle cx="700" cy="540" r="2.5" fill="#7eb8d0"/>
+  <circle cx="180" cy="720" r="2" fill="#7eb8d0"/>
+  <circle cx="320" cy="700" r="3" fill="#7eb8d0"/>
+  <circle cx="450" cy="680" r="2.5" fill="#7eb8d0"/>
+  <circle cx="580" cy="730" r="2" fill="#7eb8d0"/>
+  <circle cx="680" cy="690" r="3" fill="#7eb8d0"/>
+  <circle cx="150" cy="800" r="2.5" fill="#7eb8d0"/>
+  <circle cx="280" cy="780" r="2" fill="#7eb8d0"/>
+  <circle cx="420" cy="760" r="3" fill="#7eb8d0"/>
+  <circle cx="550" cy="810" r="2.5" fill="#7eb8d0"/>
+  <circle cx="650" cy="770" r="2" fill="#7eb8d0"/>
+  <circle cx="200" cy="870" r="3" fill="#7eb8d0"/>
+  <circle cx="350" cy="850" r="2" fill="#7eb8d0"/>
+  <circle cx="480" cy="830" r="2.5" fill="#7eb8d0"/>
+  <circle cx="600" cy="880" r="3" fill="#7eb8d0"/>
+  <circle cx="720" cy="840" r="2" fill="#7eb8d0"/>
+  <circle cx="100" cy="950" r="2" fill="#7eb8d0"/>
+  <circle cx="260" cy="920" r="3" fill="#7eb8d0"/>
+  <circle cx="400" cy="900" r="2.5" fill="#7eb8d0"/>
+  <circle cx="530" cy="940" r="2" fill="#7eb8d0"/>
+  <circle cx="670" cy="910" r="3" fill="#7eb8d0"/>
+  <!-- Lines -->
+  <line x1="120" y1="650" x2="250" y2="580" stroke="#7eb8d0" stroke-width="0.5"/>
+  <line x1="250" y1="580" x2="380" y2="620" stroke="#7eb8d0" stroke-width="0.5"/>
+  <line x1="380" y1="620" x2="500" y2="560" stroke="#7eb8d0" stroke-width="0.5"/>
+  <line x1="500" y1="560" x2="620" y2="610" stroke="#7eb8d0" stroke-width="0.5"/>
+  <line x1="620" y1="610" x2="700" y2="540" stroke="#7eb8d0" stroke-width="0.5"/>
+  <line x1="120" y1="650" x2="180" y2="720" stroke="#7eb8d0" stroke-width="0.5"/>
+  <line x1="250" y1="580" x2="320" y2="700" stroke="#7eb8d0" stroke-width="0.5"/>
+  <line x1="380" y1="620" x2="450" y2="680" stroke="#7eb8d0" stroke-width="0.5"/>
+  <line x1="500" y1="560" x2="580" y2="730" stroke="#7eb8d0" stroke-width="0.5"/>
+  <line x1="620" y1="610" x2="680" y2="690" stroke="#7eb8d0" stroke-width="0.5"/>
+  <line x1="180" y1="720" x2="320" y2="700" stroke="#7eb8d0" stroke-width="0.5"/>
+  <line x1="320" y1="700" x2="450" y2="680" stroke="#7eb8d0" stroke-width="0.5"/>
+  <line x1="450" y1="680" x2="580" y2="730" stroke="#7eb8d0" stroke-width="0.5"/>
+  <line x1="580" y1="730" x2="680" y2="690" stroke="#7eb8d0" stroke-width="0.5"/>
+  <line x1="180" y1="720" x2="150" y2="800" stroke="#7eb8d0" stroke-width="0.5"/>
+  <line x1="320" y1="700" x2="280" y2="780" stroke="#7eb8d0" stroke-width="0.5"/>
+  <line x1="450" y1="680" x2="420" y2="760" stroke="#7eb8d0" stroke-width="0.5"/>
+  <line x1="580" y1="730" x2="550" y2="810" stroke="#7eb8d0" stroke-width="0.5"/>
+  <line x1="680" y1="690" x2="650" y2="770" stroke="#7eb8d0" stroke-width="0.5"/>
+  <line x1="150" y1="800" x2="280" y2="780" stroke="#7eb8d0" stroke-width="0.5"/>
+  <line x1="280" y1="780" x2="420" y2="760" stroke="#7eb8d0" stroke-width="0.5"/>
+  <line x1="420" y1="760" x2="550" y2="810" stroke="#7eb8d0" stroke-width="0.5"/>
+  <line x1="550" y1="810" x2="650" y2="770" stroke="#7eb8d0" stroke-width="0.5"/>
+  <line x1="150" y1="800" x2="200" y2="870" stroke="#7eb8d0" stroke-width="0.5"/>
+  <line x1="280" y1="780" x2="350" y2="850" stroke="#7eb8d0" stroke-width="0.5"/>
+  <line x1="420" y1="760" x2="480" y2="830" stroke="#7eb8d0" stroke-width="0.5"/>
+  <line x1="550" y1="810" x2="600" y2="880" stroke="#7eb8d0" stroke-width="0.5"/>
+  <line x1="650" y1="770" x2="720" y2="840" stroke="#7eb8d0" stroke-width="0.5"/>
+  <line x1="200" y1="870" x2="350" y2="850" stroke="#7eb8d0" stroke-width="0.5"/>
+  <line x1="350" y1="850" x2="480" y2="830" stroke="#7eb8d0" stroke-width="0.5"/>
+  <line x1="480" y1="830" x2="600" y2="880" stroke="#7eb8d0" stroke-width="0.5"/>
+  <line x1="600" y1="880" x2="720" y2="840" stroke="#7eb8d0" stroke-width="0.5"/>
+  <line x1="200" y1="870" x2="260" y2="920" stroke="#7eb8d0" stroke-width="0.5"/>
+  <line x1="350" y1="850" x2="400" y2="900" stroke="#7eb8d0" stroke-width="0.5"/>
+  <line x1="480" y1="830" x2="530" y2="940" stroke="#7eb8d0" stroke-width="0.5"/>
+  <line x1="600" y1="880" x2="670" y2="910" stroke="#7eb8d0" stroke-width="0.5"/>
+  <line x1="260" y1="920" x2="400" y2="900" stroke="#7eb8d0" stroke-width="0.5"/>
+  <line x1="400" y1="900" x2="530" y2="940" stroke="#7eb8d0" stroke-width="0.5"/>
+  <line x1="530" y1="940" x2="670" y2="910" stroke="#7eb8d0" stroke-width="0.5"/>
+  <line x1="200" y1="870" x2="100" y2="950" stroke="#7eb8d0" stroke-width="0.5"/>
+  <line x1="350" y1="850" x2="260" y2="920" stroke="#7eb8d0" stroke-width="0.4"/>
+  <line x1="120" y1="650" x2="320" y2="700" stroke="#7eb8d0" stroke-width="0.3"/>
+  <line x1="250" y1="580" x2="450" y2="680" stroke="#7eb8d0" stroke-width="0.3"/>
+  <line x1="380" y1="620" x2="580" y2="730" stroke="#7eb8d0" stroke-width="0.3"/>
+  <line x1="500" y1="560" x2="680" y2="690" stroke="#7eb8d0" stroke-width="0.3"/>
+  <line x1="180" y1="720" x2="420" y2="760" stroke="#7eb8d0" stroke-width="0.3"/>
+  <line x1="320" y1="700" x2="550" y2="810" stroke="#7eb8d0" stroke-width="0.3"/>
+  <line x1="450" y1="680" x2="650" y2="770" stroke="#7eb8d0" stroke-width="0.3"/>
+  <line x1="150" y1="800" x2="350" y2="850" stroke="#7eb8d0" stroke-width="0.3"/>
+  <line x1="280" y1="780" x2="480" y2="830" stroke="#7eb8d0" stroke-width="0.3"/>
+  <line x1="420" y1="760" x2="600" y2="880" stroke="#7eb8d0" stroke-width="0.3"/>
+  <line x1="550" y1="810" x2="720" y2="840" stroke="#7eb8d0" stroke-width="0.3"/>
+</svg>
+</div>
+
+<div class="content">
+    <!-- Logo badge -->
+    <div>
+        <div class="logo-badge">
+            <img src="../assets/logo-1024.png" alt="JTS GO" style="height:9mm;width:auto;">
+        </div>
+        <div class="brandline">JAY TECH SOLUTIONS</div>
+    </div>
+
+    <!-- Title -->
+    <div class="title-block">
+        <h1>The <span class="accent">JTS GO</span><br>Programming Language</h1>
+        <div class="subtitle">From Basics to Machine Learning &amp;<br>Web Development</div>
+        <div class="edition-badge">COMPREHENSIVE UNIVERSITY-LEVEL EDITION</div>
+        <div class="version-text">VERSION 2.1</div>
+    </div>
+
+    <!-- Features -->
+    <div class="features">
+        LANGUAGE FUNDAMENTALS &middot; BUILT-IN FUNCTION REFERENCE &middot; STANDARD LIBRARY (SCROLLS)<br>
+        OBJECT-ORIENTED PROGRAMMING &middot; MACHINE LEARNING &middot; WEB DEVELOPMENT
+    </div>
+
+    <!-- Bottom -->
+    <div class="bottom-section">
+        <div class="author">ASWINJAY &mdash; CEO, JAY TECH SOLUTIONS</div>
+        <div class="copyright">COPYRIGHT &copy; 2026 JAY TECH SOLUTIONS &middot; ALL RIGHTS RESERVED</div>
+    </div>
+</div>
+</body>
+</html>
