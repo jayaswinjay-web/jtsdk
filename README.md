@@ -237,9 +237,12 @@ print(mse([1, 2, 3], [1.1, 2.2, 3.1]))
 ### Web Development
 ```jts
 # Create and start an HTTP server
-server = http_server(8080)
-http_start(server)
+srv = http_server(8080)
+http_route(srv, "GET", "/", "<h1>Home</h1>")
+http_route(srv, "GET", "/api/data", '{"ok": true}')
+http_start(srv)
 ```
+> **Note:** `server` is a reserved keyword — use a different variable name (e.g. `srv`).
 
 ### Math Functions
 ```jts
@@ -276,6 +279,7 @@ print(str(nil))         # "nil"
 | `relu(x)` | ReLU activation: max(0, x) |
 | `mse(predicted, actual)` | Mean squared error loss |
 | `http_server(port)` | Create an HTTP server |
+| `http_route(server, method, path, body)` | Register a route on the server |
 | `http_start(server)` | Start the HTTP server |
 | `http_request(url)` | Make an HTTP request |
 | `read_file(path)` | Read a file's contents as a string |

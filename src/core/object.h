@@ -103,11 +103,23 @@ typedef struct {
     bool (*function)(int arg_count, Value* args, Value* result);
 } ObjNative;
 
+#define MAX_ROUTES 64
+#define MAX_METHOD_LEN 8
+#define MAX_PATH_LEN 256
+
+typedef struct {
+    char method[MAX_METHOD_LEN];
+    char path[MAX_PATH_LEN];
+    Value body;
+} HttpRoute;
+
 typedef struct ObjHttpServer {
     Obj obj;
     int port;
     Value handler;
     bool running;
+    HttpRoute routes[MAX_ROUTES];
+    int route_count;
 } ObjHttpServer;
 
 typedef struct ObjTensor {

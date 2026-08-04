@@ -13,6 +13,7 @@
 #pragma comment(lib, "ws2_32.lib")
 typedef int socklen_t;
 #define GET_CWD _getcwd
+#define STRCASECMP _stricmp
 #else
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -21,11 +22,13 @@ typedef int socklen_t;
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <dirent.h>
+#include <strings.h>
 typedef int SOCKET;
 #define INVALID_SOCKET -1
 #define SOCKET_ERROR -1
 #define closesocket close
 #define GET_CWD getcwd
+#define STRCASECMP strcasecmp
 #endif
 
 static int jts_argc = 0;
@@ -527,6 +530,44 @@ static bool native_http_server(int arg_count, Value* args, Value* result) {
     return true;
 }
 
+static bool native_http_route(int arg_count, Value* args, Value* result) {
+    if (arg_count != 4) {
+        fprintf(stderr, "JTS GO: http_route() expects 4 arguments (server, method, path, body)\n");
+        return false;
+    }
+    if (!IS_HTTP_SERVER(args[0])) {
+        fprintf(stderr, "JTS GO: http_route() first argument must be an http_server\n");
+        return false;
+    }
+    if (!IS_STRING(args[1])) {
+        fprintf(stderr, "JTS GO: http_route() method must be a string (GET, POST, etc.)\n");
+        return false;
+    }
+    if (!IS_STRING(args[2])) {
+        fprintf(stderr, "JTS GO: http_route() path must be a string (e.g. \"/\")\n");
+        return false;
+    }
+
+    ObjHttpServer* server = AS_HTTP_SERVER(args[0]);
+    if (server->route_count >= MAX_ROUTES) {
+        fprintf(stderr, "JTS GO: http_route() too many routes (max %d)\n", MAX_ROUTES);
+        return false;
+    }
+
+    HttpRoute* route = &server->routes[server->route_count];
+    const char* method = AS_CSTRING(args[1]);
+    const char* path = AS_CSTRING(args[2]);
+    strncpy(route->method, method, MAX_METHOD_LEN - 1);
+    route->method[MAX_METHOD_LEN - 1] = '\0';
+    strncpy(route->path, path, MAX_PATH_LEN - 1);
+    route->path[MAX_PATH_LEN - 1] = '\0';
+    route->body = args[3];
+    server->route_count++;
+
+    *result = NIL_VAL;
+    return true;
+}
+
 static bool native_http_start(int arg_count, Value* args, Value* result) {
     if (arg_count != 1) {
         fprintf(stderr, "JTS GO: http_start() expects 1 argument\n");
@@ -611,18 +652,52 @@ static bool native_http_start(int arg_count, Value* args, Value* result) {
         char method[16] = {0};
         char path[256] = {0};
         sscanf(request, "%15s %255s", method, path);
-        printf("[%s] %s %s\n", "200", method, path);
+
+        const char* resp_body = body;
+        int resp_body_len = body_len;
+        int status_code = 200;
+        const char* content_type = "text/html; charset=utf-8";
+
+        for (int i = 0; i < server->route_count; i++) {
+            HttpRoute* route = &server->routes[i];
+            if (STRCASECMP(route->method, method) == 0 && strcmp(route->path, path) == 0) {
+                if (IS_STRING(route->body)) {
+                    resp_body = AS_CSTRING(route->body);
+                    resp_body_len = AS_STRING(route->body)->length;
+                } else {
+                    resp_body = "Route handler returned non-string";
+                    resp_body_len = (int)strlen(resp_body);
+                }
+                if (resp_body_len > 0 && resp_body[0] == '{') {
+                    content_type = "application/json; charset=utf-8";
+                }
+                break;
+            }
+        }
+
+        if (server->route_count == 0 && resp_body == body) {
+            status_code = 200;
+        } else if (resp_body == body && server->route_count > 0) {
+            resp_body = "404 Not Found";
+            resp_body_len = (int)strlen(resp_body);
+            status_code = 404;
+            content_type = "text/plain; charset=utf-8";
+        }
+
+        printf("[%d] %s %s\n", status_code, method, path);
 
         char header[512];
         int header_len = snprintf(header, sizeof(header),
-            "HTTP/1.1 200 OK\r\n"
-            "Content-Type: text/html; charset=utf-8\r\n"
+            "HTTP/1.1 %d %s\r\n"
+            "Content-Type: %s\r\n"
             "Content-Length: %d\r\n"
             "Connection: close\r\n"
-            "\r\n", body_len);
+            "\r\n", status_code,
+            status_code == 200 ? "OK" : "Not Found",
+            content_type, resp_body_len);
 
         send(client_fd, header, header_len, 0);
-        send(client_fd, body, body_len, 0);
+        send(client_fd, resp_body, resp_body_len, 0);
         closesocket(client_fd);
     }
 
@@ -2536,6 +2611,7 @@ static NativeDef native_functions[] = {
     {"relu",  1, native_relu},
     {"mse",   2, native_mse},
     {"http_server", -1, native_http_server},
+    {"http_route",  4, native_http_route},
     {"http_start",  1, native_http_start},
     {"http_request", -1, native_http_request},
     {"sqrt",   1, native_sqrt},

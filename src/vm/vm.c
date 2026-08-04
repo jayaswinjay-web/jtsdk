@@ -64,7 +64,7 @@ void init_vm(void) {
 
     const char* native_names[] = {
         "str", "tensor", "matrix", "matmul", "sigmoid", "relu", "mse",
-        "http_server", "http_start", "http_request", "sqrt", "math",
+        "http_server", "http_route", "http_start", "http_request", "sqrt", "math",
         "sin", "cos", "tan", "log", "exp",
         "upper", "lower", "trim", "split", "contains", "replace",
         "substring", "starts_with", "ends_with", "length",

@@ -261,14 +261,38 @@ http_start(srv)
 </code></pre>
 <p>If no response body is given, the server returns a default <code>JTS GO Server</code> page.</p>
 
-<h2>23.2 Fetching Web Content: <code>http_request(url)</code></h2>
+<h2>23.2 Multiple Pages: <code>http_route(server, method, path, body)</code></h2>
+<p>A single server can serve many different pages and API endpoints. <code>http_route</code> registers a route
+for a specific HTTP method and path on the server. When a matching request arrives, that route's body is served;
+unmatched paths return <code>404 Not Found</code>.</p>
+<pre><code>srv = http_server(8080)
+
+http_route(srv, "GET", "/",       "<html><body><h1>Home</h1></body></html>")
+http_route(srv, "GET", "/about",  "<html><body><h1>About Us</h1></body></html>")
+http_route(srv, "GET", "/api/data", '{"name": "JTS GO", "version": "2.1"}')
+
+http_start(srv)
+</code></pre>
+<p>Bodies that start with <code>{</code> or <code>[</code> are served with the <code>application/json</code>
+content type automatically. Routes are matched by method (case-insensitive) and exact path. A full multi-page
+website can be built by reading HTML files from disk and registering one route per page:</p>
+<pre><code>home = read_file("index.html")
+about = read_file("about.html")
+
+srv = http_server(8080)
+http_route(srv, "GET", "/", home)
+http_route(srv, "GET", "/about", about)
+http_start(srv)
+</code></pre>
+
+<h2>23.3 Fetching Web Content: <code>http_request(url)</code></h2>
 <p><code>http_request</code> performs a GET request and returns the response body as a string. Both
 <code>http://</code> and <code>https://</code> URLs are supported.</p>
 <pre><code>body = http_request("http://example.com")
 print(len(body))    # length of the fetched page
 </code></pre>
 
-<h2>23.3 A Complete Example: A Portfolio Page</h2>
+<h2>23.4 A Complete Example: A Portfolio Page</h2>
 <p>Chapter 41 builds a full multi-section website in JTS GO. The key idea is simple: build the HTML as a string
 (concatenating parts is fine), then serve it.</p>
 <pre><code>part1 = "<html><head><title>JTS GO</title></head><body>"

@@ -226,10 +226,11 @@ with no external dependencies. This chapter builds a complete single-page websit
 official JTS GO site uses.</p>
 
 <h2>41.1 The Server Built-ins</h2>
-<p>Three built-ins cover everything (Chapter 23):</p>
+<p>Four built-ins cover everything (Chapter 23):</p>
 <table>
 <tr><th>Built-in</th><th>Purpose</th></tr>
 <tr><td><code>http_server(port, html)</code></td><td>Creates a server object bound to a port, serving the given HTML.</td></tr>
+<tr><td><code>http_route(srv, method, path, body)</code></td><td>Registers a route; matching requests serve that body.</td></tr>
 <tr><td><code>http_start(srv)</code></td><td>Starts the server; the program stays alive serving requests.</td></tr>
 <tr><td><code>http_request(url)</code></td><td>Makes an outbound HTTP request and returns the response.</td></tr>
 </table>

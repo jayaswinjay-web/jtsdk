@@ -53,15 +53,27 @@ body {
     padding: 22mm 20mm 18mm 20mm;
     box-sizing: border-box;
 }
-.cover .cover-top {
+.cover .logo-badge {
     text-align: center;
-    margin-bottom: 10mm;
+    margin: 0 auto 10mm;
+    display: inline-flex;
+    align-items: center;
+    gap: 5mm;
+    border: 1.8px solid rgba(126,184,208,0.5);
+    border-radius: 4mm;
+    padding: 5mm 10mm;
+    background: rgba(126,184,208,0.08);
+    width: fit-content;
 }
 .cover .cover-logo {
-    width: 85mm;
+    width: 95mm;
     height: auto;
     display: block;
     margin: 0 auto;
+}
+.cover .cover-top {
+    text-align: center;
+    margin-bottom: 10mm;
 }
 .cover .brandline {
     margin-top: 5mm;

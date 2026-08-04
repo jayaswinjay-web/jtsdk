@@ -24,7 +24,7 @@ const binaryName = isWindows ? "jts.exe" : "jts";
 const binaryPath = path.join(binDir, subDir, binaryName);
 
 if (fs.existsSync(binaryPath)) {
-  console.log("[jts-go] JTS GO Development Kit v2.1.8 installed successfully!");
+  console.log("[jts-go] JTS GO Development Kit v2.1.10 installed successfully!");
   console.log("[jts-go] Run 'jts yourfile.jts' to get started.");
   console.log("[jts-go] Docs: https://github.com/jayaswinjay-web/jtsdk#readme");
 } else {

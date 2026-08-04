@@ -1153,9 +1153,12 @@ JTS GO includes HTTP server support for web development.
 ### Creating a Server
 
 ```jts
-server = http_server(8080)
-http_start(server)
+srv = http_server(8080)
+http_route(srv, "GET", "/", "<h1>Home</h1>")
+http_route(srv, "GET", "/api/data", '{"ok": true}')
+http_start(srv)
 ```
+> **Note:** `server` is a reserved keyword — use a different variable name (e.g. `srv`).
 
 ### Making HTTP Requests
 

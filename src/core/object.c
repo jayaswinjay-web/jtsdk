@@ -192,6 +192,7 @@ ObjHttpServer* new_http_server(int port) {
     server->port = port;
     server->handler = NIL_VAL;
     server->running = false;
+    server->route_count = 0;
     return server;
 }
 
