@@ -192,6 +192,62 @@ if type(value) == "string"
 end
 ```
 
+## Type Conversion Functions
+
+JTS GO provides functions to convert between types. These are useful when you need explicit control over how values are converted.
+
+### str(value) / string(value)
+
+Converts any value to its string representation.
+
+```jts
+print(str(123))           # "123"
+print(str(true))          # "true"
+print(str(nil))           # "nil"
+print(str([1, 2, 3]))     # "[1, 2, 3]"
+```
+
+### number(value) / float(value)
+
+Converts a string to a floating-point number.
+
+```jts
+print(number("42"))       # 42
+print(number("3.5"))      # 3.5
+print(float("3.5"))       # 3.5
+```
+
+### int(value)
+
+Converts a value to an integer, truncating any fractional part.
+
+```jts
+print(int("42"))          # 42
+print(int(3.99))          # 3
+print(int("3.7"))         # 3
+```
+
+### bool(value)
+
+Converts a value to a boolean following truthiness rules (0, nil, and empty string are falsy; everything else is truthy).
+
+```jts
+print(bool("x"))          # true
+print(bool(""))           # false
+print(bool(0))            # false
+print(bool(1))            # true
+```
+
+### list(value)
+
+Converts a string, set, tensor, or list to a new list.
+
+```jts
+print(list("abc"))        # [a, b, c]
+print(list({1, 2, 3}))    # [1, 2, 3]
+print(list([1, 2]))       # [1, 2] (copy)
+```
+
 ## Truthiness
 
 In JTS GO, values are considered "truthy" or "falsy" when used in conditions:

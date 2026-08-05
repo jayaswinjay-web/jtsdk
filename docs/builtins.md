@@ -270,10 +270,71 @@ print_type_info(true)
 |----------|---------|---------|
 | `print(value)` | Output to console | Nothing (nil) |
 | `input(prompt)` | Read user input | String |
-| `len(string)` | Count characters | Number |
+| `len(value)` | Count characters (string) or elements (list/dict/set) | Number |
 | `type(value)` | Check data type | String |
+| `str(value)` / `string(value)` | Convert any value to string | String |
+| `number(value)` / `float(value)` | Convert string to number | Number |
+| `int(value)` | Convert to integer (truncates) | Number |
+| `bool(value)` | Convert to boolean | Boolean |
+| `list(value)` | Convert string/set/tensor to list | List |
 | `read_file(path)` | Read file contents | String |
 | `write_file(path, data)` | Write data to file | Nothing (nil) |
+
+## Conversion Functions
+
+These functions convert values between different types.
+
+### str(value) / string(value)
+
+Converts any value to its string representation.
+
+```jts
+print(str(123))           # 123
+print(str(true))          # true
+print(str(nil))           # nil
+print(str([1, 2, 3]))     # [1, 2, 3]
+```
+
+### number(value) / float(value)
+
+Converts a string to a floating-point number.
+
+```jts
+print(number("42"))       # 42
+print(number("3.5"))      # 3.5
+print(float("3.5"))       # 3.5
+```
+
+### int(value)
+
+Converts a value to an integer, truncating any fractional part.
+
+```jts
+print(int("42"))          # 42
+print(int(3.99))          # 3
+print(int("3.7"))         # 3
+```
+
+### bool(value)
+
+Converts a value to a boolean following truthiness rules.
+
+```jts
+print(bool("x"))          # true
+print(bool(""))           # false
+print(bool(0))            # false
+print(bool(1))            # true
+```
+
+### list(value)
+
+Converts a string, set, tensor, or list to a new list.
+
+```jts
+print(list("abc"))        # [a, b, c]
+print(list({1, 2, 3}))    # [1, 2, 3]
+print(list([1, 2]))       # [1, 2] (copy)
+```
 
 ## String Methods
 
@@ -295,6 +356,18 @@ print(s.lower())    # hello
 ```jts
 s = "  hello  "
 print(s.trim())     # hello
+```
+
+### lstrip()
+```jts
+s = "  hello  "
+print(s.lstrip())   # hello
+```
+
+### rstrip()
+```jts
+s = "  hello  "
+print(s.rstrip())   # hello
 ```
 
 ### contains(substring)
@@ -331,59 +404,14 @@ print(s.ends_with("world"))    # true
 print(s.ends_with("hello"))    # false
 ```
 
-## List Methods
-
-List methods are called directly on list variables using dot notation.
-
-### sort()
+### ljust(width)
 ```jts
-nums = [3, 1, 2]
-nums.sort()
-print(nums)    # [1, 2, 3]
+s = "hi"
+print(s.ljust(5))     # hi
 ```
 
-### append(value)
+### rjust(width)
 ```jts
-nums = [1, 2]
-nums.append(3)
-print(nums)    # [1, 2, 3]
+s = "hi"
+print(s.rjust(5))     # hi
 ```
-
-### remove(value)
-```jts
-nums = [1, 2, 3]
-nums.remove(2)
-print(nums)    # [1, 3]
-```
-
-### pop()
-```jts
-nums = [1, 2, 3]
-nums.pop()
-print(nums)    # [1, 2]
-```
-
-## File I/O
-
-### read_file(path)
-Reads the entire contents of a file and returns it as a string.
-
-```jts
-content = read_file("data.txt")
-print(content)
-```
-
-### write_file(path, data)
-Writes a string to a file. Creates the file if it doesn't exist, overwrites if it does.
-
-```jts
-write_file("output.txt", "Hello from JTS!")
-content = read_file("output.txt")
-print(content)    # Hello from JTS!
-```
-
-## Next Steps
-
-- [Syntax Overview](syntax.md) — Review the language basics
-- [Data Types](types.md) — Understand all available types
-- [Functions](functions.md) — Define your own functions

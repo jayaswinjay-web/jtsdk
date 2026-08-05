@@ -79,7 +79,7 @@ npm install -g @jaytechsolutions/jts-go
 jts --version
 ```
 
-You should see the version number (e.g., `2.1.0`).
+You should see the version number (e.g., `2.1.12`).
 
 ### Updating JTS GO
 
@@ -1075,7 +1075,7 @@ print(content)
 
 # Build and save a report
 name = "JTS GO"
-version = "2.1.0"
+version = "2.1.12"
 report = name + " version " + version
 write_file("report.txt", report)
 print("Report saved!")
@@ -1234,6 +1234,53 @@ Converts a string to a number:
 num = number("42")
 print(type(num))    # number
 print(num + 8)      # 50
+```
+
+### str(value) / string(value)
+
+Converts any value to a string:
+
+```jts
+print(str(123))           # 123
+print(str(true))          # true
+print(str(nil))           # nil
+print(str([1, 2, 3]))     # [1, 2, 3]
+```
+
+### int(value)
+
+Converts a value to an integer, truncating decimals:
+
+```jts
+print(int("42"))          # 42
+print(int(3.99))          # 3
+```
+
+### float(value)
+
+Alias for `number()`, converts string to float:
+
+```jts
+print(float("3.5"))       # 3.5
+```
+
+### bool(value)
+
+Converts a value to boolean (0, nil, "" are falsy):
+
+```jts
+print(bool("x"))          # true
+print(bool(""))           # false
+print(bool(0))            # false
+```
+
+### list(value)
+
+Converts a string, set, tensor, or list to a new list:
+
+```jts
+print(list("abc"))        # [a, b, c]
+print(list({1, 2, 3}))    # [1, 2, 3]
 ```
 
 ---
@@ -1552,5 +1599,5 @@ print(s.contains("ell"))
 
 <p align="center">
   Made with passion by <b>JayTech Solutions</b><br>
-  JTS GO v2.1.0 — 2026
+  JTS GO v2.1.12 — 2026
 </p>

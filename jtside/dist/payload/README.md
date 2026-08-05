@@ -1,4 +1,4 @@
-# JTS Development Kit v2.1.0
+# JTS Development Kit v2.1.12
 
 <p align="center">
   <b>JTS GO — The Easiest Programming Language to Learn</b><br>
@@ -332,5 +332,5 @@ For permissions beyond this license, contact: jayaswinjay.web@gmail.com
 
 <p align="center">
   Made with passion by <b>JayTech Solutions</b><br>
-  JTS GO v2.1.0 — 2026
+  JTS GO v2.1.12 — 2026
 </p>
