@@ -63,7 +63,7 @@ void init_vm(void) {
     vm.debug_source_length = 0;
 
     const char* native_names[] = {
-        "str", "tensor", "matrix", "matmul", "sigmoid", "relu", "mse",
+        "str", "string", "tensor", "matrix", "matmul", "sigmoid", "relu", "mse",
         "http_server", "http_route", "http_start", "http_request", "sqrt", "math",
         "sin", "cos", "tan", "log", "exp",
         "upper", "lower", "trim", "split", "contains", "replace",
@@ -79,7 +79,7 @@ void init_vm(void) {
         "format",
         "insert", "extend", "clear", "copy", "reverse", "index",
         "keys", "values", "items", "get", "has", "update",
-        "set", "set_add", "set_remove", "set_contains", "set_union", "set_intersection", "set_difference",
+        "set", "list", "set_add", "set_remove", "set_contains", "set_union", "set_intersection", "set_difference",
         "json_parse", "json_stringify",
         "now", "sleep", "strftime",
         "env", "args", "exit", "cwd",

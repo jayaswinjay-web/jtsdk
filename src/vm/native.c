@@ -2149,6 +2149,34 @@ static bool native_list_copy(int arg_count, Value* args, Value* result) {
     return true;
 }
 
+static bool native_list_convert(int arg_count, Value* args, Value* result) {
+    if (arg_count != 1) {
+        fprintf(stderr, "JTS GO: list() expects 1 argument (a string, set, tensor, or list)\n");
+        return false;
+    }
+    ObjList* list = new_list();
+    if (IS_STRING(args[0])) {
+        ObjString* str = AS_STRING(args[0]);
+        for (int i = 0; i < str->length; i++) {
+            list_append(list, OBJ_VAL(copy_string(&str->chars[i], 1)));
+        }
+    } else if (IS_SET(args[0])) {
+        ObjSet* src = AS_SET(args[0]);
+        for (int i = 0; i < src->count; i++) list_append(list, src->values[i]);
+    } else if (IS_TENSOR(args[0])) {
+        ObjTensor* t = AS_TENSOR(args[0]);
+        for (int i = 0; i < t->size; i++) list_append(list, NUMBER_VAL(t->data[i]));
+    } else if (IS_LIST(args[0])) {
+        ObjList* src = AS_LIST(args[0]);
+        for (int i = 0; i < src->count; i++) list_append(list, src->values[i]);
+    } else {
+        fprintf(stderr, "JTS GO: list() expects a string, set, tensor, or list\n");
+        return false;
+    }
+    *result = OBJ_VAL(list);
+    return true;
+}
+
 static bool native_set(int arg_count, Value* args, Value* result) {
     if (arg_count != 1) {
         fprintf(stderr, "JTS GO: set() expects 1 argument (a list)\n");
@@ -2613,6 +2641,7 @@ static NativeDef native_functions[] = {
     {"append", 2, native_append},
     {"number", 1, native_number},
     {"str",    1, native_string},
+    {"string", 1, native_string},
     {"math",   2, native_math},
     {"tensor", 1, native_tensor},
     {"matrix", -1, native_matrix},
@@ -2695,6 +2724,7 @@ static NativeDef native_functions[] = {
     {"index", 2, native_list_index},
     // Set operations
     {"set", 1, native_set},
+    {"list", 1, native_list_convert},
     {"set_add", 2, native_set_add},
     {"set_remove", 2, native_set_remove},
     {"set_contains", 2, native_set_contains},

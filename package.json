@@ -1,7 +1,7 @@
 {
   "name": "@jaytechsolutions/jts-go",
-  "version": "2.1.11",
-  "description": "JTS GO - The easiest programming language to learn. v2.1.11 with dict len fix, value-based remove(), safe tensor shapes, matrix printing, and %s strftime.",
+  "version": "2.1.12",
+  "description": "JTS GO - The easiest programming language to learn. v2.1.12 with string() & list() conversion functions and appendix documentation sync.",
   "keywords": [
     "programming language",
     "jts",
