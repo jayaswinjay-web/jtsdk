@@ -94,6 +94,7 @@ static void free_object(Obj* object) {
         case OBJ_TENSOR: {
             ObjTensor* tensor = (ObjTensor*)object;
             if (tensor->data) FREE_ARRAY(double, tensor->data, tensor->size);
+            if (tensor->shape) FREE_ARRAY(int, tensor->shape, tensor->ndim);
             FREE_ARRAY(ObjTensor, object, sizeof(ObjTensor));
             break;
         }

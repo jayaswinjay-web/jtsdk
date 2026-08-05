@@ -115,7 +115,7 @@ static bool native_len(int arg_count, Value* args, Value* result) {
         return true;
     }
     if (IS_DICT(args[0])) {
-        *result = NUMBER_VAL((double)AS_DICT(args[0])->entries.count);
+        *result = NUMBER_VAL((double)AS_DICT(args[0])->entries.live);
         return true;
     }
     if (IS_SET(args[0])) {
@@ -364,8 +364,9 @@ static bool native_tensor(int arg_count, Value* args, Value* result) {
     }
     ObjList* list = AS_LIST(args[0]);
     int ndim = 1;
-    int shape[4];
+    int* shape = (int*)reallocate(NULL, 0, sizeof(int) * 4);
     shape[0] = list->count;
+    shape[1] = shape[2] = shape[3] = 0;
     int total = list->count;
     double* data = (double*)reallocate(NULL, 0, sizeof(double) * total);
     for (int i = 0; i < list->count; i++) {
@@ -1049,22 +1050,23 @@ static bool native_length(int arg_count, Value* args, Value* result) {
 }
 
 static bool native_remove(int arg_count, Value* args, Value* result) {
-    if (arg_count != 2 || !IS_LIST(args[0]) || !IS_NUMBER(args[1])) {
-        fprintf(stderr, "JTS GO: remove() expects (list, index)\n");
+    if (arg_count != 2 || !IS_LIST(args[0])) {
+        fprintf(stderr, "JTS GO: remove() expects (list, value)\n");
         return false;
     }
     ObjList* list = AS_LIST(args[0]);
-    int index = (int)AS_NUMBER(args[1]);
-    if (index < 0 || index >= list->count) {
-        fprintf(stderr, "JTS GO: remove() index out of bounds\n");
-        return false;
+    for (int i = 0; i < list->count; i++) {
+        if (values_equal(list->values[i], args[1])) {
+            *result = list->values[i];
+            for (int j = i; j < list->count - 1; j++) {
+                list->values[j] = list->values[j + 1];
+            }
+            list->count--;
+            return true;
+        }
     }
-    *result = list->values[index];
-    for (int i = index; i < list->count - 1; i++) {
-        list->values[i] = list->values[i + 1];
-    }
-    list->count--;
-    return true;
+    fprintf(stderr, "JTS GO: remove() value not found in list\n");
+    return false;
 }
 
 static bool native_pop(int arg_count, Value* args, Value* result) {
@@ -2087,6 +2089,7 @@ static bool native_list_clear(int arg_count, Value* args, Value* result) {
             AS_DICT(args[0])->entries.entries[i].key = NULL;
         }
         AS_DICT(args[0])->entries.count = 0;
+        AS_DICT(args[0])->entries.live = 0;
     } else {
         fprintf(stderr, "JTS GO: clear() argument must be a list or dict\n");
         return false;
@@ -2337,6 +2340,7 @@ static bool native_dict_clear(int arg_count, Value* args, Value* result) {
         AS_DICT(args[0])->entries.entries[i].key = NULL;
     }
     AS_DICT(args[0])->entries.count = 0;
+    AS_DICT(args[0])->entries.live = 0;
     *result = args[0];
     return true;
 }
@@ -2544,7 +2548,13 @@ static bool native_strftime(int arg_count, Value* args, Value* result) {
     localtime_r(&t, &tmv);
 #endif
     char buf[256];
-    strftime(buf, sizeof(buf), AS_CSTRING(args[0]), &tmv);
+    const char* fmt = AS_CSTRING(args[0]);
+    if (strcmp(fmt, "%s") == 0) {
+        snprintf(buf, sizeof(buf), "%lld", (long long)t);
+        *result = OBJ_VAL(copy_string(buf, (int)strlen(buf)));
+        return true;
+    }
+    strftime(buf, sizeof(buf), fmt, &tmv);
     *result = OBJ_VAL(copy_string(buf, (int)strlen(buf)));
     return true;
 }

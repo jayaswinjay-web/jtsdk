@@ -1343,7 +1343,7 @@ static InterpretResult run(void) {
             } else if (IS_LIST(obj)) {
                 push(NUMBER_VAL((double)AS_LIST(obj)->count));
             } else if (IS_DICT(obj)) {
-                push(NUMBER_VAL((double)AS_DICT(obj)->entries.count));
+                push(NUMBER_VAL((double)AS_DICT(obj)->entries.live));
             } else if (IS_SET(obj)) {
                 push(NUMBER_VAL((double)AS_SET(obj)->count));
             } else if (IS_TENSOR(obj)) {

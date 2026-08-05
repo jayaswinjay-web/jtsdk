@@ -320,9 +320,21 @@ void print_obj(Value value) {
             printf(")>");
             break;
         }
-        case OBJ_MATRIX:
-            printf("<matrix %dx%d>", AS_MATRIX(value)->rows, AS_MATRIX(value)->cols);
+        case OBJ_MATRIX: {
+            ObjMatrix* m = AS_MATRIX(value);
+            printf("[");
+            for (int i = 0; i < m->rows; i++) {
+                if (i > 0) printf(", ");
+                printf("[");
+                for (int j = 0; j < m->cols; j++) {
+                    if (j > 0) printf(", ");
+                    print_value(NUMBER_VAL(m->data[i][j]));
+                }
+                printf("]");
+            }
+            printf("]");
             break;
+        }
         case OBJ_GENERATOR:
             printf("<generator>");
             break;

@@ -9,6 +9,7 @@
 
 void init_table(Table* table) {
     table->count = 0;
+    table->live = 0;
     table->capacity = 0;
     table->entries = NULL;
 }
@@ -55,6 +56,7 @@ static void adjust_capacity(Table* table, int capacity) {
         entries[i].value = NIL_VAL;
     }
     table->count = 0;
+    table->live = 0;
     for (int i = 0; i < table->capacity; i++) {
         Entry* entry = &table->entries[i];
         if (entry->key == NULL) continue;
@@ -62,6 +64,7 @@ static void adjust_capacity(Table* table, int capacity) {
         dest->key = entry->key;
         dest->value = entry->value;
         table->count++;
+        table->live++;
     }
     FREE_ARRAY(Entry, table->entries, table->capacity);
     table->entries = entries;
@@ -76,7 +79,10 @@ bool table_set(Table* table, ObjString* key, Value value) {
     Entry* entry = find_entry(table->entries, table->capacity, key);
     bool is_new_key = entry->key == NULL;
     if (is_new_key) {
-        if (IS_NIL(entry->value)) table->count++;
+        if (IS_NIL(entry->value)) {
+            table->count++;
+        }
+        table->live++;
     }
     entry->key = key;
     entry->value = value;
@@ -89,6 +95,7 @@ bool table_delete(Table* table, ObjString* key) {
     if (entry->key == NULL) return false;
     entry->key = NULL;
     entry->value = BOOL_VAL(true);
+    table->live--;
     return true;
 }
 
