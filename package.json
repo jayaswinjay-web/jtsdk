@@ -1,7 +1,7 @@
 {
   "name": "@jaytechsolutions/jts-go",
-  "version": "2.1.13",
-  "description": "JTS GO - The easiest programming language to learn. v2.1.13 with de-Pythonized keywords: say() instead of print(), ask() instead of input(), of instead of in, void instead of nil.",
+  "version": "0.9.0-beta",
+  "description": "JTS GO - The easiest programming language to learn. Open-source beta: say() instead of print(), ask() instead of input(), of instead of in, void instead of nil.",
   "keywords": [
     "programming language",
     "jts",
@@ -15,7 +15,7 @@
     "web-development"
   ],
   "author": "Aswinjay",
-  "license": "SEE-LICENSE-IN-PROPRIETARY_LICENSE",
+  "license": "Apache-2.0",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/jayaswinjay-web/jtsdk.git"
@@ -37,7 +37,7 @@
     "scrolls/",
     "assets/",
     "install.js",
-    "PROPRIETARY_LICENSE",
+    "LICENSE",
     "README.md"
   ],
   "os": [

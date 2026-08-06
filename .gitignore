@@ -3,8 +3,12 @@ bin/
 *.o
 *.txt
 *.log
+*.tmp
 node_modules/
 jtsdk/
+build-mingw/
+build/
+jtside/
 jts_debug.txt
 test_output.txt
 package-lock.json
@@ -16,6 +20,3 @@ config.json
 examples/ml/2.jts
 examples/ml/test 1.jts
 examples/ml/website.jts
-jtside/dist/payload/examples/ml/2.jts
-jtside/dist/payload/examples/ml/test 1.jts
-jtside/dist/payload/examples/ml/website.jts

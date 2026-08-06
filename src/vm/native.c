@@ -23,6 +23,7 @@ typedef int socklen_t;
 #include <sys/types.h>
 #include <dirent.h>
 #include <strings.h>
+#include <netdb.h>
 typedef int SOCKET;
 #define INVALID_SOCKET -1
 #define SOCKET_ERROR -1
@@ -612,7 +613,7 @@ static bool native_http_start(int arg_count, Value* args, Value* result) {
     struct sockaddr_in address;
     address.sin_family = AF_INET;
     address.sin_addr.s_addr = INADDR_ANY;
-    address.sin_port = htons((u_short)port);
+    address.sin_port = htons((unsigned short)port);
 
     if (bind(server_fd, (struct sockaddr*)&address, sizeof(address)) == SOCKET_ERROR) {
         fprintf(stderr, "JTS GO: Failed to bind to port %d\n", port);
@@ -762,7 +763,7 @@ static bool native_http_request(int arg_count, Value* args, Value* result) {
 
     struct sockaddr_in server_addr;
     server_addr.sin_family = AF_INET;
-    server_addr.sin_port = htons((u_short)port);
+    server_addr.sin_port = htons((unsigned short)port);
 
     struct hostent* he = gethostbyname(host);
     if (!he) {

@@ -1,4 +1,4 @@
-# JTS GO Language Specification v2.1.12
+# JTS GO Language Specification 0.9.0-beta
 
 This document is the complete, formal specification of the JTS GO programming language. It covers every keyword, operator, type, function, and semantic rule. AI language models can use this document to generate correct JTS GO code.
 

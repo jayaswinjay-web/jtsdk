@@ -14,11 +14,11 @@ CSS_FILE = os.path.join(ROOT, "css", "book.css")
 OUT_PDF = os.path.join(ROOT, "JTS-GO-Programming-Language.pdf")
 
 KEYWORDS = {
-    "and", "or", "not", "if", "elif", "else", "end", "while", "for", "in",
-    "to", "func", "return", "true", "false", "nil", "class", "self", "super",
+    "and", "or", "not", "if", "elif", "else", "end", "while", "for", "of",
+    "to", "func", "return", "true", "false", "void", "class", "self", "super",
     "extends", "new", "is", "del", "assert", "try", "catch", "throw",
     "finally", "yield", "break", "continue", "import", "append",
-    "len", "print", "input", "type", "str", "int", "float", "bool", "number",
+    "len", "say", "ask", "type", "str", "int", "float", "bool", "number",
     "matrix", "tensor", "predict", "http", "request", "response", "server",
     "model", "set", "var", "list",
 }

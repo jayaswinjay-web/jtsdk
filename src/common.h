@@ -11,8 +11,8 @@
 #include <ctype.h>
 #include <stdarg.h>
 
-#define JTS_VERSION_MAJOR 2
-#define JTS_VERSION_MINOR 1
+#define JTS_VERSION_MAJOR 0
+#define JTS_VERSION_MINOR 9
 #define JTS_VERSION_PATCH 0
 
 #define UINT8_COUNT (UINT8_MAX + 1)
