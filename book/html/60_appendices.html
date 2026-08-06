@@ -27,8 +27,8 @@ extracted from the language's scanner.</p>
 <tr><td><code>http</code></td><td>Web/server namespace</td><td>23</td></tr>
 <tr><td><code>if</code></td><td>Conditional branch</td><td>8</td></tr>
 <tr><td><code>import</code></td><td>Import a file</td><td>25</td></tr>
-<tr><td><code>in</code></td><td>Membership test; loop variable binder</td><td>7</td></tr>
-<tr><td><code>input</code></td><td>Read a line from the user</td><td>14</td></tr>
+<tr><td><code>of</code></td><td>Membership test; loop variable binder</td><td>7</td></tr>
+<tr><td><code>ask</code></td><td>Read a line from the user</td><td>14</td></tr>
 <tr><td><code>int</code></td><td>Type name; convert to integer</td><td>5</td></tr>
 <tr><td><code>is</code></td><td>Identity / type test</td><td>7</td></tr>
 <tr><td><code>len</code></td><td>Length of a value</td><td>14</td></tr>
@@ -36,12 +36,12 @@ extracted from the language's scanner.</p>
 <tr><td><code>matrix</code></td><td>Create a matrix</td><td>24</td></tr>
 <tr><td><code>model</code></td><td>AI model construct</td><td>24</td></tr>
 <tr><td><code>new</code></td><td>Instantiate an object</td><td>10</td></tr>
-<tr><td><code>nil</code></td><td>Null literal</td><td>5</td></tr>
+<tr><td><code>void</code></td><td>Null literal</td><td>5</td></tr>
 <tr><td><code>not</code></td><td>Logical negation</td><td>7</td></tr>
 <tr><td><code>number</code></td><td>Type name; convert to number</td><td>5</td></tr>
 <tr><td><code>or</code></td><td>Logical disjunction</td><td>7</td></tr>
 <tr><td><code>predict</code></td><td>AI prediction construct</td><td>24</td></tr>
-<tr><td><code>print</code></td><td>Write to the console</td><td>14</td></tr>
+<tr><td><code>say</code></td><td>Write to the console</td><td>14</td></tr>
 <tr><td><code>request</code></td><td>HTTP request construct</td><td>23</td></tr>
 <tr><td><code>response</code></td><td>HTTP response construct</td><td>23</td></tr>
 <tr><td><code>return</code></td><td>Return from a function</td><td>9</td></tr>
@@ -52,7 +52,7 @@ extracted from the language's scanner.</p>
 <tr><td><code>super</code></td><td>The parent class</td><td>10</td></tr>
 <tr><td><code>tensor</code></td><td>Create a tensor</td><td>24</td></tr>
 <tr><td><code>throw</code></td><td>Raise an error value</td><td>13</td></tr>
-<tr><td><code>to</code></td><td>Range loop syntax <code>for x in 0 to n</code></td><td>8</td></tr>
+<tr><td><code>to</code></td><td>Range loop syntax <code>for x of 0 to n</code></td><td>8</td></tr>
 <tr><td><code>true</code></td><td>Boolean literal</td><td>5</td></tr>
 <tr><td><code>try</code></td><td>Begin a protected block</td><td>13</td></tr>
 <tr><td><code>type</code></td><td>Type of a value</td><td>14</td></tr>
@@ -62,8 +62,8 @@ extracted from the language's scanner.</p>
 </table>
 
 <div class="note"><b>Note:</b> many of these keywords are also ordinary built-in function names (for example
-<code>print</code>, <code>len</code>, and <code>input</code>), so "keyword" and "built-in" overlap in JTS GO.
-You can always recognize them by their syntax role: <code>if</code> introduces a block, <code>print</code> is a
+<code>say</code>, <code>len</code>, and <code>ask</code>), so "keyword" and "built-in" overlap in JTS GO.
+You can always recognize them by their syntax role: <code>if</code> introduces a block, <code>say</code> is a
 callable.</div>
 
 <h1 id="appb">Appendix B. Operator Precedence</h1>
@@ -100,8 +100,8 @@ to the full documentation and examples.</p>
 <h2>C.1 Console and I/O</h2>
 <table>
 <tr><th>Built-in</th><th>Description</th><th>See</th></tr>
-<tr><td><code>print(...)</code></td><td>Print values to the console</td><td>14</td></tr>
-<tr><td><code>input(prompt?)</code></td><td>Read a line of text</td><td>14</td></tr>
+<tr><td><code>say(...)</code></td><td>Print values to the console</td><td>14</td></tr>
+<tr><td><code>ask(prompt?)</code></td><td>Read a line of text</td><td>14</td></tr>
 <tr><td><code>args()</code></td><td>Command-line arguments</td><td>20</td></tr>
 <tr><td><code>cwd()</code></td><td>Current working directory</td><td>20</td></tr>
 <tr><td><code>env(name)</code></td><td>Environment variable value</td><td>20</td></tr>

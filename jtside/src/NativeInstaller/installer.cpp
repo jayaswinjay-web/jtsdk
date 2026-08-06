@@ -1,4 +1,4 @@
-﻿// JTS GO native installer (Windows 7+ compatible, no .NET / Node dependency).
+// JTS GO native installer (Windows 7+ compatible, no .NET / Node dependency).
 // Self-contained: embeds payload.zip as a Win32 RCDATA resource and extracts it.
 //
 // GUI mode (default): a PropertySheet wizard with Welcome / License / Location /
@@ -57,7 +57,7 @@
 namespace {
 
 const wchar_t* kAppName = L"JTS GO";
-const wchar_t* kVersion = L"2.1.0";
+const wchar_t* kVersion = L"2.1.13";
 const wchar_t* kCompany = L"JayTech Solutions";
 const wchar_t* kRepoUrl = L"https://github.com/jayaswinjay-web/jtsdk";
 const wchar_t* kUninstallKey =
@@ -954,7 +954,7 @@ void RunInstallWizard() {
     psh.dwFlags = PSH_WIZARD97 | PSH_USEHICON;
     psh.hInstance = hInst;
     psh.hIcon = LoadIconW(hInst, MAKEINTRESOURCEW(IDI_APP));
-    psh.pszCaption = L"JTS GO 2.1.0 Setup";
+    psh.pszCaption = L"JTS GO 2.1.13 Setup";
     psh.nPages = count;
     psh.phpage = pages;
 

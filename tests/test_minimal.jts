@@ -1,10 +1,11 @@
 # Minimal test
-print("enter your age")
-x = input()
+say("enter your age")
+x = ask()
 if x < 10
-    print("small")
+    say("small")
 elif x < 20
-    print("medium")
+    say("medium")
 else
-    print("big")
+    say("big")
 end
+

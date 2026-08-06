@@ -1,3 +1,5 @@
 func greet(a)
 end
-print("hello")
+say("hello")
+
+

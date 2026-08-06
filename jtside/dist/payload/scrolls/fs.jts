@@ -121,9 +121,9 @@ end
 
 func word_count(path)
     n = 0
-    for line in read_lines(path)
+    for line of read_lines(path)
         words = line.split(" ")
-        for w in words
+        for w of words
             if w != ""
                 n = n + 1
             end
@@ -131,3 +131,4 @@ func word_count(path)
     end
     return n
 end
+

@@ -12,21 +12,21 @@ functions become available under a namespace with the same name:</p>
 <pre><code>bring math
 bring strings
 
-print(math.factorial(5))            # 120
-print(strings.is_palindrome("racecar"))   # true
+say(math.factorial(5))            # 120
+say(strings.is_palindrome("racecar"))   # true
 </code></pre>
 <p>Scroll globals also leak into the program's flat namespace, so <code>math.factorial(5)</code> and
 <code>factorial(5)</code> are both valid after <code>bring math</code>:</p>
 <pre><code>bring math
-print(math.pi)        # 3.14159   (namespaced)
-print(pi)             # 3.14159   (flat)
+say(math.pi)        # 3.14159   (namespaced)
+say(pi)             # 3.14159   (flat)
 </code></pre>
 
 <h2>25.3 Sub-Scrolls and Nested Namespaces</h2>
 <p>Scrolls can be organised into nested namespaces:</p>
 <pre><code>bring testmath.stats
 
-print(testmath.stats.mean([1, 2, 3, 4, 5]))    # 3
+say(testmath.stats.mean([1, 2, 3, 4, 5]))    # 3
 </code></pre>
 
 <h2>25.4 How Scrolls Resolve</h2>
@@ -47,7 +47,7 @@ file of the same name next to your program — a simple but powerful way to cust
 <p>Bringing the same scroll twice does not double-execute it:</p>
 <pre><code>bring math
 bring math          # safe — no-op the second time
-print("OK")
+say("OK")
 </code></pre>
 
 <h2>25.6 Writing Your Own Scroll</h2>
@@ -66,8 +66,8 @@ end
 <p>Now use it from any program:</p>
 <pre><code>bring geometry
 
-print(geometry.circle_area(2))        # 12.5664
-print(rectangle_area(3, 4))           # 12     (flat access)
+say(geometry.circle_area(2))        # 12.5664
+say(rectangle_area(3, 4))           # 12     (flat access)
 </code></pre>
 
 <h2>25.7 Importing a File: <code>import</code></h2>
@@ -76,7 +76,7 @@ definitions available to the current program. Unlike <code>bring</code>, which r
 names from the scroll search path, <code>import</code> takes a quoted path and is equivalent to
 calling the built-in <code>import_file(path)</code> function (Chapter 20.3):</p>
 <pre><code>import "helpers.jts"       # runs helpers.jts — its globals are now visible
-print(double(5))           # 10   (defined inside helpers.jts)
+say(double(5))           # 10   (defined inside helpers.jts)
 </code></pre>
 <p>Use <code>import</code> when you want to load a project-local file by path. Use
 <code>bring</code> when you want to load a standard-library scroll by name.</p>

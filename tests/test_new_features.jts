@@ -1,5 +1,5 @@
 # Test break/continue
-print("--- Break/Continue ---")
+say("--- Break/Continue ---")
 i = 0
 while i < 10
     i = i + 1
@@ -9,70 +9,71 @@ while i < 10
     if i == 7
         break
     end
-    print(i)
+    say(i)
 end
 
 # Test elif
-print("--- Elif ---")
+say("--- Elif ---")
 x = 15
 if x < 10
-    print("small")
+    say("small")
 elif x < 20
-    print("medium")
+    say("medium")
 elif x < 30
-    print("big")
+    say("big")
 else
-    print("huge")
+    say("huge")
 end
 
 # Test += / -=
-print("--- Compound Assignment ---")
+say("--- Compound Assignment ---")
 a = 10
 a += 5
-print(a)
+say(a)
 a -= 3
-print(a)
+say(a)
 
 # Test try/catch/throw
-print("--- Try/Catch/Throw ---")
+say("--- Try/Catch/Throw ---")
 try
     throw "Something went wrong!"
 catch e
-    print("Caught: " + e)
+    say("Caught: " + e)
 end
 
 # Test string methods
-print("--- String Methods ---")
+say("--- String Methods ---")
 s = "hello world"
-print(s.upper())
-print(s.lower())
-print(s.trim())
-print(s.contains("world"))
-print(s.replace("world", "JTS"))
-print(s.substring(0, 5))
-print(s.starts_with("hello"))
-print(s.ends_with("world"))
+say(s.upper())
+say(s.lower())
+say(s.trim())
+say(s.contains("world"))
+say(s.replace("world", "JTS"))
+say(s.substring(0, 5))
+say(s.starts_with("hello"))
+say(s.ends_with("world"))
 
 # Test dictionary
-print("--- Dictionary ---")
+say("--- Dictionary ---")
 d = {"name": "JTS", "version": "2.0"}
-print(d)
-print(d["name"])
+say(d)
+say(d["name"])
 
 # Test list methods
-print("--- List Methods ---")
+say("--- List Methods ---")
 lst = [3, 1, 2]
 lst.sort()
-print(lst)
+say(lst)
 lst.remove(2)
-print(lst)
+say(lst)
 lst.pop()
-print(lst)
+say(lst)
 
 # Test file I/O
-print("--- File I/O ---")
+say("--- File I/O ---")
 write_file("test_output.txt", "Hello from JTS!")
 content = read_file("test_output.txt")
-print(content)
+say(content)
 
-print("--- All tests passed! ---")
+say("--- All tests passed! ---")
+

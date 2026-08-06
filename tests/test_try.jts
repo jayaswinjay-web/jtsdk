@@ -1,7 +1,8 @@
 # Test try/catch/throw
-print("--- Try/Catch/Throw ---")
+say("--- Try/Catch/Throw ---")
 try
     throw "Something went wrong!"
 catch e
-    print("Caught: " + e)
+    say("Caught: " + e)
 end
+

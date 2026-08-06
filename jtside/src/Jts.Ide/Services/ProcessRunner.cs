@@ -6,7 +6,7 @@ using System.Windows.Threading;
 namespace JtsIde.Services;
 
 /// Runs the JTS GO toolchain, streaming stdout/stderr back on the UI thread
-/// and keeping stdin writable so running programs can call input().
+/// and keeping stdin writable so running programs can call ask().
 public class ProcessRunner
 {
     private readonly Dispatcher _dispatcher;

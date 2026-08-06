@@ -45,7 +45,7 @@ jts --update
 ## Hello, World!
 
 ```jts
-print("Hello, World!")
+say("Hello, World!")
 ```
 
 Save as `hello.jts` and run:
@@ -62,7 +62,7 @@ jts hello.jts
 name = "JTS GO"
 version = 2.0
 is_awesome = true
-nothing = nil
+nothing = void
 
 # Type-annotated declarations
 int age = 25
@@ -72,7 +72,7 @@ bool active = true
 list numbers = [1, 2, 3]
 var x = 42
 
-print(name)
+say(name)
 ```
 
 ### Compound Assignment
@@ -89,13 +89,13 @@ x *= 2      # x is now 24
 score = 85
 
 if score >= 90
-    print("Grade: A")
+    say("Grade: A")
 elif score >= 80
-    print("Grade: B")
+    say("Grade: B")
 elif score >= 70
-    print("Grade: C")
+    say("Grade: C")
 else
-    print("Grade: F")
+    say("Grade: F")
 end
 ```
 
@@ -111,7 +111,7 @@ while i < 10
     if i == 7
         break
     end
-    print(i)
+    say(i)
 end
 # Output: 1, 2, 4, 5, 6
 ```
@@ -119,52 +119,52 @@ end
 ### Functions
 ```jts
 func greet(name)
-    print("Hello, " + name + "!")
+    say("Hello, " + name + "!")
 end
 
 func add(a, b)
     return a + b
 end
 
-print(add(3, 4))   # 7
+say(add(3, 4))   # 7
 ```
 
 ### Lists
 ```jts
 nums = [3, 1, 2]
-print(nums)         # [3, 1, 2]
+say(nums)         # [3, 1, 2]
 
 nums.sort()
-print(nums)         # [1, 2, 3]
+say(nums)         # [1, 2, 3]
 
 nums.append(4)
-print(nums)         # [1, 2, 3, 4]
+say(nums)         # [1, 2, 3, 4]
 
 nums.remove(3)
-print(nums)         # [1, 2, 4]
+say(nums)         # [1, 2, 4]
 
 nums.pop()
-print(nums)         # [1, 2]
+say(nums)         # [1, 2]
 ```
 
 ### Dictionaries
 ```jts
 d = {"name": "JTS", "version": "2.0"}
-print(d)            # {name: JTS, version: 2.0}
-print(d["name"])    # JTS
+say(d)            # {name: JTS, version: 2.0}
+say(d["name"])    # JTS
 ```
 
 ### String Methods
 ```jts
 s = "hello world"
-print(s.upper())            # HELLO WORLD
-print(s.lower())            # hello world
-print(s.trim())             # hello world
-print(s.contains("world"))  # true
-print(s.replace("world", "JTS"))  # hello JTS
-print(s.substring(0, 5))    # hello
-print(s.starts_with("hello"))  # true
-print(s.ends_with("world"))    # true
+say(s.upper())            # HELLO WORLD
+say(s.lower())            # hello world
+say(s.trim())             # hello world
+say(s.contains("world"))  # true
+say(s.replace("world", "JTS"))  # hello JTS
+say(s.substring(0, 5))    # hello
+say(s.starts_with("hello"))  # true
+say(s.ends_with("world"))    # true
 ```
 
 ### Object-Oriented Programming
@@ -175,19 +175,19 @@ class Animal
     end
 
     func speak(self)
-        print(self.name + " makes a sound")
+        say(self.name + " makes a sound")
     end
 end
 
 # Create an instance
 a = new Animal("Dog")
 a.speak()           # Dog makes a sound
-print(a.name)       # Dog
+say(a.name)       # Dog
 
 # Inheritance
 class Dog extends Animal
     func bark(self)
-        print(self.name + " barks!")
+        say(self.name + " barks!")
     end
 end
 
@@ -201,7 +201,7 @@ d.bark()            # Rex barks! (own method)
 try
     throw "Something went wrong!"
 catch e
-    print("Caught: " + e)
+    say("Caught: " + e)
 end
 # Output: Caught: Something went wrong!
 ```
@@ -210,28 +210,28 @@ end
 ```jts
 write_file("output.txt", "Hello from JTS!")
 content = read_file("output.txt")
-print(content)
+say(content)
 ```
 
 ### ML/AI Functions
 ```jts
 # Tensors
 t = tensor([1, 2, 3, 4, 5])
-print(t)
+say(t)
 
 # Matrices
 m1 = matrix([[1, 2], [3, 4]])
 m2 = matrix([[5, 6], [7, 8]])
 result = matmul(m1, m2)
-print(result)
+say(result)
 
 # Activation functions
-print(sigmoid(0))    # 0.5
-print(relu(-5))      # 0
-print(relu(5))       # 5
+say(sigmoid(0))    # 0.5
+say(relu(-5))      # 0
+say(relu(5))       # 5
 
 # Loss functions
-print(mse([1, 2, 3], [1.1, 2.2, 3.1]))
+say(mse([1, 2, 3], [1.1, 2.2, 3.1]))
 ```
 
 ### Web Development
@@ -246,25 +246,25 @@ http_start(srv)
 
 ### Math Functions
 ```jts
-print(sqrt(16))        # 4
-print(math("sin", 3.14159))  # ~0
-print(math("floor", 3.7))    # 3
-print(math("abs", -42))      # 42
+say(sqrt(16))        # 4
+say(math("sin", 3.14159))  # ~0
+say(math("floor", 3.7))    # 3
+say(math("abs", -42))      # 42
 ```
 
 ### String Conversion
 ```jts
-print(str(42))          # "42"
-print(str(true))        # "true"
-print(str(nil))         # "nil"
+say(str(42))          # "42"
+say(str(true))        # "true"
+say(str(void))         # "void"
 ```
 
 ## Built-in Functions
 
 | Function | Description |
 |----------|-------------|
-| `print(value)` | Output a value to the console |
-| `input(prompt)` | Read user input (auto-detects type) |
+| `say(value)` | Output a value to the console |
+| `ask(prompt)` | Read user input (auto-detects type) |
 | `len(value)` | Get length of a string, list, tensor, or matrix |
 | `type(value)` | Get the type of a value |
 | `append(list, value)` | Add an element to a list |

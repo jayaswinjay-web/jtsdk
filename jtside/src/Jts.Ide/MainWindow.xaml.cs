@@ -25,8 +25,8 @@ public partial class MainWindow : Window
         "    return fib(n - 1) + fib(n - 2)\n" +
         "end\n" +
         "\n" +
-        "for i in 0 to 10\n" +
-        "    print(fib(i))\n" +
+        "for i of 0 to 10\n" +
+        "    say(fib(i))\n" +
         "end\n";
 
     private readonly List<EditorDocument> _docs = new();

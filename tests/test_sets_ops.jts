@@ -1,69 +1,71 @@
-print("Bitwise:")
-print(5 & 3)
-print(5 | 3)
-print(5 ^ 3)
-print(~5)
-print(1 << 4)
-print(256 >> 2)
+say("Bitwise:")
+say(5 & 3)
+say(5 | 3)
+say(5 ^ 3)
+say(~5)
+say(1 << 4)
+say(256 >> 2)
 a = 6
 a |= 1
-print(a)
+say(a)
 b = 7
 b &= 3
-print(b)
+say(b)
 c = 5
 c ^= 3
-print(c)
+say(c)
 d = 2
 d <<= 3
-print(d)
+say(d)
 e = 64
 e >>= 2
-print(e)
+say(e)
 
-print("Is:")
-print(1 is 1)
-print(1 is 2)
-print("a" is "a")
+say("Is:")
+say(1 is 1)
+say(1 is 2)
+say("a" is "a")
 
-print("Assert:")
+say("Assert:")
 assert 1 + 1 == 2
 assert 5 > 3, "five bigger"
-print("asserts ok")
+say("asserts ok")
 
-print("Del:")
+say("Del:")
 x = 10
 del x
 lst = [1, 2, 3, 4]
 del lst[1]
-print(lst)
+say(lst)
 dct = {"a": 1, "b": 2, "c": 3}
 del dct["b"]
-print(dct)
-print(len(dct))
+say(dct)
+say(len(dct))
 
-print("Sets:")
+say("Sets:")
 s = {1, 2, 3, 2, 1}
-print(s)
-print(len(s))
-print(2 in s)
-print(9 in s)
+say(s)
+say(len(s))
+say(2 of s)
+say(9 of s)
 t = set([4, 5, 6])
-print(t)
-print(s | t)
-print(s & set([2, 3, 4]))
-print(s - set([1]))
-print(s ^ set([2, 7]))
-print(set_add(s, 7))
-print(7 in s)
-print(set_contains(s, 7))
-print(set_remove(s, 3))
-print(3 in s)
+say(t)
+say(s | t)
+say(s & set([2, 3, 4]))
+say(s - set([1]))
+say(s ^ set([2, 7]))
+say(set_add(s, 7))
+say(7 of s)
+say(set_contains(s, 7))
+say(set_remove(s, 3))
+say(3 of s)
 s2 = set("abc")
-print(s2)
-print(type(s) == "set")
-print(type(s2))
-print(len(s2))
-for item in s
-    print("item: " + item)
+say(s2)
+say(type(s) == "set")
+say(type(s2))
+say(len(s2))
+for item of s
+    say("item: " + item)
 end
+
+

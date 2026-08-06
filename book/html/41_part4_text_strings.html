@@ -11,27 +11,27 @@ building slugs, masking secrets, applying ciphers, and counting words and letter
 <h3><code>text.slugify(s)</code></h3>
 <p>Converts text to a URL-friendly slug: lowercase, spaces replaced with hyphens, non-alphanumeric characters
 removed.</p>
-<pre><code>print(text.slugify("Hello World, JTS GO!"))   # hello-world-jts-go
+<pre><code>say(text.slugify("Hello World, JTS GO!"))   # hello-world-jts-go
 </code></pre>
 
 <h3><code>text.snake_case(s)</code></h3>
 <p>Converts to <code>snake_case</code> (lowercase words joined by underscores).</p>
-<pre><code>print(text.snake_case("HelloWorld JTS"))      # hello_world_jts
+<pre><code>say(text.snake_case("HelloWorld JTS"))      # hello_world_jts
 </code></pre>
 
 <h3><code>text.kebab_case(s)</code></h3>
 <p>Converts to <code>kebab-case</code> (lowercase words joined by hyphens).</p>
-<pre><code>print(text.kebab_case("HelloWorld JTS"))      # hello-world-jts
+<pre><code>say(text.kebab_case("HelloWorld JTS"))      # hello-world-jts
 </code></pre>
 
 <h3><code>text.camel_case(s)</code></h3>
 <p>Converts to <code>camelCase</code> (first word lowercase, subsequent words capitalized).</p>
-<pre><code>print(text.camel_case("hello world jts"))     # helloWorldJts
+<pre><code>say(text.camel_case("hello world jts"))     # helloWorldJts
 </code></pre>
 
 <h3><code>text.pascal_case(s)</code></h3>
 <p>Converts to <code>PascalCase</code> (every word capitalized).</p>
-<pre><code>print(text.pascal_case("hello world jts"))    # HelloWorldJts
+<pre><code>say(text.pascal_case("hello world jts"))    # HelloWorldJts
 </code></pre>
 
 <h2>26.2 Masking and Abbreviation</h2>
@@ -39,18 +39,18 @@ removed.</p>
 <h3><code>text.mask(s, keep)</code></h3>
 <p>Masks everything except the last <code>keep</code> characters with asterisks. Useful for hiding card numbers and
 secrets.</p>
-<pre><code>print(text.mask("1234567890", 4))      # ******7890
-print(text.mask("password", 3))        # *****ord
+<pre><code>say(text.mask("1234567890", 4))      # ******7890
+say(text.mask("password", 3))        # *****ord
 </code></pre>
 
 <h3><code>text.abbreviate(s, n)</code></h3>
 <p>Keeps the first <code>n</code> words and appends <code>...</code>.</p>
-<pre><code>print(text.abbreviate("the quick brown fox jumps", 3))   # the quick brown...
+<pre><code>say(text.abbreviate("the quick brown fox jumps", 3))   # the quick brown...
 </code></pre>
 
 <h3><code>text.truncate_words(s, n)</code></h3>
 <p>Alias-style truncation by word count.</p>
-<pre><code>print(text.truncate_words("the quick brown fox jumps", 2))  # the quick...
+<pre><code>say(text.truncate_words("the quick brown fox jumps", 2))  # the quick...
 </code></pre>
 
 <h2>26.3 Pluralization</h2>
@@ -58,86 +58,86 @@ print(text.mask("password", 3))        # *****ord
 <h3><code>text.pluralize(word, count)</code></h3>
 <p>Returns the singular word when <code>count</code> is 1, and a plural form otherwise. Handles <code>s</code>,
 <code>x</code>, <code>z</code>, <code>ch</code>, <code>sh</code> and consonant-plus-<code>y</code> endings.</p>
-<pre><code>print(text.pluralize("cat", 2))      # cats
-print(text.pluralize("box", 2))      # boxes
-print(text.pluralize("party", 2))    # parties
-print(text.pluralize("box", 1))      # box
+<pre><code>say(text.pluralize("cat", 2))      # cats
+say(text.pluralize("box", 2))      # boxes
+say(text.pluralize("party", 2))    # parties
+say(text.pluralize("box", 1))      # box
 </code></pre>
 
 <h2>26.4 Word Tools</h2>
 
 <h3><code>text.reverse_words(s)</code></h3>
-<pre><code>print(text.reverse_words("the quick brown fox"))   # fox brown quick the
+<pre><code>say(text.reverse_words("the quick brown fox"))   # fox brown quick the
 </code></pre>
 
 <h3><code>text.initials(s)</code></h3>
-<pre><code>print(text.initials("John Fitzgerald Kennedy"))    # JFK
+<pre><code>say(text.initials("John Fitzgerald Kennedy"))    # JFK
 </code></pre>
 
 <h3><code>text.normalize_spaces(s)</code></h3>
-<pre><code>print(text.normalize_spaces("  a   b  c  "))       # a b c
+<pre><code>say(text.normalize_spaces("  a   b  c  "))       # a b c
 </code></pre>
 
 <h3><code>text.split_words(s)</code> and <code>text.is_blank(s)</code></h3>
 <p><code>split_words</code> splits text into words, understanding capitalization boundaries; <code>is_blank</code>
 tests whether a string is empty or whitespace-only.</p>
-<pre><code>print(text.is_blank("   "))     # true
-print(text.count_substring("banana", "an"))   # 2
+<pre><code>say(text.is_blank("   "))     # true
+say(text.count_substring("banana", "an"))   # 2
 </code></pre>
 
 <h3><code>text.count_vowels(s)</code> / <code>text.count_consonants(s)</code></h3>
-<pre><code>print(text.count_vowels("hello world"))       # 3
-print(text.count_consonants("hello world"))   # 7
+<pre><code>say(text.count_vowels("hello world"))       # 3
+say(text.count_consonants("hello world"))   # 7
 </code></pre>
 
 <h3><code>text.extract_digits(s)</code></h3>
-<pre><code>print(text.extract_digits("abc123xyz456"))    # 123456
+<pre><code>say(text.extract_digits("abc123xyz456"))    # 123456
 </code></pre>
 
 <h3><code>text.contains_any(s, chars)</code></h3>
-<pre><code>print(text.contains_any("hello", "xyz"))      # false
-print(text.contains_any("hello", "oxz"))      # true
+<pre><code>say(text.contains_any("hello", "xyz"))      # false
+say(text.contains_any("hello", "oxz"))      # true
 </code></pre>
 
 <h2>26.5 Ciphers</h2>
 
 <h3><code>text.rot13(s)</code></h3>
 <p>Rotates each letter 13 places in the alphabet. Applying it twice restores the original text.</p>
-<pre><code>print(text.rot13("Hello World"))       # Uryyb Jbeyq
-print(text.rot13(text.rot13("Hello World")))   # Hello World
+<pre><code>say(text.rot13("Hello World"))       # Uryyb Jbeyq
+say(text.rot13(text.rot13("Hello World")))   # Hello World
 </code></pre>
 
 <h3><code>text.caesar(s, shift)</code></h3>
 <p>Shifts letters by <code>shift</code> places. Negative shifts work.</p>
-<pre><code>print(text.caesar("Attack at dawn", 3))   # Dwwdfn dw gdzq
+<pre><code>say(text.caesar("Attack at dawn", 3))   # Dwwdfn dw gdzq
 </code></pre>
 
 <h2>26.6 Anagram and Character Tools</h2>
 
 <h3><code>text.is_anagram(a, b)</code></h3>
-<pre><code>print(text.is_anagram("listen", "silent"))   # true
-print(text.is_anagram("hello", "world"))     # false
+<pre><code>say(text.is_anagram("listen", "silent"))   # true
+say(text.is_anagram("hello", "world"))     # false
 </code></pre>
 
 <h3><code>text.is_isogram(s)</code></h3>
 <p>True when no letter is repeated.</p>
-<pre><code>print(text.is_isogram("background"))   # true
-print(text.is_isogram("letter"))       # false
+<pre><code>say(text.is_isogram("background"))   # true
+say(text.is_isogram("letter"))       # false
 </code></pre>
 
 <h3><code>text.sort_chars(s)</code></h3>
-<pre><code>print(text.sort_chars("cba"))          # abc
+<pre><code>say(text.sort_chars("cba"))          # abc
 </code></pre>
 
 <h3><code>text.shuffle_chars(s)</code></h3>
 <p>Returns a random reordering of the characters (random output).</p>
-<pre><code>print(text.shuffle_chars("JTS GO"))    # e.g. J STGO
+<pre><code>say(text.shuffle_chars("JTS GO"))    # e.g. J STGO
 </code></pre>
 
 <h2>26.7 Formatting</h2>
 
 <h3><code>text.indent(s, spaces)</code></h3>
-<pre><code>print(text.indent("line1\nline2", 2))
+<pre><code>say(text.indent("line1\nline2", 2))
 </code></pre>
 <pre class="output"><code>  line1
   line2
@@ -152,41 +152,41 @@ repetition, and truncation.</p>
 </code></pre>
 
 <h2>27.1 <code>strings.reverse(s)</code></h2>
-<pre><code>print(strings.reverse("hello"))    # olleh
+<pre><code>say(strings.reverse("hello"))    # olleh
 </code></pre>
 
 <h2>27.2 <code>strings.is_palindrome(s)</code></h2>
-<pre><code>print(strings.is_palindrome("racecar"))   # true
-print(strings.is_palindrome("hello"))     # false
+<pre><code>say(strings.is_palindrome("racecar"))   # true
+say(strings.is_palindrome("hello"))     # false
 </code></pre>
 
 <h2>27.3 <code>strings.count_words(s)</code></h2>
-<pre><code>print(strings.count_words("the quick brown fox"))   # 4
+<pre><code>say(strings.count_words("the quick brown fox"))   # 4
 </code></pre>
 
 <h2>27.4 <code>strings.repeat(s, n)</code></h2>
-<pre><code>print(strings.repeat("ab", 3))     # ababab
+<pre><code>say(strings.repeat("ab", 3))     # ababab
 </code></pre>
 
 <h2>27.5 <code>strings.truncate(s, n)</code></h2>
-<pre><code>print(strings.truncate("a very long string", 8))    # a ver...
+<pre><code>say(strings.truncate("a very long string", 8))    # a ver...
 </code></pre>
 
 <h2>27.6 <code>strings.words(s)</code></h2>
-<pre><code>print(strings.words("a b c"))     # [a, b, c]
+<pre><code>say(strings.words("a b c"))     # [a, b, c]
 </code></pre>
 
 <h2>27.7 <code>strings.has_letter(s, ch)</code></h2>
-<pre><code>print(strings.has_letter("hello", "e"))   # true
+<pre><code>say(strings.has_letter("hello", "e"))   # true
 </code></pre>
 
 <h2>27.8 <code>strings.strip_vowels(s)</code></h2>
-<pre><code>print(strings.strip_vowels("hello"))     # hll
+<pre><code>say(strings.strip_vowels("hello"))     # hll
 </code></pre>
 
 <h2>27.9 <code>strings.capitalize_words(s)</code> / <code>titleize(s)</code></h2>
-<pre><code>print(strings.capitalize_words("hello world jts"))   # Hell Worl Jt
-print(strings.titleize("hello world"))                # Hell Worl
+<pre><code>say(strings.capitalize_words("hello world jts"))   # Hell Worl Jt
+say(strings.titleize("hello world"))                # Hell Worl
 </code></pre>
 
 <div class="warn"><b>Known limitation:</b> <code>capitalize_words</code>/<code>titleize</code> currently drop the
@@ -196,5 +196,5 @@ scroll and fix the <code>substring(1, len(w) - 1)</code> call to <code>substring
 benefit of a readable standard library: the bug is one line, and you are free to patch it.</div>
 
 <h2>27.10 <code>strings.remove_spaces(s)</code></h2>
-<pre><code>print(strings.remove_spaces("a b c"))    # abc
+<pre><code>say(strings.remove_spaces("a b c"))    # abc
 </code></pre>

@@ -5,27 +5,29 @@ age = 25
 price = 19.99
 negative = -10
 
-print("Age: " + age)
-print("Price: " + price)
-print("Negative: " + negative)
+say("Age: " + age)
+say("Price: " + price)
+say("Negative: " + negative)
 
 # Strings
 name = "JTS GO"
 language = "Programming Language"
-print(name)
-print(language)
+say(name)
+say(language)
 
 # Booleans
 is_active = true
 is_new = false
-print(is_active)
-print(is_new)
+say(is_active)
+say(is_new)
 
-# Nil
-result = nil
-print(result)
+# void
+result = void
+say(result)
 
 # Type checking
-print(type(age))
-print(type(name))
-print(type(is_active))
+say(type(age))
+say(type(name))
+say(type(is_active))
+
+

@@ -9,7 +9,7 @@ JTS GO is dynamically typed. You do not declare a variable's type — it is dete
 | **number** | Integers and floating-point numbers | `42`, `3.14`, `-7` |
 | **string** | Text enclosed in double quotes | `"hello"`, `""` |
 | **boolean** | True or false | `true`, `false` |
-| **nil** | Absence of a value | `nil` |
+| **void** | Absence of a value | `void` |
 | **list** | Ordered collection of values | `[1, 2, 3]`, `["a", "b"]` |
 | **dict** | Key-value pairs | `{"name": "JTS", "version": "2.0"}` |
 
@@ -43,11 +43,11 @@ pi = 3.14159
 a = 10
 b = 3
 
-print(a + b)     # 13
-print(a - b)     # 7
-print(a * b)     # 30
-print(a / b)     # 3.33333
-print(a % b)     # 1
+say(a + b)     # 13
+say(a - b)     # 7
+say(a * b)     # 30
+say(a / b)     # 3.33333
+say(a % b)     # 1
 ```
 
 ### Operator Precedence
@@ -55,8 +55,8 @@ print(a % b)     # 1
 Multiplication and division are evaluated before addition and subtraction, as in standard math.
 
 ```jts
-print(2 + 3 * 4)       # 14  (not 20)
-print((2 + 3) * 4)     # 20
+say(2 + 3 * 4)       # 14  (not 20)
+say((2 + 3) * 4)     # 20
 ```
 
 ## Strings
@@ -74,9 +74,9 @@ greeting = "Hello, World!"
 Use `len()` to get the number of characters in a string.
 
 ```jts
-print(len("JTS"))       # 3
-print(len(""))          # 0
-print(len("hello"))     # 5
+say(len("JTS"))       # 3
+say(len(""))          # 0
+say(len("hello"))     # 5
 ```
 
 ### String Concatenation
@@ -87,7 +87,7 @@ The `+` operator joins two strings together.
 first = "Hello"
 second = "World"
 result = first + " " + second
-print(result)    # Hello World
+say(result)    # Hello World
 ```
 
 ### Auto-Conversion (String + Number)
@@ -96,13 +96,13 @@ When you concatenate a string with a number using `+`, the number is automatical
 
 ```jts
 age = 25
-print("Age: " + age)          # Age: 25
+say("Age: " + age)          # Age: 25
 
 price = 19.99
-print("Price: $" + price)     # Price: $19.99
+say("Price: $" + price)     # Price: $19.99
 
 count = 0
-print("Items: " + count)      # Items: 0
+say("Items: " + count)      # Items: 0
 ```
 
 This makes it easy to build messages without explicit conversion.
@@ -121,7 +121,7 @@ Booleans are commonly used with comparison and logical operators, and in if/else
 ```jts
 age = 25
 is_adult = age >= 18
-print(is_adult)    # true
+say(is_adult)    # true
 ```
 
 ### Comparison Operators
@@ -146,28 +146,28 @@ print(is_adult)    # true
 ```jts
 x = 10
 if x > 5 and x < 20
-    print("x is between 5 and 20")
+    say("x is between 5 and 20")
 end
 ```
 
 ## Nil
 
-`nil` represents the absence of a value. It is similar to `null` in other languages.
+`void` represents the absence of a value. It is similar to `null` in other languages.
 
 ```jts
-result = nil
-print(result)       # nil
-print(type(result)) # nil
+result = void
+say(result)       # void
+say(type(result)) # void
 ```
 
 Nil is falsy — it evaluates to `false` in conditions.
 
 ```jts
-value = nil
+value = void
 if value
-    print("This will NOT print")
+    say("This will NOT say")
 else
-    print("value is nil")
+    say("value is void")
 end
 ```
 
@@ -176,11 +176,11 @@ end
 Use the `type()` function to check the type of any value at runtime.
 
 ```jts
-print(type(42))          # number
-print(type(3.14))        # number
-print(type("hello"))     # string
-print(type(true))        # boolean
-print(type(nil))         # nil
+say(type(42))          # number
+say(type(3.14))        # number
+say(type("hello"))     # string
+say(type(true))        # boolean
+say(type(void))         # void
 ```
 
 `type()` returns a string that you can use in comparisons:
@@ -188,7 +188,7 @@ print(type(nil))         # nil
 ```jts
 value = "hello"
 if type(value) == "string"
-    print("value is a string")
+    say("value is a string")
 end
 ```
 
@@ -201,10 +201,10 @@ JTS GO provides functions to convert between types. These are useful when you ne
 Converts any value to its string representation.
 
 ```jts
-print(str(123))           # "123"
-print(str(true))          # "true"
-print(str(nil))           # "nil"
-print(str([1, 2, 3]))     # "[1, 2, 3]"
+say(str(123))           # "123"
+say(str(true))          # "true"
+say(str(void))           # "void"
+say(str([1, 2, 3]))     # "[1, 2, 3]"
 ```
 
 ### number(value) / float(value)
@@ -212,9 +212,9 @@ print(str([1, 2, 3]))     # "[1, 2, 3]"
 Converts a string to a floating-point number.
 
 ```jts
-print(number("42"))       # 42
-print(number("3.5"))      # 3.5
-print(float("3.5"))       # 3.5
+say(number("42"))       # 42
+say(number("3.5"))      # 3.5
+say(float("3.5"))       # 3.5
 ```
 
 ### int(value)
@@ -222,20 +222,20 @@ print(float("3.5"))       # 3.5
 Converts a value to an integer, truncating any fractional part.
 
 ```jts
-print(int("42"))          # 42
-print(int(3.99))          # 3
-print(int("3.7"))         # 3
+say(int("42"))          # 42
+say(int(3.99))          # 3
+say(int("3.7"))         # 3
 ```
 
 ### bool(value)
 
-Converts a value to a boolean following truthiness rules (0, nil, and empty string are falsy; everything else is truthy).
+Converts a value to a boolean following truthiness rules (0, void, and empty string are falsy; everything else is truthy).
 
 ```jts
-print(bool("x"))          # true
-print(bool(""))           # false
-print(bool(0))            # false
-print(bool(1))            # true
+say(bool("x"))          # true
+say(bool(""))           # false
+say(bool(0))            # false
+say(bool(1))            # true
 ```
 
 ### list(value)
@@ -243,9 +243,9 @@ print(bool(1))            # true
 Converts a string, set, tensor, or list to a new list.
 
 ```jts
-print(list("abc"))        # [a, b, c]
-print(list({1, 2, 3}))    # [1, 2, 3]
-print(list([1, 2]))       # [1, 2] (copy)
+say(list("abc"))        # [a, b, c]
+say(list({1, 2, 3}))    # [1, 2, 3]
+say(list([1, 2]))       # [1, 2] (copy)
 ```
 
 ## Truthiness
@@ -256,7 +256,7 @@ In JTS GO, values are considered "truthy" or "falsy" when used in conditions:
 |-------|------------|
 | `true` | Truthy |
 | `false` | Falsy |
-| `nil` | Falsy |
+| `void` | Falsy |
 | `0` | Falsy |
 | Any other number | Truthy |
 | `""` (empty string) | Falsy |
@@ -264,19 +264,19 @@ In JTS GO, values are considered "truthy" or "falsy" when used in conditions:
 
 ```jts
 if 0
-    print("This will NOT print — 0 is falsy")
+    say("This will NOT say — 0 is falsy")
 end
 
 if 1
-    print("This WILL print — 1 is truthy")
+    say("This WILL say — 1 is truthy")
 end
 
 if ""
-    print("This will NOT print — empty string is falsy")
+    say("This will NOT say — empty string is falsy")
 end
 
 if "hello"
-    print("This WILL print — non-empty string is truthy")
+    say("This WILL say — non-empty string is truthy")
 end
 ```
 
@@ -294,8 +294,8 @@ empty = []
 ### Accessing Elements
 ```jts
 fruits = ["apple", "banana", "cherry"]
-print(fruits[0])    # apple (first element, index starts at 0)
-print(fruits[2])    # cherry
+say(fruits[0])    # apple (first element, index starts at 0)
+say(fruits[2])    # cherry
 ```
 
 ### List Methods
@@ -313,8 +313,8 @@ Dictionaries store key-value pairs. Keys must be strings.
 
 ```jts
 d = {"name": "JTS", "version": "2.0"}
-print(d)            # {name: JTS, version: 2.0}
-print(d["name"])    # JTS
+say(d)            # {name: JTS, version: 2.0}
+say(d["name"])    # JTS
 ```
 
 ### Creating Dictionaries
@@ -324,7 +324,7 @@ empty = {}
 
 # With values
 person = {"name": "Alice", "age": 30, "active": true}
-print(person["name"])    # Alice
+say(person["name"])    # Alice
 ```
 
 ## Summary
@@ -334,7 +334,7 @@ print(person["name"])    # Alice
 | number | Integers, floats | `42`, `3.14`, `-7` |
 | string | Text in double quotes | `"hello"` |
 | boolean | `true`, `false` | `true` |
-| nil | `nil` | `nil` |
+| void | `void` | `void` |
 | list | Ordered collection | `[1, 2, 3]` |
 | dict | Key-value pairs | `{"a": 1}` |
 
@@ -342,4 +342,4 @@ print(person["name"])    # Alice
 
 - [Control Flow](control-flow.md) — Use types in conditions and loops
 - [Functions](functions.md) — Pass types as arguments and return values
-- [Built-in Functions](builtins.md) — Learn about print, input, len, and type
+- [Built-in Functions](builtins.md) — Learn about say, ask, len, and type

@@ -16,7 +16,7 @@ name = "JTS"          # this is an inline comment
 <code>for</code>, <code>func</code>, <code>class</code>, <code>try</code>, <code>catch</code>, and
 <code>finally</code>.</p>
 <pre><code>if temperature > 80
-    print("It's hot!")
+    say("It's hot!")
 end
 </code></pre>
 <ul>
@@ -26,9 +26,9 @@ end
 </ul>
 <pre><code>func check_age(age)
     if age >= 18
-        print("Adult")
+        say("Adult")
     else
-        print("Minor")
+        say("Minor")
     end
 end
 </code></pre>
@@ -49,8 +49,8 @@ concatenation:</li>
 </ul>
 <pre><code>a = 10
 b = 3
-print("a + b = " + (a + b))            # a + b = 13
-print("(a + b) * 2 = " + ((a + b) * 2))  # (a + b) * 2 = 26
+say("a + b = " + (a + b))            # a + b = 13
+say("(a + b) * 2 = " + ((a + b) * 2))  # (a + b) * 2 = 26
 </code></pre>
 
 <h2>4.4 Literals</h2>
@@ -61,7 +61,7 @@ print("(a + b) * 2 = " + ((a + b) * 2))  # (a + b) * 2 = 26
 <tr><td>Floating-point numbers</td><td><code>3.14</code>, <code>-0.5</code>, <code>1e3</code></td></tr>
 <tr><td>Strings (double quotes)</td><td><code>"hello"</code>, <code>""</code></td></tr>
 <tr><td>Booleans</td><td><code>true</code>, <code>false</code></td></tr>
-<tr><td>Nil</td><td><code>nil</code></td></tr>
+<tr><td>Nil</td><td><code>void</code></td></tr>
 <tr><td>Lists</td><td><code>[1, 2, 3]</code>, <code>[]</code>, <code>["a", 42, true]</code></td></tr>
 <tr><td>Dicts</td><td><code>{"name": "JTS", "year": 2026}</code></td></tr>
 <tr><td>Sets</td><td><code>{1, 2, 3}</code>, <code>{}</code> is an empty dict, use <code>set([])</code> for an empty set</td></tr>
@@ -95,13 +95,13 @@ item2 = "second"
 <h2>4.6 Keywords</h2>
 <p>Keywords are words with a fixed meaning in the language; you cannot use them as identifiers. The complete list
 is covered in Appendix A. The core keywords are:</p>
-<pre><code>and or not if elif else end while for in to func return
-true false nil class self super extends new is del assert
+<pre><code>and or not if elif else end while for of to func return
+true false void class self super extends new is del assert
 try catch throw finally yield break continue import append
-len print input type str int float bool number matrix tensor
+len say ask type str int float bool number matrix tensor
 set var list
 </code></pre>
-<p>Some of these words (for example <code>print</code>, <code>len</code>, <code>int</code>) are also available as
+<p>Some of these words (for example <code>say</code>, <code>len</code>, <code>int</code>) are also available as
 built-in functions. Do not create variables with these names.</p>
 
 <h2>4.7 The Structure of a Program</h2>
@@ -123,8 +123,8 @@ end
 
 # 4. The main logic, called at the end
 func main()
-    print(app_name + " v" + version)
-    print(kelvin_to_celsius(300))
+    say(app_name + " v" + version)
+    say(kelvin_to_celsius(300))
 end
 
 main()
@@ -132,16 +132,16 @@ main()
 
 <h2>4.8 Case Study: A Complete Small Program</h2>
 <pre><code># A simple greeting program using every element so far
-print("Welcome to JTS GO!")
+say("Welcome to JTS GO!")
 
-name = input("What is your name? ")
+name = ask("What is your name? ")
 name_length = len(name)
 
 if name_length > 0
-    print("Hello, " + name + "!")
-    print("Your name has " + name_length + " characters.")
+    say("Hello, " + name + "!")
+    say("Your name has " + name_length + " characters.")
 else
-    print("You didn't enter a name!")
+    say("You didn't enter a name!")
 end
 </code></pre>
 <p>This program uses a comment, a literal, a built-in function, a variable, string concatenation, and an
@@ -159,7 +159,7 @@ value you assign, and it can change later. This keeps the syntax clean while giv
 <tr><td><code>number</code></td><td>Integers and floating-point numbers</td><td><code>42</code>, <code>3.14</code>, <code>-7</code></td></tr>
 <tr><td><code>string</code></td><td>Text enclosed in double quotes</td><td><code>"hello"</code>, <code>""</code></td></tr>
 <tr><td><code>boolean</code></td><td>Logical truth values</td><td><code>true</code>, <code>false</code></td></tr>
-<tr><td><code>nil</code></td><td>The absence of a value</td><td><code>nil</code></td></tr>
+<tr><td><code>void</code></td><td>The absence of a value</td><td><code>void</code></td></tr>
 <tr><td><code>list</code></td><td>An ordered collection</td><td><code>[1, 2, 3]</code></td></tr>
 <tr><td><code>dict</code></td><td>A mapping from string keys to values</td><td><code>{"a": 1}</code></td></tr>
 <tr><td><code>set</code></td><td>An unordered collection of unique values</td><td><code>{1, 2, 3}</code></td></tr>
@@ -173,12 +173,12 @@ expect from mathematics:</p>
 <pre><code>a = 10
 b = 3
 
-print(a + b)     # 13
-print(a - b)     # 7
-print(a * b)     # 30
-print(a / b)     # 3.33333
-print(a % b)     # 1   (the remainder)
-print(-a)        # -10 (unary negation)
+say(a + b)     # 13
+say(a - b)     # 7
+say(a * b)     # 30
+say(a / b)     # 3.33333
+say(a % b)     # 1   (the remainder)
+say(-a)        # -10 (unary negation)
 </code></pre>
 <pre class="output"><code>13
 7
@@ -191,23 +191,23 @@ print(-a)        # -10 (unary negation)
 <h3>Floor division <code>//</code></h3>
 <p>In addition to the five arithmetic operators above, JTS GO provides floor division, which divides and rounds
 down to the nearest integer:</p>
-<pre><code>print(10 // 3)     # 3
-print(-10 // 3)    # -4  (rounds toward negative infinity)
-print(10 // 2)     # 5
+<pre><code>say(10 // 3)     # 3
+say(-10 // 3)    # -4  (rounds toward negative infinity)
+say(10 // 2)     # 5
 </code></pre>
 <p>Floor division is used throughout the standard library, for example to find the middle index of a list.</p>
 
 <h3>Exponentiation <code>**</code></h3>
-<pre><code>print(2 ** 10)     # 1024
-print(3 ** 2)      # 9
-print(4 ** 0.5)    # 2
+<pre><code>say(2 ** 10)     # 1024
+say(3 ** 2)      # 9
+say(4 ** 0.5)    # 2
 </code></pre>
 
 <h3>Operator precedence</h3>
 <p>Multiplication and division bind more tightly than addition and subtraction, exactly as in standard mathematics.
 Parentheses override the natural precedence.</p>
-<pre><code>print(2 + 3 * 4)       # 14  (not 20)
-print((2 + 3) * 4)     # 20
+<pre><code>say(2 + 3 * 4)       # 14  (not 20)
+say((2 + 3) * 4)     # 20
 </code></pre>
 
 <h2>5.4 Strings</h2>
@@ -218,24 +218,24 @@ greeting = "Hello, World!"
 </code></pre>
 
 <h3>String length</h3>
-<pre><code>print(len("JTS"))       # 3
-print(len(""))          # 0
-print(len("hello"))     # 5
+<pre><code>say(len("JTS"))       # 3
+say(len(""))          # 0
+say(len("hello"))     # 5
 </code></pre>
 
 <h3>Concatenation with <code>+</code></h3>
 <pre><code>first = "Hello"
 second = "World"
 result = first + " " + second
-print(result)        # Hello World
+say(result)        # Hello World
 </code></pre>
 
 <h3>Automatic conversion in concatenation</h3>
 <p>When you add a number to a string, the number is converted to its string form automatically:</p>
 <pre><code>age = 25
-print("Age: " + age)          # Age: 25
+say("Age: " + age)          # Age: 25
 price = 19.99
-print("Price: $" + price)     # Price: $19.99
+say("Price: $" + price)     # Price: $19.99
 </code></pre>
 
 <div class="note"><b>Note:</b> Concatenating a string with a list, dict, or set also converts that value to its
@@ -244,10 +244,10 @@ printed representation, which is useful when debugging (Chapter 42).</div>
 <h3>Indexing individual characters</h3>
 <p>Individual characters can be read with square brackets; indices start at 0. Negative indices count from the end.</p>
 <pre><code>s = "Hello"
-print(s[0])    # H
-print(s[4])    # o
-print(s[-1])   # o
-print(s[-2])   # l
+say(s[0])    # H
+say(s[4])    # o
+say(s[-1])   # o
+say(s[-2])   # l
 </code></pre>
 
 <h2>5.5 Booleans</h2>
@@ -256,33 +256,33 @@ operators and used to drive control flow (Chapter 8).</p>
 <pre><code>is_active = true
 age = 25
 is_adult = age >= 18
-print(is_adult)    # true
+say(is_adult)    # true
 </code></pre>
 
 <h2>5.6 Nil</h2>
-<p><code>nil</code> represents the absence of a value — similar to <code>null</code> or <code>None</code> in other
-languages. Functions that do not return a value implicitly return <code>nil</code>. Indexing a dict with a missing
-key yields <code>nil</code> (Chapter 11).</p>
-<pre><code>result = nil
-print(result)          # nil
-print(type(result))    # nil
+<p><code>void</code> represents the absence of a value — similar to <code>null</code> or <code>None</code> in other
+languages. Functions that do not return a value implicitly return <code>void</code>. Indexing a dict with a missing
+key yields <code>void</code> (Chapter 11).</p>
+<pre><code>result = void
+say(result)          # void
+say(type(result))    # void
 </code></pre>
 
 <h2>5.7 Checking Types with <code>type()</code></h2>
 <p>The built-in <code>type()</code> function returns the type of a value as a string:</p>
-<pre><code>print(type(42))          # number
-print(type(3.14))        # number
-print(type("hello"))     # string
-print(type(true))        # boolean
-print(type(nil))         # nil
-print(type([1, 2]))      # list
-print(type({"a": 1}))    # dict
-print(type({1, 2}))      # set
+<pre><code>say(type(42))          # number
+say(type(3.14))        # number
+say(type("hello"))     # string
+say(type(true))        # boolean
+say(type(void))         # void
+say(type([1, 2]))      # list
+say(type({"a": 1}))    # dict
+say(type({1, 2}))      # set
 </code></pre>
 <p>Because the result is a string, it can be compared in conditions:</p>
 <pre><code>value = "hello"
 if type(value) == "string"
-    print("value is a string")
+    say("value is a string")
 end
 </code></pre>
 
@@ -291,28 +291,28 @@ end
 <table>
 <tr><th>Falsy</th><th>Truthy</th></tr>
 <tr><td><code>false</code></td><td><code>true</code></td></tr>
-<tr><td><code>nil</code></td><td>Any non-zero number</td></tr>
+<tr><td><code>void</code></td><td>Any non-zero number</td></tr>
 <tr><td><code>0</code></td><td>Any non-empty string</td></tr>
 <tr><td><code>""</code> (empty string)</td><td>Any list, dict, or set (even empty ones)</td></tr>
 </table>
 <pre><code>if 0
-    print("This will NOT print — 0 is falsy")
+    say("This will NOT say — 0 is falsy")
 end
 
 if 1
-    print("This WILL print — 1 is truthy")
+    say("This WILL say — 1 is truthy")
 end
 
 if ""
-    print("This will NOT print — empty string is falsy")
+    say("This will NOT say — empty string is falsy")
 end
 
 if "hello"
-    print("This WILL print — non-empty string is truthy")
+    say("This WILL say — non-empty string is truthy")
 end
 </code></pre>
-<pre class="output"><code>This WILL print — 1 is truthy
-This WILL print — non-empty string is truthy
+<pre class="output"><code>This WILL say — 1 is truthy
+This WILL say — non-empty string is truthy
 </code></pre>
 
 <div class="warn"><b>Gotcha:</b> unlike Python, an <b>empty list, dict, or set is truthy</b> in JTS GO. A condition
@@ -324,18 +324,18 @@ like <code>if []</code> is true. To test whether a collection is empty, use <cod
 the rest of the book.</p>
 <pre><code># A list is ordered and indexed from 0
 lst = [10, 20, 30]
-print(lst[0])          # 10
-print(len(lst))        # 3
+say(lst[0])          # 10
+say(len(lst))        # 3
 lst.append(40)         # add to the end
-print(lst)             # [10, 20, 30, 40]
+say(lst)             # [10, 20, 30, 40]
 
 # A dict maps string keys to values
 d = {"name": "JTS", "year": 2026}
-print(d["name"])       # JTS
-print(d.get("year"))   # 2026
+say(d["name"])       # JTS
+say(d.get("year"))   # 2026
 
 # A set stores unique values
 s = {1, 2, 2, 3}
-print(s)               # {1, 2, 3}
-print(2 in s)          # true
+say(s)               # {1, 2, 3}
+say(2 of s)          # true
 </code></pre>

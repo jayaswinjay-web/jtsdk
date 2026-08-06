@@ -4,7 +4,7 @@
 #  Uses http_server + http_route (added in v2.1.10).
 # =============================================================================
 
-print("Loading website assets...")
+say("Loading website assets...")
 
 # ---- Read all static files from disk once at startup ----
 home_html = read_file("public/index.html")
@@ -19,7 +19,7 @@ projects_json = read_file("data/projects.json")
 skills_json = '{"skills": ["JTS GO", "C", "Algorithms", "Web", "ML", "Data Structures"]}'
 about_json = '{"name": "Jay Tech Solutions", "founded": 2024, "mission": "The easiest programming language to learn."}'
 
-print("All assets loaded.")
+say("All assets loaded.")
 
 # ---- Create the HTTP server ----
 srv = http_server(8080)
@@ -40,8 +40,8 @@ http_route(srv, "GET", "/api/projects", projects_json)
 http_route(srv, "GET", "/api/skills", skills_json)
 http_route(srv, "GET", "/api/about", about_json)
 
-print("Routes registered.")
-print("Visit http://localhost:8080")
-print("API: /api/projects  /api/skills  /api/about")
-print("")
+say("Routes registered.")
+say("Visit http://localhost:8080")
+say("API: /api/projects  /api/skills  /api/about")
+say("")
 http_start(srv)

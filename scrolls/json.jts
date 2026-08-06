@@ -18,3 +18,4 @@ end
 func pretty(value)
     return json_stringify(value)
 end
+

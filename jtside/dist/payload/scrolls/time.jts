@@ -22,3 +22,4 @@ end
 func clock_time()
     return strftime("%H:%M:%S")
 end
+

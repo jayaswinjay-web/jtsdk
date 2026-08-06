@@ -1,5 +1,6 @@
 try
     throw "oops"
 catch e
-    print(e)
+    say(e)
 end
+

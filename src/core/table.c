@@ -26,7 +26,7 @@ static Entry* find_entry(Entry* entries, int capacity,
     for (;;) {
         Entry* entry = &entries[index];
         if (entry->key == NULL) {
-            if (IS_NIL(entry->value)) {
+            if (IS_VOID(entry->value)) {
                 return tombstone != NULL ? tombstone : entry;
             } else {
                 if (tombstone == NULL) tombstone = entry;
@@ -53,7 +53,7 @@ static void adjust_capacity(Table* table, int capacity) {
     Entry* entries = ALLOCATE(Entry, capacity);
     for (int i = 0; i < capacity; i++) {
         entries[i].key = NULL;
-        entries[i].value = NIL_VAL;
+        entries[i].value = VOID_VAL;
     }
     table->count = 0;
     table->live = 0;
@@ -79,7 +79,7 @@ bool table_set(Table* table, ObjString* key, Value value) {
     Entry* entry = find_entry(table->entries, table->capacity, key);
     bool is_new_key = entry->key == NULL;
     if (is_new_key) {
-        if (IS_NIL(entry->value)) {
+        if (IS_VOID(entry->value)) {
             table->count++;
         }
         table->live++;
@@ -114,7 +114,7 @@ ObjString* table_find_string(Table* table, const char* chars, int length, uint32
     for (;;) {
         Entry* entry = &table->entries[index];
         if (entry->key == NULL) {
-            if (IS_NIL(entry->value)) return NULL;
+            if (IS_VOID(entry->value)) return NULL;
         } else if (entry->key->length == length &&
                    entry->key->hash == hash &&
                    memcmp(entry->key->chars, chars, length) == 0) {

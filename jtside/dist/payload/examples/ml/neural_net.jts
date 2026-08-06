@@ -15,9 +15,9 @@ n_samples = len(inputs)
 # ---------- helpers ----------
 func init_layer(rows, cols)
     layer = []
-    for r in 0 to rows
+    for r of 0 to rows
         row = []
-        for c in 0 to cols
+        for c of 0 to cols
             append(row, rand() - 0.5)
         end
         append(layer, row)
@@ -32,16 +32,16 @@ w2 = init_layer(n_hidden + 1, n_out)
 # ---------- forward pass ----------
 func forward(x)
     a1 = []
-    for j in 0 to n_hidden
+    for j of 0 to n_hidden
         z = w1[n_in][j]
-        for i in 0 to n_in
+        for i of 0 to n_in
             z = z + x[i] * w1[i][j]
         end
         append(a1, sigmoid(z))
     end
 
     z = w2[n_hidden][0]
-    for j in 0 to n_hidden
+    for j of 0 to n_hidden
         z = z + a1[j] * w2[j][0]
     end
     out = sigmoid(z)
@@ -50,9 +50,9 @@ end
 
 # ---------- training ----------
 func train(epochs)
-    for e in 0 to epochs
+    for e of 0 to epochs
         total_loss = 0
-        for s in 0 to n_samples
+        for s of 0 to n_samples
             x = inputs[s]
             t = targets[s][0]
 
@@ -65,26 +65,26 @@ func train(epochs)
 
             d_out = diff * out * (1 - out)
             d_a1 = []
-            for j in 0 to n_hidden
+            for j of 0 to n_hidden
                 append(d_a1, d_out * w2[j][0])
             end
 
             w2[n_hidden][0] = w2[n_hidden][0] - lr * d_out
-            for j in 0 to n_hidden
+            for j of 0 to n_hidden
                 w2[j][0] = w2[j][0] - lr * d_out * a1[j]
             end
 
-            for j in 0 to n_hidden
+            for j of 0 to n_hidden
                 dz1 = d_a1[j] * a1[j] * (1 - a1[j])
                 w1[n_in][j] = w1[n_in][j] - lr * dz1
-                for i in 0 to n_in
+                for i of 0 to n_in
                     w1[i][j] = w1[i][j] - lr * dz1 * x[i]
                 end
             end
         end
 
         if e % 500 == 0
-            print("epoch " + e + "   loss " + round(total_loss / 4 * 1000) / 1000)
+            say("epoch " + e + "   loss " + round(total_loss / 4 * 1000) / 1000)
         end
     end
 end
@@ -92,13 +92,13 @@ end
 # ---------- test ----------
 train(5000)
 
-print("--- Trained network on XOR ---")
+say("--- Trained network on XOR ---")
 preds = []
-for s in 0 to n_samples
+for s of 0 to n_samples
     out = forward(inputs[s])[0]
     append(preds, out)
-    print(str(inputs[s]) + "  ->  " + round(out * 1000) / 1000 + "   (target " + targets[s][0] + ")")
+    say(str(inputs[s]) + "  ->  " + round(out * 1000) / 1000 + "   (target " + targets[s][0] + ")")
 end
 
 target_list = [0, 1, 1, 0]
-print("final MSE: " + round(mse(preds, target_list) * 1000) / 1000)
+say("final MSE: " + round(mse(preds, target_list) * 1000) / 1000)

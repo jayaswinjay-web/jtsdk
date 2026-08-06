@@ -1,7 +1,7 @@
 # seq scroll - sequence/list utilities
 func head(lst)
     if len(lst) == 0
-        return nil
+        return void
     end
     return lst[0]
 end
@@ -29,7 +29,7 @@ end
 func last_item(lst)
     n = len(lst)
     if n == 0
-        return nil
+        return void
     end
     return lst[n - 1]
 end
@@ -60,7 +60,7 @@ func nth(lst, i)
         i = n + i
     end
     if i < 0 or i >= n
-        return nil
+        return void
     end
     return lst[i]
 end
@@ -133,8 +133,8 @@ end
 
 func product(a, b)
     out = []
-    for x in a
-        for y in b
+    for x of a
+        for y of b
             out.append([x, y])
         end
     end
@@ -143,7 +143,7 @@ end
 
 func frequency(lst)
     out = []
-    for item in lst
+    for item of lst
         found = -1
         i = 0
         while i < len(out)
@@ -195,7 +195,7 @@ end
 func accumulate(lst)
     out = []
     total = 0
-    for x in lst
+    for x of lst
         total = total + x
         out.append(total)
     end
@@ -224,3 +224,4 @@ func intersperse(lst, sep)
     end
     return out
 end
+

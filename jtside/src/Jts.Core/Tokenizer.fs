@@ -23,8 +23,8 @@ module Tokenizer =
     let keywords =
         [ "and"; "append"; "assert"; "bool"; "break"; "bring"; "catch"; "class"; "continue"
           "del"; "elif"; "else"; "end"; "extends"; "false"; "finally"; "float"; "for"
-          "func"; "http"; "if"; "import"; "in"; "input"; "int"; "is"; "len"; "list"
-          "matrix"; "model"; "new"; "nil"; "not"; "number"; "or"; "predict"; "print"
+          "func"; "http"; "if"; "import"; "of"; "ask"; "int"; "is"; "len"; "list"
+          "matrix"; "model"; "new"; "void"; "not"; "number"; "or"; "predict"; "say"
           "request"; "response"; "return"; "self"; "server"; "set"; "string"; "super"
           "tensor"; "throw"; "to"; "true"; "try"; "type"; "var"; "while"; "yield" ]
         |> Set.ofList

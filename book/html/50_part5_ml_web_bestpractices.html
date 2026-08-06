@@ -26,13 +26,13 @@ A single-layer perceptron cannot learn it; a network with one hidden layer can. 
 constant offset it can learn. The weight matrices are <code>w1</code> (3×3) and <code>w2</code> (4×1).</p>
 
 <h2>40.3 Random Initialization</h2>
-<p>Weights start as small random values near zero. The <code>for r in 0 to rows</code> loop form was introduced in
+<p>Weights start as small random values near zero. The <code>for r of 0 to rows</code> loop form was introduced in
 Chapter 8:</p>
 <pre><code>func init_layer(rows, cols)
     layer = []
-    for r in 0 to rows
+    for r of 0 to rows
         row = []
-        for c in 0 to cols
+        for c of 0 to cols
             append(row, rand() - 0.5)
         end
         append(layer, row)
@@ -49,16 +49,16 @@ w2 = init_layer(4, 1)   # hidden+1 rows, 1 output neuron
 output neuron does the same using the hidden activations:</p>
 <pre><code>func forward(x)
     a1 = []
-    for j in 0 to n_hidden
+    for j of 0 to n_hidden
         z = w1[n_in][j]
-        for i in 0 to n_in
+        for i of 0 to n_in
             z = z + x[i] * w1[i][j]
         end
         append(a1, sigmoid(z))
     end
 
     z = w2[n_hidden][0]
-    for j in 0 to n_hidden
+    for j of 0 to n_hidden
         z = z + a1[j] * w2[j][0]
     end
     out = sigmoid(z)
@@ -74,15 +74,15 @@ the gradient of that error. The derivative of the sigmoid <code>s</code> is <cod
 d_out = diff * out * (1 - out)
 
 w2[n_hidden][0] = w2[n_hidden][0] - lr * d_out
-for j in 0 to n_hidden
+for j of 0 to n_hidden
     w2[j][0] = w2[j][0] - lr * d_out * a1[j]
 end
 </code></pre>
 <p>The hidden layer's weight updates chain the gradient backward through the output layer:</p>
-<pre><code>for j in 0 to n_hidden
+<pre><code>for j of 0 to n_hidden
     dz1 = d_a1[j] * a1[j] * (1 - a1[j])
     w1[n_in][j] = w1[n_in][j] - lr * dz1
-    for i in 0 to n_in
+    for i of 0 to n_in
         w1[i][j] = w1[i][j] - lr * dz1 * x[i]
     end
 end
@@ -90,7 +90,7 @@ end
 <p>The learning rate <code>lr = 1.0</code> controls how large each step is. Too large, and training diverges; too
 small, and it crawls. A common debugging technique is printing the loss every few hundred epochs:</p>
 <pre><code>if e % 500 == 0
-    print("epoch " + e + "   loss " + round(total_loss / 4 * 1000) / 1000)
+    say("epoch " + e + "   loss " + round(total_loss / 4 * 1000) / 1000)
 end
 </code></pre>
 
@@ -107,9 +107,9 @@ n_samples = len(inputs)
 
 func init_layer(rows, cols)
     layer = []
-    for r in 0 to rows
+    for r of 0 to rows
         row = []
-        for c in 0 to cols
+        for c of 0 to cols
             append(row, rand() - 0.5)
         end
         append(layer, row)
@@ -122,15 +122,15 @@ w2 = init_layer(n_hidden + 1, n_out)
 
 func forward(x)
     a1 = []
-    for j in 0 to n_hidden
+    for j of 0 to n_hidden
         z = w1[n_in][j]
-        for i in 0 to n_in
+        for i of 0 to n_in
             z = z + x[i] * w1[i][j]
         end
         append(a1, sigmoid(z))
     end
     z = w2[n_hidden][0]
-    for j in 0 to n_hidden
+    for j of 0 to n_hidden
         z = z + a1[j] * w2[j][0]
     end
     out = sigmoid(z)
@@ -138,9 +138,9 @@ func forward(x)
 end
 
 func train(epochs)
-    for e in 0 to epochs
+    for e of 0 to epochs
         total_loss = 0
-        for s in 0 to n_samples
+        for s of 0 to n_samples
             x = inputs[s]
             t = targets[s][0]
             f = forward(x)
@@ -150,39 +150,39 @@ func train(epochs)
             total_loss = total_loss + diff * diff
             d_out = diff * out * (1 - out)
             d_a1 = []
-            for j in 0 to n_hidden
+            for j of 0 to n_hidden
                 append(d_a1, d_out * w2[j][0])
             end
             w2[n_hidden][0] = w2[n_hidden][0] - lr * d_out
-            for j in 0 to n_hidden
+            for j of 0 to n_hidden
                 w2[j][0] = w2[j][0] - lr * d_out * a1[j]
             end
-            for j in 0 to n_hidden
+            for j of 0 to n_hidden
                 dz1 = d_a1[j] * a1[j] * (1 - a1[j])
                 w1[n_in][j] = w1[n_in][j] - lr * dz1
-                for i in 0 to n_in
+                for i of 0 to n_in
                     w1[i][j] = w1[i][j] - lr * dz1 * x[i]
                 end
             end
         end
         if e % 500 == 0
-            print("epoch " + e + "   loss " + round(total_loss / 4 * 1000) / 1000)
+            say("epoch " + e + "   loss " + round(total_loss / 4 * 1000) / 1000)
         end
     end
 end
 
 train(5000)
 
-print("--- Trained network on XOR ---")
+say("--- Trained network on XOR ---")
 preds = []
-for s in 0 to n_samples
+for s of 0 to n_samples
     out = forward(inputs[s])[0]
     append(preds, out)
-    print(str(inputs[s]) + "  ->  " + round(out * 1000) / 1000 + "   (target " + targets[s][0] + ")")
+    say(str(inputs[s]) + "  ->  " + round(out * 1000) / 1000 + "   (target " + targets[s][0] + ")")
 end
 
 target_list = [0, 1, 1, 0]
-print("final MSE: " + round(mse(preds, target_list) * 1000) / 1000)
+say("final MSE: " + round(mse(preds, target_list) * 1000) / 1000)
 </code></pre>
 <p>The output below was captured from a real run of this program. Because the initial weights are random, your
 loss values will differ slightly, but the trajectory — a loss falling from about 0.28 toward 0 and predictions
@@ -245,7 +245,7 @@ in pieces and join them — exactly how the official site works:</p>
        ".card { background: #16213e; border-radius: 12px; padding: 25px; } " +
        "</style> </head> <body> "
 
-hero = "<div class='hero'> <h1>JTS GO</h1> <p>Web apps in your language.</p> </div> "
+hero = "<div class='hero'> <h1>JTS GO</h1> <p>Web apps of your language.</p> </div> "
 
 time_card = "<div class='card'> <h3>Current time</h3> <p>" + time.today() + " " + time.clock_time() + "</p> </div> "
 
@@ -254,7 +254,7 @@ footer = "<footer> Made with JTS GO </footer> </body> </html>"
 html = head + hero + time_card + footer
 
 srv = http_server(8080, html)
-print("Serving at http://localhost:8080")
+say("Serving at http://localhost:8080")
 http_start(srv)
 </code></pre>
 <p>Notice how the "Current time" card embeds values computed by the <code>time</code> scroll (Chapter 39): because
@@ -264,7 +264,7 @@ the page is assembled by running code, its content can be dynamic.</p>
 <p>The repository's <code>tests/website.jts</code> example assembles a full marketing site from seven string parts
 (<code>part1</code> through <code>part7</code>):</p>
 <pre><code>html = part1 + part2 + part3 + part4 + part5 + part6 + part7
-print("Starting JTS GO website on port 8080...")
+say("Starting JTS GO website on port 8080...")
 srv = http_server(8080, html)
 http_start(srv)
 </code></pre>
@@ -275,7 +275,7 @@ example, an ML demo, an install box, and the footer. Concatenating keeps each st
 <pre><code>jts tests/website.jts
 </code></pre>
 <pre class="output"><code>Starting JTS GO website on port 8080...
-Open http://localhost:8080 in your browser
+Open http://localhost:8080 of your browser
 </code></pre>
 <p>Leave the program running and open the URL. The server keeps serving until you stop the program
 (Ctrl+C).</p>
@@ -287,13 +287,13 @@ reverse proxy in front.</div>
 <h2>41.5 Client Requests: <code>http_request</code></h2>
 <p>In the opposite direction, <code>http_request(url)</code> fetches a resource and returns its content:</p>
 <pre><code>data = http_request("https://example.com/")
-print(len(data))       # the number of characters returned
+say(len(data))       # the number of characters returned
 </code></pre>
 <p>This turns JTS GO into a scripting tool for REST APIs, web scraping, and automated health checks. Combine it
 with <code>json.parse</code> (Chapter 21) to consume JSON APIs:</p>
 <pre><code>bring json
 resp = http_request("https://api.example.com/status")
-print(json.parse(resp))
+say(json.parse(resp))
 </code></pre>
 
 <h1 id="ch42">42. Debugging and Best Practices</h1>
@@ -303,10 +303,10 @@ exist. Every topic builds on material from earlier chapters.</p>
 
 <h2>42.1 The Debug Loop</h2>
 <p>Bugs are inevitable; the trick is finding them quickly. JTS GO's error messages name the line and the file:</p>
-<pre><code>print(1 / 0)
+<pre><code>say(1 / 0)
 </code></pre>
 <pre class="output"><code>STDERR: Division by zero.
-[line 1] in script
+[line 1] of script
 Runtime error.
 </code></pre>
 <p>Use the line number to jump straight to the offending statement, then simplify: reproduce the problem in the
@@ -320,22 +320,22 @@ end
 func outer()
     return inner(0)
 end
-print(outer())
+say(outer())
 </code></pre>
 <pre class="output"><code>STDERR: Division by zero.
-[line 2] in inner()
-[line 5] in outer()
-[line 7] in script
+[line 2] of inner()
+[line 5] of outer()
+[line 7] of script
 Runtime error.
 </code></pre>
 <p>Read traces from the top: the deepest frame is where the error happened, and each line below is the caller that
-invoked it. The bottom line, <code>in script</code>, is the top-level program.</p>
+invoked it. The bottom line, <code>of script</code>, is the top-level program.</p>
 
-<h2>42.3 Debugging With <code>print</code></h2>
+<h2>42.3 Debugging With <code>say</code></h2>
 <p>The oldest tool is still the best. Print values at the boundary between suspicious code and the rest of the
 program:</p>
 <pre><code>func area(w, h)
-    print("area: w=" + w + " h=" + h)
+    say("area: w=" + w + " h=" + h)
     return w * h
 end
 </code></pre>
@@ -377,9 +377,9 @@ and validate JSON before indexing keys.</li>
 <pre><code># testing.jts — a minimal test harness
 func check(desc, got, expected)
     if got == expected
-        print("PASS  " + desc)
+        say("PASS  " + desc)
     else
-        print("FAIL  " + desc + "  (got " + str(got) + ", expected " + str(expected) + ")")
+        say("FAIL  " + desc + "  (got " + str(got) + ", expected " + str(expected) + ")")
     end
 end
 </code></pre>
@@ -407,7 +407,7 @@ Choose the data structure that fits (Chapter 11).</li>
 <h2>42.8 A Checklist Before You Finish</h2>
 <ol>
 <li>Do all blocks have their matching <code>end</code>?</li>
-<li>Are every variable's possible values covered (empty lists, zero, negative numbers, nil)?</li>
+<li>Are every variable's possible values covered (empty lists, zero, negative numbers, void)?</li>
 <li>Does every function return on all paths?</li>
 <li>Are side effects (file writes, global mutation) intentional?</li>
 <li>Does the program run cleanly from a fresh directory, with the scrolls it needs available?</li>

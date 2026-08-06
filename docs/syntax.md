@@ -19,7 +19,7 @@ JTS GO uses indentation to define code blocks, terminated by the `end` keyword. 
 
 ```jts
 if temperature > 80
-    print("It's hot!")
+    say("It's hot!")
 end
 ```
 
@@ -31,9 +31,9 @@ end
 ```jts
 func check_age(age)
     if age >= 18
-        print("Adult")
+        say("Adult")
     else
-        print("Minor")
+        say("Minor")
     end
 end
 ```
@@ -47,7 +47,7 @@ name = "Alice"         # string
 age = 25               # number (integer)
 price = 9.99           # number (float)
 is_active = true       # boolean
-result = nil           # nil
+result = void           # void
 ```
 
 **Rules:**
@@ -86,14 +86,14 @@ Use the `+` operator to join strings together.
 first = "Hello"
 second = "World"
 message = first + " " + second
-print(message)    # Hello World
+say(message)    # Hello World
 ```
 
 When you concatenate a string with a number, the number is automatically converted to a string.
 
 ```jts
 age = 25
-print("I am " + age + " years old")    # I am 25 years old
+say("I am " + age + " years old")    # I am 25 years old
 ```
 
 ### Parentheses in Expressions
@@ -103,8 +103,8 @@ Use parentheses to control the order of operations or to make concatenation clea
 ```jts
 a = 10
 b = 3
-print("a + b = " + (a + b))        # a + b = 13
-print("(a + b) * 2 = " + ((a + b) * 2))   # (a + b) * 2 = 26
+say("a + b = " + (a + b))        # a + b = 13
+say("(a + b) * 2 = " + ((a + b) * 2))   # (a + b) * 2 = 26
 ```
 
 ### Compound Assignment
@@ -126,13 +126,13 @@ Chain multiple conditions with `elif`:
 score = 85
 
 if score >= 90
-    print("Grade: A")
+    say("Grade: A")
 elif score >= 80
-    print("Grade: B")
+    say("Grade: B")
 elif score >= 70
-    print("Grade: C")
+    say("Grade: C")
 else
-    print("Grade: F")
+    say("Grade: F")
 end
 ```
 
@@ -142,7 +142,7 @@ Dictionaries store key-value pairs:
 
 ```jts
 d = {"name": "JTS", "version": "2.0"}
-print(d["name"])    # JTS
+say(d["name"])    # JTS
 ```
 
 ## Try/Catch/Throw
@@ -153,7 +153,7 @@ Handle errors gracefully with try/catch:
 try
     throw "Something went wrong!"
 catch e
-    print("Caught: " + e)
+    say("Caught: " + e)
 end
 ```
 
@@ -161,24 +161,24 @@ end
 
 JTS GO provides several built-in functions you can use right away.
 
-### print()
+### say()
 
 Outputs a value to the console.
 
 ```jts
-print("Hello!")
-print(42)
-print(true)
-print(nil)
+say("Hello!")
+say(42)
+say(true)
+say(void)
 ```
 
-### input()
+### ask()
 
 Reads a line of text from the user. Returns a string.
 
 ```jts
-name = input("Enter your name: ")
-print("Hello, " + name + "!")
+name = ask("Enter your name: ")
+say("Hello, " + name + "!")
 ```
 
 ### len()
@@ -186,9 +186,9 @@ print("Hello, " + name + "!")
 Returns the length of a string.
 
 ```jts
-print(len("JTS"))         # 3
-print(len("Hello"))       # 5
-print(len(""))            # 0
+say(len("JTS"))         # 3
+say(len("Hello"))       # 5
+say(len(""))            # 0
 ```
 
 ### type()
@@ -196,10 +196,10 @@ print(len(""))            # 0
 Returns the type of a value as a string.
 
 ```jts
-print(type(42))           # number
-print(type("hello"))      # string
-print(type(true))         # boolean
-print(type(nil))          # nil
+say(type(42))           # number
+say(type("hello"))      # string
+say(type(true))         # boolean
+say(type(void))          # void
 ```
 
 ## Putting It All Together
@@ -209,26 +209,26 @@ Here is a small program that uses everything covered on this page:
 ```jts
 # A simple greeting program
 
-print("Welcome to JTS GO!")
+say("Welcome to JTS GO!")
 
-# Get user input
-name = input("What is your name? ")
+# Get user ask
+name = ask("What is your name? ")
 
 # Check the length of the name
 name_length = len(name)
 
-# Build and print a message
+# Build and say a message
 if name_length > 0
-    print("Hello, " + name + "!")
-    print("Your name has " + name_length + " characters.")
+    say("Hello, " + name + "!")
+    say("Your name has " + name_length + " characters.")
 else
-    print("You didn't enter a name!")
+    say("You didn't enter a name!")
 end
 ```
 
 ## Next Steps
 
-- [Data Types](types.md) — Learn about numbers, strings, booleans, and nil
+- [Data Types](types.md) — Learn about numbers, strings, booleans, and void
 - [Control Flow](control-flow.md) — if/else, while, and for loops
 - [Functions](functions.md) — Define your own functions
 - [Built-in Functions](builtins.md) — Full reference for all built-in functions

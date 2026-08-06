@@ -59,7 +59,7 @@ ObjFunction* new_function(void) {
 ObjUpvalue* new_upvalue(Value* slot) {
     ObjUpvalue* upvalue = ALLOCATE_OBJ(ObjUpvalue, OBJ_UPVALUE);
     upvalue->location = slot;
-    upvalue->closed = NIL_VAL;
+    upvalue->closed = VOID_VAL;
     upvalue->next = NULL;
     return upvalue;
 }
@@ -96,7 +96,7 @@ void list_append(ObjList* list, Value value) {
 
 Value list_get(ObjList* list, int index) {
     if (index < 0 || index >= list->count) {
-        return NIL_VAL;
+        return VOID_VAL;
     }
     return list->values[index];
 }
@@ -190,7 +190,7 @@ ObjNative* new_native(int arity, bool (*function)(int, Value*, Value*)) {
 ObjHttpServer* new_http_server(int port) {
     ObjHttpServer* server = ALLOCATE_OBJ(ObjHttpServer, OBJ_HTTP_SERVER);
     server->port = port;
-    server->handler = NIL_VAL;
+    server->handler = VOID_VAL;
     server->running = false;
     server->route_count = 0;
     return server;

@@ -18,12 +18,12 @@ Use these to compare values. Each returns a boolean (`true` or `false`).
 ```jts
 x = 10
 
-print(x == 10)    # true
-print(x != 5)     # true
-print(x > 20)     # false
-print(x < 20)     # true
-print(x >= 10)    # true
-print(x <= 9)     # false
+say(x == 10)    # true
+say(x != 5)     # true
+say(x > 20)     # false
+say(x < 20)     # true
+say(x >= 10)    # true
+say(x <= 9)     # false
 ```
 
 ## Logical Operators
@@ -42,18 +42,18 @@ has_id = true
 
 # Both conditions must be true
 if age >= 18 and has_id
-    print("Entry allowed")
+    say("Entry allowed")
 end
 
 # At least one must be true
 if age < 13 or age > 65
-    print("Discount applies")
+    say("Discount applies")
 end
 
 # Invert a condition
 is_raining = false
 if not is_raining
-    print("No umbrella needed")
+    say("No umbrella needed")
 end
 ```
 
@@ -61,38 +61,38 @@ end
 
 When a value is used in a condition, it is evaluated as truthy or falsy:
 
-- **Falsy**: `false`, `nil`, `0`, `""` (empty string)
+- **Falsy**: `false`, `void`, `0`, `""` (empty string)
 - **Truthy**: `true`, any non-zero number, any non-empty string
 
 ```jts
 # These are all falsy
 if false
-    print("won't print")
+    say("won't say")
 end
 
-if nil
-    print("won't print")
+if void
+    say("won't say")
 end
 
 if 0
-    print("won't print")
+    say("won't say")
 end
 
 if ""
-    print("won't print")
+    say("won't say")
 end
 
 # These are all truthy
 if true
-    print("this prints")
+    say("this prints")
 end
 
 if 1
-    print("this prints")
+    say("this prints")
 end
 
 if "hello"
-    print("this prints")
+    say("this prints")
 end
 ```
 
@@ -106,7 +106,7 @@ Use `if` to execute code based on a condition.
 temperature = 75
 
 if temperature > 80
-    print("It's hot outside!")
+    say("It's hot outside!")
 end
 ```
 
@@ -118,9 +118,9 @@ Add an `else` branch for when the condition is false.
 temperature = 75
 
 if temperature > 80
-    print("It's hot outside!")
+    say("It's hot outside!")
 else
-    print("It's nice outside!")
+    say("It's nice outside!")
 end
 ```
 
@@ -132,15 +132,15 @@ Chain multiple conditions with `elif`.
 score = 85
 
 if score >= 90
-    print("Grade: A")
+    say("Grade: A")
 elif score >= 80
-    print("Grade: B")
+    say("Grade: B")
 elif score >= 70
-    print("Grade: C")
+    say("Grade: C")
 elif score >= 60
-    print("Grade: D")
+    say("Grade: D")
 else
-    print("Grade: F")
+    say("Grade: F")
 end
 ```
 
@@ -156,12 +156,12 @@ has_ticket = true
 
 if age >= 18
     if has_ticket
-        print("Entry allowed")
+        say("Entry allowed")
     else
-        print("Need a ticket")
+        say("Need a ticket")
     end
 else
-    print("Must be 18 or older")
+    say("Must be 18 or older")
 end
 ```
 
@@ -175,7 +175,7 @@ A `while` loop repeats a block as long as its condition is true.
 count = 0
 
 while count < 5
-    print(count)
+    say(count)
     count = count + 1
 end
 
@@ -188,11 +188,11 @@ end
 n = 5
 
 while n > 0
-    print(n)
+    say(n)
     n = n - 1
 end
 
-print("Liftoff!")
+say("Liftoff!")
 # Output: 5, 4, 3, 2, 1, Liftoff!
 ```
 
@@ -203,7 +203,7 @@ Always make sure the condition eventually becomes `false`. Otherwise you get an 
 ```jts
 # WARNING: This runs forever — don't do this
 # while true
-#     print("stuck!")
+#     say("stuck!")
 # end
 ```
 
@@ -212,7 +212,7 @@ Always make sure the condition eventually becomes `false`. Otherwise you get an 
 A `for` loop iterates over a range of numbers. The syntax is:
 
 ```
-for VARIABLE in START to END
+for VARIABLE of START to END
     ...
 end
 ```
@@ -224,8 +224,8 @@ end
 ### Counting Up
 
 ```jts
-for i in 0 to 5
-    print(i)
+for i of 0 to 5
+    say(i)
 end
 
 # Output: 0, 1, 2, 3, 4
@@ -234,8 +234,8 @@ end
 ### Counting from 1
 
 ```jts
-for i in 1 to 6
-    print(i)
+for i of 1 to 6
+    say(i)
 end
 
 # Output: 1, 2, 3, 4, 5
@@ -244,8 +244,8 @@ end
 ### Multiplication Table
 
 ```jts
-for i in 1 to 11
-    print("5 x " + i + " = " + (5 * i))
+for i of 1 to 11
+    say("5 x " + i + " = " + (5 * i))
 end
 ```
 
@@ -253,11 +253,11 @@ end
 
 ```jts
 total = 0
-for i in 1 to 101
+for i of 1 to 101
     total = total + i
 end
 
-print("Sum of 1 to 100: " + total)
+say("Sum of 1 to 100: " + total)
 # Output: Sum of 1 to 100: 5050
 ```
 
@@ -267,12 +267,12 @@ You can mix and nest all of these constructs freely.
 
 ```jts
 # Find even numbers and categorize them
-for i in 1 to 21
+for i of 1 to 21
     if i % 2 == 0
         if i <= 10
-            print(i + " is a small even number")
+            say(i + " is a small even number")
         else
-            print(i + " is a large even number")
+            say(i + " is a large even number")
         end
     end
 end
@@ -285,11 +285,11 @@ Use `break` to exit a loop early, and `continue` to skip to the next iteration.
 ### Break
 
 ```jts
-for i in 0 to 10
+for i of 0 to 10
     if i == 5
         break
     end
-    print(i)
+    say(i)
 end
 # Output: 0, 1, 2, 3, 4
 ```
@@ -297,11 +297,11 @@ end
 ### Continue
 
 ```jts
-for i in 0 to 6
+for i of 0 to 6
     if i == 3
         continue
     end
-    print(i)
+    say(i)
 end
 # Output: 0, 1, 2, 4, 5
 ```
@@ -318,7 +318,7 @@ while i < 10
     if i == 7
         break
     end
-    print(i)
+    say(i)
 end
 # Output: 1, 2, 4, 5, 6
 ```
@@ -331,12 +331,12 @@ end
 | Elif | `elif CONDITION` | `end` |
 | Else | `else` | `end` |
 | While | `while CONDITION` | `end` |
-| For | `for VAR in START to END` | `end` |
+| For | `for VAR of START to END` | `end` |
 | Break | `break` | — |
 | Continue | `continue` | — |
 
 ## Next Steps
 
 - [Functions](functions.md) — Define reusable blocks of code
-- [Built-in Functions](builtins.md) — print, input, len, type
+- [Built-in Functions](builtins.md) — say, ask, len, type
 - [Examples](../examples/) — See complete programs

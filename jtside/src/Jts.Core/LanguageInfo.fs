@@ -3,7 +3,7 @@ namespace Jts.Core
 /// Shared facts about the language, used by the IDE and the installer.
 module LanguageInfo =
 
-    let Version = "2.1.0"
+    let Version = "2.1.13"
     let Name = "JTS GO"
     let Company = "JayTech Solutions"
     let Repository = "https://github.com/jayaswinjay-web/jtsdk"

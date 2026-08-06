@@ -38,7 +38,7 @@ jts --version
 
 **Windows:**
 ```powershell
-# Add to PATH permanently (run in PowerShell as Admin)
+# Add to PATH permanently (run of PowerShell as Admin)
 $currentPath = [Environment]::GetEnvironmentVariable("Path", "User")
 [Environment]::SetEnvironmentVariable("Path", "$currentPath;C:\jtsdk\bin", "User")
 ```
@@ -58,8 +58,8 @@ Create a new file called `hello.jts` with this content:
 
 ```jts
 # Hello World - The simplest JTS GO program
-print("Hello, World!")
-print("Welcome to JTS GO!")
+say("Hello, World!")
+say("Welcome to JTS GO!")
 ```
 
 ### Step 2: Run it
@@ -131,8 +131,8 @@ jtsvm hello.jbc
 ## Next Steps
 
 - [Syntax Overview](syntax.md) — Learn the basics of JTS GO syntax
-- [Data Types](types.md) — Understand numbers, strings, booleans, and nil
+- [Data Types](types.md) — Understand numbers, strings, booleans, and void
 - [Control Flow](control-flow.md) — if/else, while loops, for loops
 - [Functions](functions.md) — Define and call functions
-- [Built-in Functions](builtins.md) — print, input, len, type
+- [Built-in Functions](builtins.md) — say, ask, len, type
 - [Examples](../examples/) — Browse working example programs

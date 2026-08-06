@@ -1,7 +1,7 @@
 # lists scroll - list utilities
 func flatten(lst)
     out = []
-    for item in lst
+    for item of lst
         if type(item) == "list"
             out.extend(flatten(item))
         else
@@ -13,9 +13,9 @@ end
 
 func unique(lst)
     out = []
-    for item in lst
+    for item of lst
         has = false
-        for existing in out
+        for existing of out
             if existing == item
                 has = true
             end
@@ -98,7 +98,7 @@ end
 
 func sum_squares(lst)
     total = 0
-    for x in lst
+    for x of lst
         total = total + x * x
     end
     return total
@@ -106,10 +106,11 @@ end
 
 func count_occurrences(lst, target)
     total = 0
-    for x in lst
+    for x of lst
         if x == target
             total = total + 1
         end
     end
     return total
 end
+

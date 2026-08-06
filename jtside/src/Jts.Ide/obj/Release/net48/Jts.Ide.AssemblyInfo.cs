@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Jts.Ide")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+93d5767abd162f1de9950bc520547695e23e4b55")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+25dd66d6e089a63c9919d453ea71ba11a0ea5cad")]
 [assembly: System.Reflection.AssemblyProductAttribute("Jts.Ide")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Jts.Ide")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

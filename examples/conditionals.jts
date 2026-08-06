@@ -3,24 +3,24 @@
 temperature = 75
 
 if temperature > 80
-    print("It's hot outside!")
+    say("It's hot outside!")
 else
-    print("It's nice outside!")
+    say("It's nice outside!")
 end
 
 # Grading system
 score = 85
 
 if score >= 90
-    print("Grade: A")
+    say("Grade: A")
 else if score >= 80
-    print("Grade: B")
+    say("Grade: B")
 else if score >= 70
-    print("Grade: C")
+    say("Grade: C")
 else if score >= 60
-    print("Grade: D")
+    say("Grade: D")
 else
-    print("Grade: F")
+    say("Grade: F")
 end
 
 # Nested if
@@ -29,10 +29,10 @@ has_ticket = true
 
 if age >= 18
     if has_ticket
-        print("Entry allowed")
+        say("Entry allowed")
     else
-        print("Need a ticket")
+        say("Need a ticket")
     end
 else
-    print("Must be 18 or older")
+    say("Must be 18 or older")
 end

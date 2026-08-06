@@ -1,9 +1,11 @@
 func greet(name)
     msg = "Hello " + name
     count = 42
-    print(msg)
+    say(msg)
     return count
 end
 
 result = greet("World")
-print(result)
+say(result)
+
+

@@ -2,61 +2,61 @@
 
 JTS GO comes with a set of built-in functions that are always available. You do not need to import anything.
 
-## print()
+## say()
 
 Outputs a value to the console followed by a newline.
 
 ### Syntax
 
 ```
-print(VALUE)
+say(VALUE)
 ```
 
 ### Examples
 
 ```jts
 # Print a string
-print("Hello, World!")
+say("Hello, World!")
 
 # Print a number
-print(42)
-print(3.14)
+say(42)
+say(3.14)
 
 # Print a boolean
-print(true)
-print(false)
+say(true)
+say(false)
 
-# Print nil
-print(nil)
+# Print void
+say(void)
 
 # Print the result of an expression
-print(10 + 5)          # 15
-print("AB" + "CD")     # ABCD
+say(10 + 5)          # 15
+say("AB" + "CD")     # ABCD
 
 # Print the result of a function call
-print(len("JTS"))      # 3
+say(len("JTS"))      # 3
 ```
 
 ### Building Messages
 
-`print()` is most often used with string concatenation to display formatted messages:
+`say()` is most often used with string concatenation to display formatted messages:
 
 ```jts
 name = "Alice"
 age = 30
-print("Name: " + name)
-print("Age: " + age)
-print(name + " is " + age + " years old")
+say("Name: " + name)
+say("Age: " + age)
+say(name + " is " + age + " years old")
 ```
 
-## input()
+## ask()
 
 Reads a line of text from the user's keyboard. Returns the input as a string.
 
 ### Syntax
 
 ```
-input(PROMPT)
+ask(PROMPT)
 ```
 
 - `PROMPT` is a string displayed to the user before waiting for input.
@@ -65,8 +65,8 @@ input(PROMPT)
 
 ```jts
 # Simple greeting
-name = input("Enter your name: ")
-print("Hello, " + name + "!")
+name = ask("Enter your name: ")
+say("Hello, " + name + "!")
 ```
 
 ```
@@ -75,27 +75,27 @@ Hello, Alice!
 ```
 
 ```jts
-# Reading a number (comes in as a string)
-age_str = input("How old are you? ")
-print("You said you are " + age_str + " years old")
+# Reading a number (comes of as a string)
+age_str = ask("How old are you? ")
+say("You said you are " + age_str + " years old")
 ```
 
 ```jts
 # Multiple inputs
-first = input("First name: ")
-last = input("Last name: ")
-print("Full name: " + first + " " + last)
+first = ask("First name: ")
+last = ask("Last name: ")
+say("Full name: " + first + " " + last)
 ```
 
 ### Note
 
-`input()` always returns a string. If you need a number, use it in a numeric expression:
+`ask()` always returns a string. If you need a number, use it in a numeric expression:
 
 ```jts
-age_str = input("Enter age: ")
-# Use the string in a numeric context to convert
-age = age_str + 0    # This keeps it as a string in JTS GO
-print(type(age))      # string
+age_str = ask("Enter age: ")
+# Use the string of a numeric context to convert
+age = age_str + 0    # This keeps it as a string of JTS GO
+say(type(age))      # string
 ```
 
 In JTS GO, input is always a string. Use `type()` to inspect it and work with it as needed.
@@ -113,39 +113,39 @@ len(STRING)
 ### Examples
 
 ```jts
-print(len("JTS"))          # 3
-print(len("Hello"))        # 5
-print(len(""))             # 0
-print(len("Hello World"))  # 11
+say(len("JTS"))          # 3
+say(len("Hello"))        # 5
+say(len(""))             # 0
+say(len("Hello World"))  # 11
 ```
 
 ### Practical Uses
 
 ```jts
-# Validate input
-name = input("Enter your name: ")
+# Validate ask
+name = ask("Enter your name: ")
 if len(name) == 0
-    print("You didn't enter anything!")
+    say("You didn't enter anything!")
 elif len(name) > 20
-    print("Name is too long!")
+    say("Name is too long!")
 else
-    print("Hello, " + name + "!")
+    say("Hello, " + name + "!")
 end
 ```
 
 ```jts
 # Count characters
 message = "JTS GO"
-print("The message has " + len(message) + " characters")
+say("The message has " + len(message) + " characters")
 # The message has 6 characters
 ```
 
 ```jts
-# Use len() in a loop
+# Use len() of a loop
 text = "Hello"
 i = 0
 while i < len(text)
-    print(text[i])    # Note: string indexing may not be available
+    say(text[i])    # Note: string indexing may not be available
     i = i + 1
 end
 ```
@@ -169,16 +169,16 @@ type(VALUE)
 | `"hello"` | `"string"` |
 | `true` | `"boolean"` |
 | `false` | `"boolean"` |
-| `nil` | `"nil"` |
+| `void` | `"void"` |
 
 ### Examples
 
 ```jts
-print(type(42))          # number
-print(type(3.14))        # number
-print(type("hello"))     # string
-print(type(true))        # boolean
-print(type(nil))         # nil
+say(type(42))          # number
+say(type(3.14))        # number
+say(type("hello"))     # string
+say(type(true))        # boolean
+say(type(void))         # void
 ```
 
 ### Using type() in Conditions
@@ -189,11 +189,11 @@ Since `type()` returns a string, you can compare it:
 value = "hello"
 
 if type(value) == "string"
-    print("It's a string!")
+    say("It's a string!")
 end
 
 if type(42) == "number"
-    print("42 is a number")
+    say("42 is a number")
 end
 ```
 
@@ -203,24 +203,24 @@ end
 func describe(value)
     t = type(value)
     if t == "string"
-        print("String of length " + len(value))
+        say("String of length " + len(value))
     elif t == "number"
-        print("A number")
+        say("A number")
     elif t == "boolean"
         if value
-            print("Boolean: true")
+            say("Boolean: true")
         else
-            print("Boolean: false")
+            say("Boolean: false")
         end
     else
-        print("nil")
+        say("void")
     end
 end
 
 describe("hello")    # String of length 5
 describe(42)         # A number
 describe(true)       # Boolean: true
-describe(nil)        # nil
+describe(void)        # void
 ```
 
 ## Combining Built-in Functions
@@ -229,25 +229,25 @@ The real power comes from combining these functions together.
 
 ```jts
 # Interactive calculator
-a_str = input("Enter first number: ")
-b_str = input("Enter second number: ")
+a_str = ask("Enter first number: ")
+b_str = ask("Enter second number: ")
 
-# Note: input() returns strings. Arithmetic works because
+# Note: ask() returns strings. Arithmetic works because
 # JTS GO handles number-string interactions.
-print("You entered: " + a_str + " and " + b_str)
-print("Type of first input: " + type(a_str))
+say("You entered: " + a_str + " and " + b_str)
+say("Type of first ask: " + type(a_str))
 ```
 
 ```jts
 # Validate and process a name
-name = input("Enter your name: ")
+name = ask("Enter your name: ")
 
 if type(name) == "string"
     if len(name) > 0
-        print("Welcome, " + name + "!")
-        print("Your name has " + len(name) + " characters.")
+        say("Welcome, " + name + "!")
+        say("Your name has " + len(name) + " characters.")
     else
-        print("Please enter a name.")
+        say("Please enter a name.")
     end
 end
 ```
@@ -255,8 +255,8 @@ end
 ```jts
 # Quick type-checking utility
 func print_type_info(value)
-    print("Value: " + value)
-    print("Type: " + type(value))
+    say("Value: " + value)
+    say("Type: " + type(value))
 end
 
 print_type_info("hello")
@@ -268,8 +268,8 @@ print_type_info(true)
 
 | Function | Purpose | Returns |
 |----------|---------|---------|
-| `print(value)` | Output to console | Nothing (nil) |
-| `input(prompt)` | Read user input | String |
+| `say(value)` | Output to console | Nothing (void) |
+| `ask(prompt)` | Read user input | String |
 | `len(value)` | Count characters (string) or elements (list/dict/set) | Number |
 | `type(value)` | Check data type | String |
 | `str(value)` / `string(value)` | Convert any value to string | String |
@@ -278,7 +278,7 @@ print_type_info(true)
 | `bool(value)` | Convert to boolean | Boolean |
 | `list(value)` | Convert string/set/tensor to list | List |
 | `read_file(path)` | Read file contents | String |
-| `write_file(path, data)` | Write data to file | Nothing (nil) |
+| `write_file(path, data)` | Write data to file | Nothing (void) |
 
 ## Conversion Functions
 
@@ -289,10 +289,10 @@ These functions convert values between different types.
 Converts any value to its string representation.
 
 ```jts
-print(str(123))           # 123
-print(str(true))          # true
-print(str(nil))           # nil
-print(str([1, 2, 3]))     # [1, 2, 3]
+say(str(123))           # 123
+say(str(true))          # true
+say(str(void))           # void
+say(str([1, 2, 3]))     # [1, 2, 3]
 ```
 
 ### number(value) / float(value)
@@ -300,9 +300,9 @@ print(str([1, 2, 3]))     # [1, 2, 3]
 Converts a string to a floating-point number.
 
 ```jts
-print(number("42"))       # 42
-print(number("3.5"))      # 3.5
-print(float("3.5"))       # 3.5
+say(number("42"))       # 42
+say(number("3.5"))      # 3.5
+say(float("3.5"))       # 3.5
 ```
 
 ### int(value)
@@ -310,9 +310,9 @@ print(float("3.5"))       # 3.5
 Converts a value to an integer, truncating any fractional part.
 
 ```jts
-print(int("42"))          # 42
-print(int(3.99))          # 3
-print(int("3.7"))         # 3
+say(int("42"))          # 42
+say(int(3.99))          # 3
+say(int("3.7"))         # 3
 ```
 
 ### bool(value)
@@ -320,10 +320,10 @@ print(int("3.7"))         # 3
 Converts a value to a boolean following truthiness rules.
 
 ```jts
-print(bool("x"))          # true
-print(bool(""))           # false
-print(bool(0))            # false
-print(bool(1))            # true
+say(bool("x"))          # true
+say(bool(""))           # false
+say(bool(0))            # false
+say(bool(1))            # true
 ```
 
 ### list(value)
@@ -331,9 +331,9 @@ print(bool(1))            # true
 Converts a string, set, tensor, or list to a new list.
 
 ```jts
-print(list("abc"))        # [a, b, c]
-print(list({1, 2, 3}))    # [1, 2, 3]
-print(list([1, 2]))       # [1, 2] (copy)
+say(list("abc"))        # [a, b, c]
+say(list({1, 2, 3}))    # [1, 2, 3]
+say(list([1, 2]))       # [1, 2] (copy)
 ```
 
 ## String Methods
@@ -343,75 +343,75 @@ String methods are called directly on string variables using dot notation.
 ### upper()
 ```jts
 s = "hello"
-print(s.upper())    # HELLO
+say(s.upper())    # HELLO
 ```
 
 ### lower()
 ```jts
 s = "HELLO"
-print(s.lower())    # hello
+say(s.lower())    # hello
 ```
 
 ### trim()
 ```jts
 s = "  hello  "
-print(s.trim())     # hello
+say(s.trim())     # hello
 ```
 
 ### lstrip()
 ```jts
 s = "  hello  "
-print(s.lstrip())   # hello
+say(s.lstrip())   # hello
 ```
 
 ### rstrip()
 ```jts
 s = "  hello  "
-print(s.rstrip())   # hello
+say(s.rstrip())   # hello
 ```
 
 ### contains(substring)
 ```jts
 s = "hello world"
-print(s.contains("world"))    # true
-print(s.contains("xyz"))      # false
+say(s.contains("world"))    # true
+say(s.contains("xyz"))      # false
 ```
 
 ### replace(old, new)
 ```jts
 s = "hello world"
-print(s.replace("world", "JTS"))    # hello JTS
+say(s.replace("world", "JTS"))    # hello JTS
 ```
 
 ### substring(start, end)
 ```jts
 s = "hello"
-print(s.substring(0, 3))    # hel
-print(s.substring(1, 4))    # ell
+say(s.substring(0, 3))    # hel
+say(s.substring(1, 4))    # ell
 ```
 
 ### starts_with(prefix)
 ```jts
 s = "hello world"
-print(s.starts_with("hello"))    # true
-print(s.starts_with("world"))    # false
+say(s.starts_with("hello"))    # true
+say(s.starts_with("world"))    # false
 ```
 
 ### ends_with(suffix)
 ```jts
 s = "hello world"
-print(s.ends_with("world"))    # true
-print(s.ends_with("hello"))    # false
+say(s.ends_with("world"))    # true
+say(s.ends_with("hello"))    # false
 ```
 
 ### ljust(width)
 ```jts
 s = "hi"
-print(s.ljust(5))     # hi
+say(s.ljust(5))     # hi
 ```
 
 ### rjust(width)
 ```jts
 s = "hi"
-print(s.rjust(5))     # hi
+say(s.rjust(5))     # hi
 ```

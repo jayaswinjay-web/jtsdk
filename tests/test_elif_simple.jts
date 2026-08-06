@@ -1,6 +1,7 @@
-print("hello")
+say("hello")
 if true
-    print("yes")
+    say("yes")
 elif false
-    print("no")
+    say("no")
 end
+

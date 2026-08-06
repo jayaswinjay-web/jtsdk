@@ -33,7 +33,7 @@ int disassemble_instruction(Chunk* chunk, int offset) {
     uint8_t instruction = chunk->code[offset];
     switch (instruction) {
         case OP_CONSTANT:       return byte_instruction("OP_CONSTANT", chunk, offset);
-        case OP_NIL:            return simple_instruction("OP_NIL", offset);
+        case OP_VOID:            return simple_instruction("OP_VOID", offset);
         case OP_TRUE:           return simple_instruction("OP_TRUE", offset);
         case OP_FALSE:          return simple_instruction("OP_FALSE", offset);
         case OP_POP:            return simple_instruction("OP_POP", offset);
@@ -65,7 +65,7 @@ int disassemble_instruction(Chunk* chunk, int offset) {
         case OP_LESS:           return simple_instruction("OP_LESS", offset);
         case OP_GREATER_EQUAL:  return simple_instruction("OP_GREATER_EQUAL", offset);
         case OP_LESS_EQUAL:     return simple_instruction("OP_LESS_EQUAL", offset);
-        case OP_PRINT:          return simple_instruction("OP_PRINT", offset);
+        case OP_SAY:          return simple_instruction("OP_SAY", offset);
         case OP_JUMP:           return jump_instruction("OP_JUMP", 1, chunk, offset);
         case OP_JUMP_IF_FALSE:  return jump_instruction("OP_JUMP_IF_FALSE", 1, chunk, offset);
         case OP_LOOP:           return jump_instruction("OP_LOOP", -1, chunk, offset);

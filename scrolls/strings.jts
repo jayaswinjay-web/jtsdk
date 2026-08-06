@@ -16,7 +16,7 @@ end
 func count_words(s)
     words = s.split(" ")
     count = 0
-    for w in words
+    for w of words
         if w != ""
             count = count + 1
         end
@@ -45,7 +45,7 @@ func capitalize_words(s)
     words = s.split(" ")
     out = ""
     first = true
-    for w in words
+    for w of words
         if w == ""
             continue
         end
@@ -60,7 +60,7 @@ end
 
 func strip_vowels(s)
     out = ""
-    for c in s
+    for c of s
         lower = c.lower()
         if lower != "a" and lower != "e" and lower != "i" and lower != "o" and lower != "u"
             out = out + c
@@ -71,7 +71,7 @@ end
 
 func remove_spaces(s)
     out = ""
-    for c in s
+    for c of s
         if c != " "
             out = out + c
         end
@@ -90,3 +90,4 @@ end
 func titleize(s)
     return capitalize_words(s)
 end
+

@@ -19,8 +19,8 @@ the productivity of an interpreted language and the structure of a compiled one.
 <h2>1.2 A First Impression</h2>
 <p>Here is a complete JTS GO program:</p>
 <pre><code># hello.jts — your first program
-print("Hello, World!")
-print("Welcome to JTS GO!")
+say("Hello, World!")
+say("Welcome to JTS GO!")
 </code></pre>
 <pre class="output"><code>Hello, World!
 Welcome to JTS GO!
@@ -152,8 +152,8 @@ Make sure it sits next to the interpreter, or set the <code>JTS_SCROLLS</code> e
 
 <h2>3.1 Hello, World</h2>
 <p>Create a file named <code>hello.jts</code> containing:</p>
-<pre><code>print("Hello, World!")
-print("Welcome to JTS GO!")
+<pre><code>say("Hello, World!")
+say("Welcome to JTS GO!")
 </code></pre>
 <p>Run it from the command line:</p>
 <pre><code>jts hello.jts
@@ -165,40 +165,40 @@ Welcome to JTS GO!
 translated your source into bytecode, and the virtual machine executed that bytecode.</p>
 
 <h2>3.2 Printing Many Kinds of Values</h2>
-<p><code>print</code> accepts any value. Numbers, booleans, and <code>nil</code> are all printed naturally:</p>
-<pre><code>print(42)
-print(3.14159)
-print(true)
-print(false)
-print(nil)
+<p><code>say</code> accepts any value. Numbers, booleans, and <code>void</code> are all printed naturally:</p>
+<pre><code>say(42)
+say(3.14159)
+say(true)
+say(false)
+say(void)
 </code></pre>
 <pre class="output"><code>42
 3.14159
 true
 false
-nil
+void
 </code></pre>
 
 <h2>3.3 Reading User Input</h2>
-<p>The <code>input</code> function reads a line of text from the user. It accepts an optional prompt:</p>
-<pre><code>name = input("What is your name? ")
-print("Hello, " + name + "!")
+<p>The <code>ask</code> function reads a line of text from the user. It accepts an optional prompt:</p>
+<pre><code>name = ask("What is your name? ")
+say("Hello, " + name + "!")
 </code></pre>
 <p>If the user types <code>Alice</code>, the output is:</p>
 <pre class="output"><code>What is your name? Alice
 Hello, Alice!
 </code></pre>
 
-<div class="note"><b>Note:</b> <code>input</code> always returns a string. If you need a number, you can convert it
+<div class="note"><b>Note:</b> <code>ask</code> always returns a string. If you need a number, you can convert it
 with <code>number()</code> or <code>int()</code> (Chapters 14 and 15).</div>
 
 <h2>3.4 A Simple Calculator</h2>
 <pre><code># A friendly calculator
-a = input("Enter first number: ")
-b = input("Enter second number: ")
+a = ask("Enter first number: ")
+b = ask("Enter second number: ")
 
-print("You entered: " + a + " and " + b)
-print("Their sum is: " + (number(a) + number(b)))
+say("You entered: " + a + " and " + b)
+say("Their sum is: " + (number(a) + number(b)))
 </code></pre>
 <p>This example introduces three ideas we will study in depth: variables, string concatenation with the
 <code>+</code> operator, and the <code>number()</code> conversion function.</p>
@@ -217,7 +217,7 @@ jtsvm hello.jbc
 <p>Every language has a small set of fundamental ideas. For JTS GO those ideas are:</p>
 <ul>
 <li><b>Comments</b> — text the compiler ignores (Chapter 4).</li>
-<li><b>Values and types</b> — numbers, strings, booleans, <code>nil</code>, lists, dicts, and sets (Chapters 5 and 11).</li>
+<li><b>Values and types</b> — numbers, strings, booleans, <code>void</code>, lists, dicts, and sets (Chapters 5 and 11).</li>
 <li><b>Variables</b> — named storage for values (Chapter 6).</li>
 <li><b>Operators</b> — the vocabulary of expressions (Chapter 7).</li>
 <li><b>Statements</b> — <code>if</code>, <code>while</code>, and <code>for</code> that control what runs and when (Chapter 8).</li>

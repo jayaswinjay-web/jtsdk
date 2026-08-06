@@ -8,30 +8,30 @@
 age = 25                # a number variable
 price = 9.99            # a float variable
 is_active = true        # a boolean variable
-result = nil            # a nil variable
+result = void            # a void variable
 </code></pre>
 
 <h2>6.2 Reassignment</h2>
 <p>A variable can be assigned a new value at any time, and the new value may have a different type:</p>
 <pre><code>x = 10
-print(type(x))      # number
+say(type(x))      # number
 x = "ten"
-print(type(x))      # string
+say(type(x))      # string
 x = [1, 2]
-print(type(x))      # list
+say(type(x))      # list
 </code></pre>
 
 <h2>6.3 Compound Assignment Operators</h2>
 <p>JTS GO supports the classic compound assignment operators. They update a variable in place:</p>
 <pre><code>a = 10
 a += 5     # a = a + 5
-print(a)   # 15
+say(a)   # 15
 a -= 3     # a = a - 3
-print(a)   # 12
+say(a)   # 12
 a *= 2     # a = a * 2
-print(a)   # 24
+say(a)   # 24
 a /= 4     # a = a / 4
-print(a)   # 6
+say(a)   # 6
 </code></pre>
 <p>The full set includes <code>+=</code>, <code>-=</code>, <code>*=</code>, <code>/=</code>, <code>//=</code>,
 <code>%=</code>, <code>**=</code>, and the bitwise forms <code>&amp;=</code>, <code>|=</code>, <code>^=</code>,
@@ -43,7 +43,7 @@ including inside functions.</p>
 <pre><code>greeting = "Hello"
 
 func greet(name)
-    print(greeting + ", " + name + "!")
+    say(greeting + ", " + name + "!")
 end
 
 greet("Alice")       # Hello, Alice!
@@ -56,11 +56,11 @@ leak between calls. A local variable can share a name with a global variable; in
 
 func modify()
     x = 20                  # creates a NEW local variable x
-    print("Inside: " + x)   # Inside: 20
+    say("Inside: " + x)   # Inside: 20
 end
 
 modify()
-print("Outside: " + x)      # Outside: 10
+say("Outside: " + x)      # Outside: 10
 </code></pre>
 <pre class="output"><code>Inside: 20
 Outside: 10
@@ -74,10 +74,10 @@ not modify a global of the same name. This is a deliberate design choice that ke
 <p>Variables created inside an <code>if</code>, <code>while</code>, or <code>for</code> block behave like local
 variables of the enclosing scope. In particular, a loop variable assigned inside a loop is still visible after the
 loop:</p>
-<pre><code>for i in 0 to 5
+<pre><code>for i of 0 to 5
     last = i
 end
-print(last)      # 4  (visible after the loop)
+say(last)      # 4  (visible after the loop)
 </code></pre>
 
 <div class="note"><b>Implementation note:</b> the JTS compiler performs a two-pass analysis of function bodies and
@@ -93,12 +93,12 @@ del x                      # x no longer exists
 
 lst = [1, 2, 3, 4]
 del lst[1]                 # remove the element at index 1
-print(lst)                 # [1, 3, 4]
+say(lst)                 # [1, 3, 4]
 
 dct = {"a": 1, "b": 2, "c": 3}
 del dct["b"]               # remove the key "b"
-print(dct)                 # {c: 3, a: 1}
-print(len(dct))            # 2
+say(dct)                 # {c: 3, a: 1}
+say(len(dct))            # 2
 </code></pre>
 <pre class="output"><code>[1, 3, 4]
 {c: 3, a: 1}
@@ -130,9 +130,9 @@ APP_NAME = "JTS GO"
 <h3>Modulo with negative numbers</h3>
 <p>The modulo operator returns a result with the sign of the dividend. Some algorithms want a non-negative result;
 the <code>dates</code> scroll ships a <code>mod</code> helper for that purpose (Chapter 34).</p>
-<pre><code>print(10 % 3)      # 1
-print(-10 % 3)     # -1
-print(10 % -3)     # 1
+<pre><code>say(10 % 3)      # 1
+say(-10 % 3)     # -1
+say(10 % -3)     # 1
 </code></pre>
 
 <h2>7.2 Comparison Operators</h2>
@@ -147,8 +147,8 @@ print(10 % -3)     # 1
 <tr><td><code>&lt;=</code></td><td>Less than or equal</td><td><code>5 &lt;= 3</code></td><td><code>false</code></td></tr>
 </table>
 <p>Strings compare lexicographically (alphabetically):</p>
-<pre><code>print("apple" &lt; "banana")    # true
-print("a" &lt; "A")             # false  (uppercase sorts first)
+<pre><code>say("apple" &lt; "banana")    # true
+say("a" &lt; "A")             # false  (uppercase sorts first)
 </code></pre>
 
 <h2>7.3 Logical Operators</h2>
@@ -162,47 +162,47 @@ print("a" &lt; "A")             # false  (uppercase sorts first)
 has_id = true
 
 if age >= 18 and has_id
-    print("Entry allowed")
+    say("Entry allowed")
 end
 
 if age < 13 or age > 65
-    print("Discount applies")
+    say("Discount applies")
 end
 
 is_raining = false
 if not is_raining
-    print("No umbrella needed")
+    say("No umbrella needed")
 end
 </code></pre>
 
-<h2>7.4 Membership: <code>in</code></h2>
-<p>The <code>in</code> operator tests membership. It works on strings (is a character present), lists, dicts (is a
+<h2>7.4 Membership: <code>of</code></h2>
+<p>The <code>of</code> operator tests membership. It works on strings (is a character present), lists, dicts (is a
 key present), and sets:</p>
-<pre><code>print("e" in "hello")        # true
-print("z" in "hello")        # false
-print(2 in [1, 2, 3])        # true
-print("b" in {"a": 1, "b": 2})   # true  (key membership)
-print(9 in {1, 2, 3})        # false
+<pre><code>say("e" of "hello")        # true
+say("z" of "hello")        # false
+say(2 of [1, 2, 3])        # true
+say("b" of {"a": 1, "b": 2})   # true  (key membership)
+say(9 of {1, 2, 3})        # false
 </code></pre>
 
 <h2>7.5 Identity: <code>is</code></h2>
 <p>The <code>is</code> operator compares values for identity. For simple values (numbers, strings, booleans) it
-behaves like equality; it is also used with <code>nil</code>:</p>
-<pre><code>print(1 is 1)        # true
-print(1 is 2)        # false
-print("a" is "a")    # true
-print(nil is nil)    # true
+behaves like equality; it is also used with <code>void</code>:</p>
+<pre><code>say(1 is 1)        # true
+say(1 is 2)        # false
+say("a" is "a")    # true
+say(void is void)    # true
 </code></pre>
 
 <h2>7.6 Bitwise Operators</h2>
 <p>JTS GO includes the full set of bitwise operators from C and Java. They operate on the binary representations of
 integers.</p>
-<pre><code>print(5 &amp; 3)      # 1    (bitwise AND: 101 & 011 = 001)
-print(5 | 3)      # 7    (bitwise OR:  101 | 011 = 111)
-print(5 ^ 3)      # 6    (bitwise XOR: 101 ^ 011 = 110)
-print(~5)         # -6   (bitwise NOT: two's complement)
-print(1 &lt;&lt; 4)     # 16   (left shift)
-print(256 &gt;&gt; 2)  # 64   (right shift)
+<pre><code>say(5 &amp; 3)      # 1    (bitwise AND: 101 & 011 = 001)
+say(5 | 3)      # 7    (bitwise OR:  101 | 011 = 111)
+say(5 ^ 3)      # 6    (bitwise XOR: 101 ^ 011 = 110)
+say(~5)         # -6   (bitwise NOT: two's complement)
+say(1 &lt;&lt; 4)     # 16   (left shift)
+say(256 &gt;&gt; 2)  # 64   (right shift)
 </code></pre>
 <pre class="output"><code>1
 7
@@ -222,7 +222,7 @@ d = 2
 d &lt;&lt;= 3      # 16
 e = 64
 e &gt;&gt;= 2      # 16
-print(a, b, c, d, e)   # [7, 3, 6, 16, 16]  (multi-argument print)
+say(a, b, c, d, e)   # [7, 3, 6, 16, 16]  (multi-argument say)
 </code></pre>
 
 <div class="tip"><b>Why bitwise operators matter:</b> the <code>numbers</code> scroll uses bitwise tests for
@@ -241,7 +241,7 @@ bit shifts are the fastest way to multiply or divide by powers of two.</div>
 <tr><td>6</td><td><code>^</code></td></tr>
 <tr><td>7</td><td><code>|</code></td></tr>
 <tr><td>8</td><td><code>&lt;</code> <code>&lt;=</code> <code>&gt;</code> <code>&gt;=</code></td></tr>
-<tr><td>9</td><td><code>==</code> <code>!=</code> <code>is</code> <code>in</code></td></tr>
+<tr><td>9</td><td><code>==</code> <code>!=</code> <code>is</code> <code>of</code></td></tr>
 <tr><td>10</td><td><code>and</code></td></tr>
 <tr><td>11 (lowest)</td><td><code>or</code></td></tr>
 </table>
@@ -256,7 +256,7 @@ bit shifts are the fastest way to multiply or divide by powers of two.</div>
 <h3>Basic if</h3>
 <pre><code>temperature = 75
 if temperature > 80
-    print("It's hot outside!")
+    say("It's hot outside!")
 end
 </code></pre>
 <p>Because the condition is false, nothing prints. The body of an <code>if</code> runs only when the condition is
@@ -265,9 +265,9 @@ truthy (Chapter 5.8).</p>
 <h3>if / else</h3>
 <pre><code>temperature = 75
 if temperature > 80
-    print("It's hot outside!")
+    say("It's hot outside!")
 else
-    print("It's nice outside!")
+    say("It's nice outside!")
 end
 </code></pre>
 <pre class="output"><code>It's nice outside!
@@ -279,15 +279,15 @@ true branch runs and the rest are skipped.</p>
 <pre><code>score = 85
 
 if score >= 90
-    print("Grade: A")
+    say("Grade: A")
 elif score >= 80
-    print("Grade: B")
+    say("Grade: B")
 elif score >= 70
-    print("Grade: C")
+    say("Grade: C")
 elif score >= 60
-    print("Grade: D")
+    say("Grade: D")
 else
-    print("Grade: F")
+    say("Grade: F")
 end
 </code></pre>
 <pre class="output"><code>Grade: B
@@ -299,12 +299,12 @@ has_ticket = true
 
 if age >= 18
     if has_ticket
-        print("Entry allowed")
+        say("Entry allowed")
     else
-        print("Need a ticket")
+        say("Need a ticket")
     end
 else
-    print("Must be 18 or older")
+    say("Must be 18 or older")
 end
 </code></pre>
 
@@ -313,7 +313,7 @@ end
 becomes false, or the loop never ends.</p>
 <pre><code>count = 0
 while count < 5
-    print(count)
+    say(count)
     count = count + 1
 end
 </code></pre>
@@ -327,10 +327,10 @@ end
 <h3>Countdown</h3>
 <pre><code>n = 5
 while n > 0
-    print(n)
+    say(n)
     n = n - 1
 end
-print("Liftoff!")
+say("Liftoff!")
 </code></pre>
 <pre class="output"><code>5
 4
@@ -343,23 +343,23 @@ Liftoff!
 <div class="warn"><b>Infinite loops:</b> the body below never ends — the condition <code>true</code> never becomes
 false. Do not run it without a way to interrupt your program.
 <pre><code># while true
-#     print("stuck!")
+#     say("stuck!")
 # end
 </code></pre></div>
 
 <h2>8.3 The <code>for</code> Loop</h2>
 <p>The <code>for</code> loop iterates over a numeric range. The syntax is:</p>
-<pre><code>for VARIABLE in START to END
+<pre><code>for VARIABLE of START to END
     ...
 end
 </code></pre>
 <ul>
 <li><code>START</code> is inclusive — the loop begins there.</li>
 <li><code>END</code> is <b>exclusive</b> — the loop stops before it.</li>
-<li>To loop from 0 to <code>n</code> inclusive, write <code>for i in 0 to n + 1</code>.</li>
+<li>To loop from 0 to <code>n</code> inclusive, write <code>for i of 0 to n + 1</code>.</li>
 </ul>
-<pre><code>for i in 0 to 5
-    print(i)
+<pre><code>for i of 0 to 5
+    say(i)
 end
 </code></pre>
 <pre class="output"><code>0
@@ -370,8 +370,8 @@ end
 </code></pre>
 
 <h3>Multiplication table</h3>
-<pre><code>for i in 1 to 11
-    print("5 x " + i + " = " + (5 * i))
+<pre><code>for i of 1 to 11
+    say("5 x " + i + " = " + (5 * i))
 end
 </code></pre>
 <pre class="output"><code>5 x 1 = 5
@@ -388,19 +388,19 @@ end
 
 <h3>Summing a range</h3>
 <pre><code>total = 0
-for i in 1 to 101
+for i of 1 to 101
     total = total + i
 end
-print("Sum of 1 to 100: " + total)
+say("Sum of 1 to 100: " + total)
 </code></pre>
 <pre class="output"><code>Sum of 1 to 100: 5050
 </code></pre>
 
 <h3>Iterating over lists, dicts, and sets</h3>
-<p>The <code>for ... in</code> form also iterates over collections (Chapter 11).</p>
+<p>The <code>for ... of</code> form also iterates over collections (Chapter 11).</p>
 <pre><code>fruits = ["apple", "banana", "cherry"]
-for fruit in fruits
-    print(fruit)
+for fruit of fruits
+    say(fruit)
 end
 </code></pre>
 <pre class="output"><code>apple
@@ -411,10 +411,10 @@ cherry
 <h3>The <code>range()</code> function</h3>
 <p>The built-in <code>range()</code> produces a list of numbers and is a convenient alternative to
 <code>for ... to</code>:</p>
-<pre><code>print(range(5))        # [0, 1, 2, 3, 4]
-print(range(2, 6))     # [2, 3, 4, 5]
-for x in range(3)
-    print("x = " + x)
+<pre><code>say(range(5))        # [0, 1, 2, 3, 4]
+say(range(2, 6))     # [2, 3, 4, 5]
+for x of range(3)
+    say("x = " + x)
 end
 </code></pre>
 
@@ -432,7 +432,7 @@ while i < 10
     if i == 7
         break             # stop at 7
     end
-    print(i)
+    say(i)
 end
 </code></pre>
 <pre class="output"><code>1
@@ -444,12 +444,12 @@ end
 
 <h2>8.5 Combining Control Flow</h2>
 <p>All constructs nest freely. This example finds even numbers and categorizes them:</p>
-<pre><code>for i in 1 to 21
+<pre><code>for i of 1 to 21
     if i % 2 == 0
         if i <= 10
-            print(i + " is a small even number")
+            say(i + " is a small even number")
         else
-            print(i + " is a large even number")
+            say(i + " is a large even number")
         end
     end
 end
@@ -460,7 +460,7 @@ end
 message can follow the condition after a comma.</p>
 <pre><code>assert 1 + 1 == 2
 assert 5 > 3, "five should be bigger than three"
-print("asserts ok")
+say("asserts ok")
 </code></pre>
 <pre class="output"><code>asserts ok
 </code></pre>
@@ -473,8 +473,8 @@ print("asserts ok")
 <tr><td>Else if</td><td><code>elif condition</code></td><td><code>end</code></td></tr>
 <tr><td>Else</td><td><code>else</code></td><td><code>end</code></td></tr>
 <tr><td>While</td><td><code>while condition</code></td><td><code>end</code></td></tr>
-<tr><td>For over range</td><td><code>for i in start to end</code></td><td><code>end</code></td></tr>
-<tr><td>For over collection</td><td><code>for x in collection</code></td><td><code>end</code></td></tr>
+<tr><td>For over range</td><td><code>for i of start to end</code></td><td><code>end</code></td></tr>
+<tr><td>For over collection</td><td><code>for x of collection</code></td><td><code>end</code></td></tr>
 <tr><td>Delete</td><td><code>del name</code></td><td>—</td></tr>
 <tr><td>Assert</td><td><code>assert condition, message</code></td><td>—</td></tr>
 </table>

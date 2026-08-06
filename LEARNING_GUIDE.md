@@ -100,7 +100,7 @@ Let's create your first JTS GO program.
 Create a new file called `hello.jts` with this content:
 
 ```jts
-print("Hello, World!")
+say("Hello, World!")
 ```
 
 ### Step 2: Run the Program
@@ -149,7 +149,7 @@ Variables store values. In JTS GO, you can declare variables in two ways:
 name = "JTS GO"        # String
 age = 25               # Number
 is_student = true      # Boolean
-nothing = nil          # Null/Empty
+nothing = void          # Null/Empty
 ```
 
 **Type-annotated declarations:**
@@ -162,7 +162,7 @@ list nums = [1, 2, 3]  # List
 var x = 42             # Same as dynamic
 ```
 
-**Unassigned variables (default to nil):**
+**Unassigned variables (default to void):**
 ```jts
 int count
 string message
@@ -170,8 +170,8 @@ float temperature
 bool is_ready
 list items
 
-print(count)    # nil
-print(message)  # nil
+say(count)    # void
+say(message)  # void
 ```
 
 ### Data Types
@@ -183,7 +183,7 @@ JTS GO has these data types:
 | **string** | Text | `"hello"`, `"JTS GO"` |
 | **number** | Numbers (integers and decimals) | `42`, `3.14` |
 | **bool** | True or false | `true`, `false` |
-| **nil** | Nothing/empty | `nil` |
+| **void** | Nothing/empty | `void` |
 
 ### Using Variables
 
@@ -193,20 +193,20 @@ age = 30
 height = 5.6
 is_student = true
 
-print(name)        # Alice
-print(age)         # 30
-print(height)      # 5.6
-print(is_student)  # true
+say(name)        # Alice
+say(age)         # 30
+say(height)      # 5.6
+say(is_student)  # true
 ```
 
 ### Reassigning Variables
 
 ```jts
 x = 10
-print(x)    # 10
+say(x)    # 10
 
 x = 20
-print(x)    # 20
+say(x)    # 20
 ```
 
 ### Variable Naming Rules
@@ -249,11 +249,11 @@ JTS GO supports all basic math operations.
 a = 10
 b = 3
 
-print(a + b)    # 13
-print(a - b)    # 7
-print(a * b)    # 30
-print(a / b)    # 3.33333
-print(a % b)    # 1
+say(a + b)    # 13
+say(a - b)    # 7
+say(a * b)    # 30
+say(a / b)    # 3.33333
+say(a % b)    # 1
 ```
 
 ### Order of Operations
@@ -293,21 +293,21 @@ Use `+` to combine strings:
 first = "Hello"
 second = "World"
 message = first + " " + second
-print(message)    # Hello World
+say(message)    # Hello World
 ```
 
 ### String Length
 
 ```jts
 text = "JTS"
-print(len(text))    # 3
+say(len(text))    # 3
 ```
 
 ### String Type
 
 ```jts
 name = "Alice"
-print(type(name))    # string
+say(type(name))    # string
 ```
 
 ### String Examples
@@ -317,46 +317,46 @@ print(type(name))    # string
 first_name = "John"
 last_name = "Doe"
 full_name = first_name + " " + last_name
-print(full_name)    # John Doe
+say(full_name)    # John Doe
 
 # Repeated text
 line = "-" * 20
-print(line)    # --------------------
+say(line)    # --------------------
 
 # Empty string
 empty = ""
-print(len(empty))    # 0
+say(len(empty))    # 0
 ```
 
 ---
 
 ## Input and Output
 
-### Output with print()
+### Output with say()
 
-The `print()` function displays text on the screen:
+The `say()` function displays text on the screen:
 
 ```jts
-print("Hello, World!")
-print(42)
-print(true)
-print(nil)
+say("Hello, World!")
+say(42)
+say(true)
+say(void)
 ```
 
 ### Multiple Values
 
 ```jts
-print("Name:", "Alice")
-print("Age:", 30)
+say("Name:", "Alice")
+say("Age:", 30)
 ```
 
-### Input with input()
+### Input with ask()
 
-The `input()` function reads user input:
+The `ask()` function reads user input:
 
 ```jts
-name = input("What is your name? ")
-print("Hello, " + name + "!")
+name = ask("What is your name? ")
+say("Hello, " + name + "!")
 ```
 
 ### Smart Input
@@ -365,16 +365,16 @@ JTS GO automatically detects the type of input:
 
 ```jts
 # If user enters "25", age will be a number
-age = input("Enter your age: ")
-print(type(age))    # number
+age = ask("Enter your age: ")
+say(type(age))    # number
 
 # If user enters "Alice", name will be a string
-name = input("Enter your name: ")
-print(type(name))    # string
+name = ask("Enter your name: ")
+say(type(name))    # string
 
 # If user enters "true", flag will be a boolean
-flag = input("Enter true or false: ")
-print(type(flag))    # bool
+flag = ask("Enter true or false: ")
+say(type(flag))    # bool
 ```
 
 ---
@@ -389,7 +389,7 @@ Conditionals let your program make decisions.
 age = 18
 
 if age >= 18
-    print("You are an adult")
+    say("You are an adult")
 end
 ```
 
@@ -399,9 +399,9 @@ end
 age = 15
 
 if age >= 18
-    print("You are an adult")
+    say("You are an adult")
 else
-    print("You are a minor")
+    say("You are a minor")
 end
 ```
 
@@ -411,15 +411,15 @@ end
 score = 85
 
 if score >= 90
-    print("Grade: A")
+    say("Grade: A")
 elif score >= 80
-    print("Grade: B")
+    say("Grade: B")
 elif score >= 70
-    print("Grade: C")
+    say("Grade: C")
 elif score >= 60
-    print("Grade: D")
+    say("Grade: D")
 else
-    print("Grade: F")
+    say("Grade: F")
 end
 ```
 
@@ -442,12 +442,12 @@ income = 50000
 
 # AND - both conditions must be true
 if age >= 18 and income >= 30000
-    print("Approved")
+    say("Approved")
 end
 
 # OR - at least one condition must be true
 if age < 18 or income < 30000
-    print("Not eligible")
+    say("Not eligible")
 end
 ```
 
@@ -463,7 +463,7 @@ Loops repeat code multiple times.
 count = 0
 
 while count < 5
-    print(count)
+    say(count)
     count = count + 1
 end
 ```
@@ -480,8 +480,8 @@ Output:
 ### For Loop
 
 ```jts
-for i in 0 to 5
-    print(i)
+for i of 0 to 5
+    say(i)
 end
 ```
 
@@ -498,17 +498,17 @@ Output:
 ### Counting Backwards
 
 ```jts
-for i in 10 to 0
-    print(i)
+for i of 10 to 0
+    say(i)
 end
 ```
 
 ### Nested Loops
 
 ```jts
-for i in 0 to 3
-    for j in 0 to 3
-        print(i + "," + j)
+for i of 0 to 3
+    for j of 0 to 3
+        say(i + "," + j)
     end
 end
 ```
@@ -518,21 +518,21 @@ end
 **Sum of numbers:**
 ```jts
 sum = 0
-for i in 1 to 10
+for i of 1 to 10
     sum = sum + i
 end
-print(sum)    # 55
+say(sum)    # 55
 ```
 
 **Counting occurrences:**
 ```jts
 count = 0
-for i in 0 to 10
+for i of 0 to 10
     if i % 2 == 0
         count = count + 1
     end
 end
-print(count)    # 6 (0, 2, 4, 6, 8, 10)
+say(count)    # 6 (0, 2, 4, 6, 8, 10)
 ```
 
 ### Break and Continue
@@ -541,22 +541,22 @@ Use `break` to exit a loop early and `continue` to skip to the next iteration.
 
 ```jts
 # Break: stop at 5
-for i in 0 to 10
+for i of 0 to 10
     if i == 5
         break
     end
-    print(i)
+    say(i)
 end
 # Output: 0, 1, 2, 3, 4
 ```
 
 ```jts
 # Continue: skip 3
-for i in 0 to 6
+for i of 0 to 6
     if i == 3
         continue
     end
-    print(i)
+    say(i)
 end
 # Output: 0, 1, 2, 4, 5
 ```
@@ -572,7 +572,7 @@ while i < 10
     if i == 7
         break
     end
-    print(i)
+    say(i)
 end
 # Output: 1, 2, 4, 5, 6
 ```
@@ -587,7 +587,7 @@ Functions are reusable blocks of code.
 
 ```jts
 func greet()
-    print("Hello, World!")
+    say("Hello, World!")
 end
 
 # Call the function
@@ -598,7 +598,7 @@ greet()
 
 ```jts
 func greet(name)
-    print("Hello, " + name + "!")
+    say("Hello, " + name + "!")
 end
 
 greet("Alice")    # Hello, Alice!
@@ -613,7 +613,7 @@ func add(a, b)
 end
 
 result = add(3, 4)
-print(result)    # 7
+say(result)    # 7
 ```
 
 ### Multiple Parameters
@@ -624,7 +624,7 @@ func calculate_area(length, width)
 end
 
 area = calculate_area(5, 3)
-print(area)    # 15
+say(area)    # 15
 ```
 
 ### Functions Calling Functions
@@ -639,7 +639,7 @@ func sum_of_squares(a, b)
 end
 
 result = sum_of_squares(3, 4)
-print(result)    # 25 (9 + 16)
+say(result)    # 25 (9 + 16)
 ```
 
 ### Recursion
@@ -654,8 +654,8 @@ func factorial(n)
     return n * factorial(n - 1)
 end
 
-print(factorial(5))    # 120
-print(factorial(10))   # 3628800
+say(factorial(5))    # 120
+say(factorial(10))   # 3628800
 ```
 
 **How recursion works:**
@@ -675,8 +675,8 @@ func fib(n)
     return fib(n - 1) + fib(n - 2)
 end
 
-for i in 0 to 10
-    print(fib(i))
+for i of 0 to 10
+    say(fib(i))
 end
 ```
 
@@ -722,9 +722,9 @@ empty = []
 ```jts
 fruits = ["apple", "banana", "cherry"]
 
-print(fruits[0])    # apple (first element)
-print(fruits[1])    # banana (second element)
-print(fruits[2])    # cherry (third element)
+say(fruits[0])    # apple (first element)
+say(fruits[1])    # banana (second element)
+say(fruits[2])    # cherry (third element)
 ```
 
 **Note:** Lists start at index 0, not 1.
@@ -735,7 +735,7 @@ print(fruits[2])    # cherry (third element)
 fruits = ["apple", "banana", "cherry"]
 
 fruits[1] = "blueberry"
-print(fruits)    # [apple, blueberry, cherry]
+say(fruits)    # [apple, blueberry, cherry]
 ```
 
 ### Adding Elements
@@ -744,24 +744,24 @@ print(fruits)    # [apple, blueberry, cherry]
 numbers = [1, 2, 3]
 
 append(numbers, 4)
-print(numbers)    # [1, 2, 3, 4]
+say(numbers)    # [1, 2, 3, 4]
 
 append(numbers, 5)
-print(numbers)    # [1, 2, 3, 4, 5]
+say(numbers)    # [1, 2, 3, 4, 5]
 ```
 
 ### List Length
 
 ```jts
 numbers = [1, 2, 3, 4, 5]
-print(len(numbers))    # 5
+say(len(numbers))    # 5
 ```
 
 ### List Type
 
 ```jts
 numbers = [1, 2, 3]
-print(type(numbers))    # list
+say(type(numbers))    # list
 ```
 
 ### Looping Through Lists
@@ -769,8 +769,8 @@ print(type(numbers))    # list
 ```jts
 fruits = ["apple", "banana", "cherry"]
 
-for i in 0 to len(fruits) - 1
-    print(fruits[i])
+for i of 0 to len(fruits) - 1
+    say(fruits[i])
 end
 ```
 
@@ -780,7 +780,7 @@ end
 ```jts
 func find_max(list)
     max = list[0]
-    for i in 1 to len(list) - 1
+    for i of 1 to len(list) - 1
         if list[i] > max
             max = list[i]
         end
@@ -789,21 +789,21 @@ func find_max(list)
 end
 
 numbers = [3, 7, 2, 9, 4]
-print(find_max(numbers))    # 9
+say(find_max(numbers))    # 9
 ```
 
 **Sum of list:**
 ```jts
 func sum_list(list)
     total = 0
-    for i in 0 to len(list) - 1
+    for i of 0 to len(list) - 1
         total = total + list[i]
     end
     return total
 end
 
 numbers = [1, 2, 3, 4, 5]
-print(sum_list(numbers))    # 15
+say(sum_list(numbers))    # 15
 ```
 
 ---
@@ -821,7 +821,7 @@ class Animal
     end
 
     func speak(self)
-        print(self.name + " makes a sound")
+        say(self.name + " makes a sound")
     end
 end
 ```
@@ -836,7 +836,7 @@ end
 ```jts
 a = new Animal("Dog")
 a.speak()       # Dog makes a sound
-print(a.name)   # Dog
+say(a.name)   # Dog
 ```
 
 ### Methods
@@ -859,7 +859,7 @@ end
 
 calc = new Calculator()
 calc.add(5).add(3)
-print(calc.get())   # 8
+say(calc.get())   # 8
 ```
 
 ### Inheritance
@@ -871,13 +871,13 @@ class Animal
     end
 
     func speak(self)
-        print(self.name + " makes a sound")
+        say(self.name + " makes a sound")
     end
 end
 
 class Dog extends Animal
     func bark(self)
-        print(self.name + " barks!")
+        say(self.name + " barks!")
     end
 end
 
@@ -906,8 +906,8 @@ empty = {}
 person = {"name": "Alice", "age": 30, "active": true}
 
 # Accessing values
-print(person["name"])    # Alice
-print(person["age"])     # 30
+say(person["name"])    # Alice
+say(person["age"])     # 30
 ```
 
 ### Modifying Dictionaries
@@ -916,7 +916,7 @@ print(person["age"])     # 30
 d = {"name": "JTS"}
 d["version"] = "2.0"
 d["name"] = "JTS GO"
-print(d)    # {name: JTS GO, version: 2.0}
+say(d)    # {name: JTS GO, version: 2.0}
 ```
 
 ### Dictionary Examples
@@ -925,9 +925,9 @@ print(d)    # {name: JTS GO, version: 2.0}
 # Counting with a dictionary
 word = "hello world"
 count = {}
-for i in 0 to len(word) - 1
+for i of 0 to len(word) - 1
     ch = word[i]
-    if ch in count
+    if ch of count
         count[ch] = count[ch] + 1
     else
         count[ch] = 1
@@ -947,7 +947,7 @@ Use `try`/`catch` to handle errors without crashing your program.
 try
     throw "Something went wrong!"
 catch e
-    print("Caught: " + e)
+    say("Caught: " + e)
 end
 # Output: Caught: Something went wrong!
 ```
@@ -967,7 +967,7 @@ You can throw any value (string, number, etc.):
 try
     throw 42
 catch e
-    print("Error code: " + e)
+    say("Error code: " + e)
 end
 # Output: Error code: 42
 ```
@@ -978,7 +978,7 @@ end
 try
     throw "oops"
 catch
-    print("Something failed!")
+    say("Something failed!")
 end
 ```
 
@@ -992,10 +992,10 @@ JTS GO provides built-in methods for string manipulation. Call them on any strin
 
 ```jts
 s = "hello"
-print(s.upper())    # HELLO
+say(s.upper())    # HELLO
 
 t = "WORLD"
-print(t.lower())    # world
+say(t.lower())    # world
 ```
 
 ### trim()
@@ -1004,7 +1004,7 @@ Removes leading and trailing whitespace:
 
 ```jts
 s = "  hello  "
-print(s.trim())     # hello
+say(s.trim())     # hello
 ```
 
 ### contains()
@@ -1013,8 +1013,8 @@ Check if a string contains a substring:
 
 ```jts
 s = "hello world"
-print(s.contains("world"))    # true
-print(s.contains("xyz"))      # false
+say(s.contains("world"))    # true
+say(s.contains("xyz"))      # false
 ```
 
 ### replace()
@@ -1023,7 +1023,7 @@ Replace occurrences of a substring:
 
 ```jts
 s = "hello world"
-print(s.replace("world", "JTS"))    # hello JTS
+say(s.replace("world", "JTS"))    # hello JTS
 ```
 
 ### substring()
@@ -1032,16 +1032,16 @@ Extract a portion of the string:
 
 ```jts
 s = "hello"
-print(s.substring(0, 3))    # hel
-print(s.substring(1, 4))    # ell
+say(s.substring(0, 3))    # hel
+say(s.substring(1, 4))    # ell
 ```
 
 ### starts_with() and ends_with()
 
 ```jts
 s = "hello world"
-print(s.starts_with("hello"))    # true
-print(s.ends_with("world"))      # true
+say(s.starts_with("hello"))    # true
+say(s.ends_with("world"))      # true
 ```
 
 ---
@@ -1060,7 +1060,7 @@ write_file("output.txt", "Hello from JTS!")
 
 ```jts
 content = read_file("output.txt")
-print(content)    # Hello from JTS!
+say(content)    # Hello from JTS!
 ```
 
 ### File I/O Example
@@ -1071,14 +1071,14 @@ write_file("data.txt", "Line 1\nLine 2\nLine 3")
 
 # Read it back
 content = read_file("data.txt")
-print(content)
+say(content)
 
 # Build and save a report
 name = "JTS GO"
 version = "2.1.12"
 report = name + " version " + version
 write_file("report.txt", report)
-print("Report saved!")
+say("Report saved!")
 ```
 
 ### String Methods on File Content
@@ -1086,9 +1086,9 @@ print("Report saved!")
 ```jts
 content = read_file("data.txt")
 if content.contains("error")
-    print("File contains errors!")
+    say("File contains errors!")
 end
-print(len(content) + " characters read")
+say(len(content) + " characters read")
 ```
 
 ---
@@ -1101,8 +1101,8 @@ JTS GO includes built-in ML/AI functions for numerical computing.
 
 ```jts
 t = tensor([1, 2, 3, 4, 5])
-print(t)       # [1, 2, 3, 4, 5]
-print(len(t))  # 5
+say(t)       # [1, 2, 3, 4, 5]
+say(len(t))  # 5
 ```
 
 ### Matrices
@@ -1111,16 +1111,16 @@ print(len(t))  # 5
 m1 = matrix([[1, 2], [3, 4]])
 m2 = matrix([[5, 6], [7, 8]])
 result = matmul(m1, m2)
-print(result)   # [[19, 22] [43, 50]]
+say(result)   # [[19, 22] [43, 50]]
 ```
 
 ### Activation Functions
 
 ```jts
-print(sigmoid(0))    # 0.5
-print(sigmoid(1))    # 0.731...
-print(relu(-5))      # 0
-print(relu(5))       # 5
+say(sigmoid(0))    # 0.5
+say(sigmoid(1))    # 0.731...
+say(relu(-5))      # 0
+say(relu(5))       # 5
 ```
 
 ### Loss Functions
@@ -1128,20 +1128,20 @@ print(relu(5))       # 5
 ```jts
 predicted = [1.0, 2.0, 3.0]
 actual = [1.1, 2.2, 3.1]
-print(mse(predicted, actual))   # 0.02
+say(mse(predicted, actual))   # 0.02
 ```
 
 ### Math Functions
 
 ```jts
-print(sqrt(16))              # 4
-print(math("sin", 3.14159))  # ~0
-print(math("cos", 0))        # 1
-print(math("floor", 3.7))    # 3
-print(math("ceil", 3.2))     # 4
-print(math("abs", -42))      # 42
-print(math("log", 2.71828))  # ~1
-print(math("exp", 1))        # ~2.718
+say(sqrt(16))              # 4
+say(math("sin", 3.14159))  # ~0
+say(math("cos", 0))        # 1
+say(math("floor", 3.7))    # 3
+say(math("ceil", 3.2))     # 4
+say(math("abs", -42))      # 42
+say(math("log", 2.71828))  # ~1
+say(math("exp", 1))        # ~2.718
 ```
 
 ---
@@ -1164,7 +1164,7 @@ http_start(srv)
 
 ```jts
 response = http_request("https://api.example.com/data")
-print(response)   # [200, "OK"]
+say(response)   # [200, "OK"]
 ```
 
 ---
@@ -1173,25 +1173,25 @@ print(response)   # [200, "OK"]
 
 JTS GO comes with these built-in functions:
 
-### print(value)
+### say(value)
 
 Displays a value on the screen:
 
 ```jts
-print("Hello")
-print(42)
-print(true)
-print(nil)
-print([1, 2, 3])
+say("Hello")
+say(42)
+say(true)
+say(void)
+say([1, 2, 3])
 ```
 
-### input(prompt)
+### ask(prompt)
 
 Reads user input:
 
 ```jts
-name = input("Enter your name: ")
-age = input("Enter your age: ")
+name = ask("Enter your name: ")
+age = ask("Enter your age: ")
 ```
 
 ### len(value)
@@ -1199,9 +1199,9 @@ age = input("Enter your age: ")
 Returns the length of a string or list:
 
 ```jts
-print(len("hello"))        # 5
-print(len([1, 2, 3]))     # 3
-print(len([]))             # 0
+say(len("hello"))        # 5
+say(len([1, 2, 3]))     # 3
+say(len([]))             # 0
 ```
 
 ### type(value)
@@ -1209,11 +1209,11 @@ print(len([]))             # 0
 Returns the type of a value:
 
 ```jts
-print(type("hello"))    # string
-print(type(42))         # number
-print(type(true))       # bool
-print(type(nil))        # nil
-print(type([1, 2]))     # list
+say(type("hello"))    # string
+say(type(42))         # number
+say(type(true))       # bool
+say(type(void))        # void
+say(type([1, 2]))     # list
 ```
 
 ### append(list, value)
@@ -1223,7 +1223,7 @@ Adds an element to a list:
 ```jts
 nums = [1, 2, 3]
 append(nums, 4)
-print(nums)    # [1, 2, 3, 4]
+say(nums)    # [1, 2, 3, 4]
 ```
 
 ### number(string)
@@ -1232,8 +1232,8 @@ Converts a string to a number:
 
 ```jts
 num = number("42")
-print(type(num))    # number
-print(num + 8)      # 50
+say(type(num))    # number
+say(num + 8)      # 50
 ```
 
 ### str(value) / string(value)
@@ -1241,10 +1241,10 @@ print(num + 8)      # 50
 Converts any value to a string:
 
 ```jts
-print(str(123))           # 123
-print(str(true))          # true
-print(str(nil))           # nil
-print(str([1, 2, 3]))     # [1, 2, 3]
+say(str(123))           # 123
+say(str(true))          # true
+say(str(void))           # void
+say(str([1, 2, 3]))     # [1, 2, 3]
 ```
 
 ### int(value)
@@ -1252,8 +1252,8 @@ print(str([1, 2, 3]))     # [1, 2, 3]
 Converts a value to an integer, truncating decimals:
 
 ```jts
-print(int("42"))          # 42
-print(int(3.99))          # 3
+say(int("42"))          # 42
+say(int(3.99))          # 3
 ```
 
 ### float(value)
@@ -1261,17 +1261,17 @@ print(int(3.99))          # 3
 Alias for `number()`, converts string to float:
 
 ```jts
-print(float("3.5"))       # 3.5
+say(float("3.5"))       # 3.5
 ```
 
 ### bool(value)
 
-Converts a value to boolean (0, nil, "" are falsy):
+Converts a value to boolean (0, void, "" are falsy):
 
 ```jts
-print(bool("x"))          # true
-print(bool(""))           # false
-print(bool(0))            # false
+say(bool("x"))          # true
+say(bool(""))           # false
+say(bool(0))            # false
 ```
 
 ### list(value)
@@ -1279,8 +1279,8 @@ print(bool(0))            # false
 Converts a string, set, tensor, or list to a new list:
 
 ```jts
-print(list("abc"))        # [a, b, c]
-print(list({1, 2, 3}))    # [1, 2, 3]
+say(list("abc"))        # [a, b, c]
+say(list({1, 2, 3}))    # [1, 2, 3]
 ```
 
 ---
@@ -1306,27 +1306,27 @@ func divide(a, b)
     return a / b
 end
 
-num1 = input("Enter first number: ")
-num2 = input("Enter second number: ")
+num1 = ask("Enter first number: ")
+num2 = ask("Enter second number: ")
 
-print("Sum: " + add(num1, num2))
-print("Difference: " + subtract(num1, num2))
-print("Product: " + multiply(num1, num2))
-print("Quotient: " + divide(num1, num2))
+say("Sum: " + add(num1, num2))
+say("Difference: " + subtract(num1, num2))
+say("Product: " + multiply(num1, num2))
+say("Quotient: " + divide(num1, num2))
 ```
 
 ### 2. FizzBuzz
 
 ```jts
-for i in 1 to 100
+for i of 1 to 100
     if i % 15 == 0
-        print("FizzBuzz")
+        say("FizzBuzz")
     elif i % 3 == 0
-        print("Fizz")
+        say("Fizz")
     elif i % 5 == 0
-        print("Buzz")
+        say("Buzz")
     else
-        print(i)
+        say(i)
     end
 end
 ```
@@ -1338,13 +1338,13 @@ secret = 42
 guess = 0
 
 while guess != secret
-    guess = input("Guess the number: ")
+    guess = ask("Guess the number: ")
     if guess < secret
-        print("Too low!")
+        say("Too low!")
     elif guess > secret
-        print("Too high!")
+        say("Too high!")
     else
-        print("Congratulations! You got it!")
+        say("Congratulations! You got it!")
     end
 end
 ```
@@ -1359,9 +1359,9 @@ func factorial(n)
     return n * factorial(n - 1)
 end
 
-num = input("Enter a number: ")
+num = ask("Enter a number: ")
 result = factorial(num)
-print("Factorial: " + result)
+say("Factorial: " + result)
 ```
 
 ### 5. List Statistics
@@ -1369,7 +1369,7 @@ print("Factorial: " + result)
 ```jts
 func average(list)
     total = 0
-    for i in 0 to len(list) - 1
+    for i of 0 to len(list) - 1
         total = total + list[i]
     end
     return total / len(list)
@@ -1377,7 +1377,7 @@ end
 
 func find_max(list)
     max = list[0]
-    for i in 1 to len(list) - 1
+    for i of 1 to len(list) - 1
         if list[i] > max
             max = list[i]
         end
@@ -1387,7 +1387,7 @@ end
 
 func find_min(list)
     min = list[0]
-    for i in 1 to len(list) - 1
+    for i of 1 to len(list) - 1
         if list[i] < min
             min = list[i]
         end
@@ -1397,10 +1397,10 @@ end
 
 numbers = [23, 45, 12, 67, 89, 34, 56]
 
-print("List: " + numbers)
-print("Average: " + average(numbers))
-print("Maximum: " + find_max(numbers))
-print("Minimum: " + find_min(numbers))
+say("List: " + numbers)
+say("Average: " + average(numbers))
+say("Maximum: " + find_max(numbers))
+say("Minimum: " + find_min(numbers))
 ```
 
 ---
@@ -1452,7 +1452,7 @@ bool flag = true
 list nums = [1, 2, 3]
 var y = 42
 
-# Unassigned variables (default to nil)
+# Unassigned variables (default to void)
 int count
 string text
 
@@ -1464,16 +1464,16 @@ result = 5 + 3 * 2
 
 # Conditionals
 if x > 10
-    print("Big")
+    say("Big")
 elif x > 5
-    print("Medium")
+    say("Medium")
 else
-    print("Small")
+    say("Small")
 end
 
 # Loops
-for i in 0 to 10
-    print(i)
+for i of 0 to 10
+    say(i)
 end
 
 while x > 0
@@ -1481,14 +1481,14 @@ while x > 0
 end
 
 # Break and Continue
-for i in 0 to 10
+for i of 0 to 10
     if i == 3
         continue
     end
     if i == 7
         break
     end
-    print(i)
+    say(i)
 end
 
 # Functions
@@ -1503,7 +1503,7 @@ nums.sort()
 
 # Dictionaries
 d = {"name": "JTS", "version": "2.0"}
-print(d["name"])
+say(d["name"])
 
 # Compound Assignment
 x = 10
@@ -1514,12 +1514,12 @@ x -= 3
 try
     throw "error"
 catch e
-    print(e)
+    say(e)
 end
 
 # Input/Output
-name = input("Name: ")
-print("Hello, " + name)
+name = ask("Name: ")
+say("Hello, " + name)
 
 # File I/O
 write_file("out.txt", "data")
@@ -1527,16 +1527,16 @@ content = read_file("out.txt")
 
 # String Methods
 s = "hello"
-print(s.upper())
-print(s.contains("ell"))
+say(s.upper())
+say(s.contains("ell"))
 ```
 
 ### Built-in Functions
 
 | Function | Description |
 |----------|-------------|
-| `print(value)` | Display output |
-| `input(prompt)` | Read input |
+| `say(value)` | Display output |
+| `ask(prompt)` | Read input |
 | `len(value)` | Get length |
 | `type(value)` | Get type |
 | `append(list, value)` | Add to list |

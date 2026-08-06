@@ -58,7 +58,7 @@ end
 
 func from_digits(lst)
     n = 0
-    for d in lst
+    for d of lst
         n = n * 10 + int(d)
     end
     return n
@@ -143,7 +143,7 @@ func from_base(s, base)
         c = s[i]
         v = hexdigits.find(c)
         if v < 0 or v >= base
-            return nil
+            return void
         end
         n = n * base + v
         i = i + 1
@@ -249,3 +249,4 @@ func count_bits(n)
     end
     return c
 end
+

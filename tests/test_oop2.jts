@@ -4,9 +4,11 @@ class Animal
     end
 
     func speak(self)
-        print(self.sound)
+        say(self.sound)
     end
 end
 
 a = new Animal()
 a.speak()
+
+

@@ -7,7 +7,9 @@ func fibonacci(n)
     return fibonacci(n - 1) + fibonacci(n - 2)
 end
 
-print("Fibonacci sequence:")
-for i in 0 to 12
-    print("fib(" + i + ") = " + fibonacci(i))
+say("Fibonacci sequence:")
+for i of 0 to 12
+    say("fib(" + i + ") = " + fibonacci(i))
 end
+
+

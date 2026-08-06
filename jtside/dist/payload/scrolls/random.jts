@@ -10,7 +10,7 @@ end
 func choice(lst)
     n = len(lst)
     if n == 0
-        return nil
+        return void
     end
     return lst[randint(0, n - 1)]
 end
@@ -40,3 +40,4 @@ end
 func coin_flip()
     return rand() > 0.5
 end
+

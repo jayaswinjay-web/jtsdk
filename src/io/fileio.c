@@ -57,7 +57,7 @@ bool save_bytecode(Chunk* chunk, const char* path) {
         Value value = chunk->constants.values[i];
         fwrite(&value.type, sizeof(ValueType), 1, file);
         switch (value.type) {
-            case VAL_NIL: break;
+            case VAL_VOID: break;
             case VAL_BOOL: {
                 bool b = AS_BOOL(value);
                 fwrite(&b, sizeof(bool), 1, file);
@@ -111,8 +111,8 @@ bool load_bytecode(Chunk* chunk, const char* path) {
         ValueType type;
         fread(&type, sizeof(ValueType), 1, file);
         switch (type) {
-            case VAL_NIL:
-                add_constant(chunk, NIL_VAL);
+            case VAL_VOID:
+                add_constant(chunk, VOID_VAL);
                 break;
             case VAL_BOOL: {
                 bool b;

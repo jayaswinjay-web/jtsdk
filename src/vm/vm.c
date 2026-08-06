@@ -63,7 +63,7 @@ void init_vm(void) {
     vm.debug_source_length = 0;
 
     const char* native_names[] = {
-        "str", "string", "tensor", "matrix", "matmul", "sigmoid", "relu", "mse",
+        "say", "ask", "str", "string", "tensor", "matrix", "matmul", "sigmoid", "relu", "mse",
         "http_server", "http_route", "http_start", "http_request", "sqrt", "math",
         "sin", "cos", "tan", "log", "exp",
         "upper", "lower", "trim", "split", "contains", "replace",
@@ -214,7 +214,7 @@ static bool call(Value callee, int arg_count) {
     int padded = arg_count;
     if (max_arity > arg_count) {
         for (int i = arg_count; i < max_arity; i++) {
-            push(NIL_VAL);
+            push(VOID_VAL);
         }
         padded = max_arity;
     }
@@ -517,7 +517,7 @@ static InterpretResult run(void) {
             break;
         }
 
-        case OP_NIL:     push(NIL_VAL); break;
+        case OP_VOID:     push(VOID_VAL); break;
         case OP_TRUE:    push(BOOL_VAL(true)); break;
         case OP_FALSE:   push(BOOL_VAL(false)); break;
 
@@ -843,7 +843,7 @@ static InterpretResult run(void) {
 
         case OP_NOT: {
             Value val = pop();
-            bool is_falsy = IS_NIL(val) || (IS_BOOL(val) && !AS_BOOL(val)) ||
+            bool is_falsy = IS_VOID(val) || (IS_BOOL(val) && !AS_BOOL(val)) ||
                             (IS_NUMBER(val) && AS_NUMBER(val) == 0) ||
                             (IS_STRING(val) && AS_STRING(val)->length == 0);
             push(BOOL_VAL(is_falsy));
@@ -872,7 +872,7 @@ static InterpretResult run(void) {
                 identical = false;
             } else {
                 switch (a.type) {
-                    case VAL_NIL:    identical = true; break;
+                    case VAL_VOID:    identical = true; break;
                     case VAL_BOOL:   identical = AS_BOOL(a) == AS_BOOL(b); break;
                     case VAL_NUMBER: identical = AS_NUMBER(a) == AS_NUMBER(b); break;
                     case VAL_OBJ:    identical = AS_OBJ(a) == AS_OBJ(b); break;
@@ -921,7 +921,7 @@ static InterpretResult run(void) {
             break;
         }
 
-        case OP_IN: {
+        case OP_OF: {
             Value container = pop();
             Value item = pop();
             bool found = false;
@@ -966,7 +966,7 @@ static InterpretResult run(void) {
         case OP_ASSERT: {
             Value message = pop();
             Value condition = pop();
-            bool is_falsy = IS_NIL(condition) || (IS_BOOL(condition) && !AS_BOOL(condition)) ||
+            bool is_falsy = IS_VOID(condition) || (IS_BOOL(condition) && !AS_BOOL(condition)) ||
                             (IS_NUMBER(condition) && AS_NUMBER(condition) == 0) ||
                             (IS_STRING(condition) && AS_STRING(condition)->length == 0);
             if (is_falsy) {
@@ -980,7 +980,7 @@ static InterpretResult run(void) {
             break;
         }
 
-        case OP_PRINT: {
+        case OP_SAY: {
             Value value = pop();
             print_value(value);
             printf("\n");
@@ -996,7 +996,7 @@ static InterpretResult run(void) {
         case OP_JUMP_IF_FALSE: {
             uint16_t offset = READ_SHORT();
             Value val = peek(0);
-            bool is_falsy = IS_NIL(val) || (IS_BOOL(val) && !AS_BOOL(val)) ||
+            bool is_falsy = IS_VOID(val) || (IS_BOOL(val) && !AS_BOOL(val)) ||
                             (IS_NUMBER(val) && AS_NUMBER(val) == 0) ||
                             (IS_STRING(val) && AS_STRING(val)->length == 0);
             if (is_falsy) {
@@ -1188,7 +1188,7 @@ static InterpretResult run(void) {
                 }
                 Value result;
                 if (!dict_get(AS_DICT(obj), AS_STRING(index), &result)) {
-                    push(NIL_VAL);
+                    push(VOID_VAL);
                 } else {
                     push(result);
                 }
@@ -1848,7 +1848,7 @@ bool vm_call(Value func, int arg_count) {
 
 InterpretResult vm_resume_generator(ObjGenerator* generator) {
     if (generator->exhausted) {
-        push(NIL_VAL);
+        push(VOID_VAL);
         return INTERPRET_OK;
     }
     
@@ -1896,7 +1896,7 @@ InterpretResult vm_resume_generator(ObjGenerator* generator) {
     // The generator suspended or completed. Pull the produced value off the
     // stack (if any), then restore the caller's stack state and hand the
     // value back on top.
-    Value produced = NIL_VAL;
+    Value produced = VOID_VAL;
     if (result == INTERPRET_YIELD) {
         produced = pop();
     }

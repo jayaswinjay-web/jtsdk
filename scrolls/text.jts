@@ -24,7 +24,7 @@ end
 
 func extract_digits(s)
     out = ""
-    for c in s
+    for c of s
         if c.is_digit()
             out = out + c
         end
@@ -61,7 +61,7 @@ end
 
 func slugify(s)
     out = ""
-    for c in s.lower()
+    for c of s.lower()
         if c.is_alnum()
             out = out + c
         else
@@ -79,7 +79,7 @@ end
 func snake_case(s)
     words = split_words(s)
     out = []
-    for w in words
+    for w of words
         out.append(w.lower())
     end
     return "_".join(out)
@@ -88,7 +88,7 @@ end
 func kebab_case(s)
     words = split_words(s)
     out = []
-    for w in words
+    for w of words
         out.append(w.lower())
     end
     return "-".join(out)
@@ -98,7 +98,7 @@ func camel_case(s)
     words = split_words(s)
     out = ""
     first = true
-    for w in words
+    for w of words
         word = w.lower()
         if first
             out = out + word
@@ -113,7 +113,7 @@ end
 func pascal_case(s)
     words = split_words(s)
     out = ""
-    for w in words
+    for w of words
         word = w.lower()
         out = out + word[0].upper() + word.substring(1, len(word))
     end
@@ -185,7 +185,7 @@ func indent(s, spaces)
     end
     lines = s.splitlines()
     out = []
-    for ln in lines
+    for ln of lines
         out.append(pad + ln)
     end
     return "\n".join(out)
@@ -194,7 +194,7 @@ end
 func normalize_spaces(s)
     out = ""
     prev_space = false
-    for c in s
+    for c of s
         if c == " "
             if not prev_space and len(out) > 0
                 out = out + " "
@@ -211,7 +211,7 @@ end
 func initials(s)
     words = s.split(" ")
     out = ""
-    for w in words
+    for w of words
         if w != ""
             out = out + w[0].upper()
         end
@@ -221,7 +221,7 @@ end
 
 func rot13(s)
     out = ""
-    for c in s
+    for c of s
         if c.is_alpha()
             is_up = c.is_upper()
             lo = c.lower()
@@ -245,7 +245,7 @@ func caesar(s, shift)
         shift = shift + 26
     end
     out = ""
-    for c in s
+    for c of s
         if c.is_alpha()
             is_up = c.is_upper()
             lo = c.lower()
@@ -265,7 +265,7 @@ end
 
 func sort_chars(s)
     arr = []
-    for c in s
+    for c of s
         arr.append(c)
     end
     i = 1
@@ -288,13 +288,13 @@ end
 
 func is_isogram(s)
     seen = []
-    for c in s
+    for c of s
         if not c.is_alpha()
             continue
         end
         ch = c.lower()
         has = false
-        for x in seen
+        for x of seen
             if x == ch
                 has = true
             end
@@ -309,7 +309,7 @@ end
 
 func shuffle_chars(s)
     arr = []
-    for c in s
+    for c of s
         arr.append(c)
     end
     shuffle(arr)
@@ -328,7 +328,7 @@ func reverse_words(s)
 end
 
 func contains_any(s, chars)
-    for c in chars
+    for c of chars
         if s.contains(c)
             return true
         end
@@ -338,7 +338,7 @@ end
 
 func count_vowels(s)
     n = 0
-    for c in s.lower()
+    for c of s.lower()
         if "aeiou".contains(c)
             n = n + 1
         end
@@ -348,10 +348,11 @@ end
 
 func count_consonants(s)
     n = 0
-    for c in s.lower()
+    for c of s.lower()
         if c.is_alpha() and not "aeiou".contains(c)
             n = n + 1
         end
     end
     return n
 end
+

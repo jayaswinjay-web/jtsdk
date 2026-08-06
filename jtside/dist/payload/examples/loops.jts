@@ -1,30 +1,30 @@
 # Loops - while and for
 
 # While loop - count 0 to 4
-print("While loop:")
+say("While loop:")
 count = 0
 while count < 5
-    print(count)
+    say(count)
     count = count + 1
 end
 
 # Countdown
-print("Countdown:")
+say("Countdown:")
 n = 5
 while n > 0
-    print(n)
+    say(n)
     n = n - 1
 end
-print("Liftoff!")
+say("Liftoff!")
 
 # For loop - count 0 to 9
-print("For loop:")
-for i in 0 to 10
-    print(i)
+say("For loop:")
+for i of 0 to 10
+    say(i)
 end
 
 # Multiplication table
-print("5x table:")
-for i in 1 to 11
-    print("5 x " + i + " = " + (5 * i))
+say("5x table:")
+for i of 1 to 11
+    say("5 x " + i + " = " + (5 * i))
 end

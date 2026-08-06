@@ -436,8 +436,8 @@ func fib(n)
     return fib(n - 1) + fib(n - 2)
 end
 
-for i in 0 to 10
-    print(fib(i))
+for i of 0 to 10
+    say(fib(i))
 end</pre>
       </div>
     </div>
@@ -502,11 +502,11 @@ end</pre>
 primes = {2, 3, 5, 7, 11}
 odds   = set([1, 3, 5, 7, 9])
 
-print(primes &amp; odds)   # {5, 7}
-print(primes | odds)   # {1, 2, 3, 5, 7, 9, 11}
-print(5 &amp; 3)           # 1
+say(primes &amp; odds)   # {5, 7}
+say(primes | odds)   # {1, 2, 3, 5, 7, 9, 11}
+say(5 &amp; 3)           # 1
 
-assert 3 in primes
+assert 3 of primes
 del odds</pre>
           </div>
         </div>
@@ -514,11 +514,11 @@ del odds</pre>
           <ul class="language-list">
             <li><span class="dot"></span><span><code>x = 42</code> — dynamic variables, no type declarations</span></li>
             <li><span class="dot"></span><span><code>func name(args) ... end</code> — clean function syntax</span></li>
-            <li><span class="dot"></span><span><code>for x in 0 to N</code> and <code>while</code> loops</span></li>
+            <li><span class="dot"></span><span><code>for x of 0 to N</code> and <code>while</code> loops</span></li>
             <li><span class="dot"></span><span><code>if / elif / else</code> conditionals</span></li>
             <li><span class="dot"></span><span><code>class / extends / new / self</code> OOP with inheritance</span></li>
             <li><span class="dot"></span><span><code>try / catch / finally / throw</code> exceptions</span></li>
-            <li><span class="dot"></span><span><code>print</code>, <code>input</code>, <code>len</code>, <code>type</code> built-ins</span></li>
+            <li><span class="dot"></span><span><code>say</code>, <code>ask</code>, <code>len</code>, <code>type</code> built-ins</span></li>
             <li><span class="dot"></span><span><code>bring scroll_name</code> package system</span></li>
             <li><span class="dot"></span><span><code>#</code> single-line comments</span></li>
           </ul>

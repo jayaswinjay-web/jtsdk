@@ -1,6 +1,7 @@
 x = 1
 if x == 1
-    print("one")
+    say("one")
 elif x == 2
-    print("two")
+    say("two")
 end
+

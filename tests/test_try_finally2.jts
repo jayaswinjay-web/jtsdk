@@ -4,39 +4,41 @@ func run_cleanup(ok)
         if ok
             throw "inner failure"
         end
-        print("no failure")
+        say("no failure")
     catch e
-        print("caught: " + e)
+        say("caught: " + e)
     finally
-        print("cleanup running")
+        say("cleanup running")
     end
-    print("function done")
+    say("function done")
 end
 
 run_cleanup(true)
 run_cleanup(false)
 
-print("--- nested try/finally ---")
+say("--- nested try/finally ---")
 try
     try
         throw "deep"
     catch e
-        print("inner caught: " + e)
+        say("inner caught: " + e)
     finally
-        print("inner finally")
+        say("inner finally")
     end
 finally
-    print("outer finally")
+    say("outer finally")
 end
-print("after nested")
+say("after nested")
 
-print("--- finally with locals ---")
+say("--- finally with locals ---")
 try
     x = 10
     y = x * 2
     throw "local err"
 catch e
-    print("err: " + e)
+    say("err: " + e)
 finally
-    print("x+y=" + (x + y))
+    say("x+y=" + (x + y))
 end
+
+

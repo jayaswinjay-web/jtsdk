@@ -108,7 +108,10 @@ static TokenType identifier_type(Scanner* scanner) {
                 switch (scanner->start[1]) {
                     case 'n': return check_keyword(scanner, 1, 2, "nd", TOKEN_AND);
                     case 'p': return check_keyword(scanner, 1, 5, "ppend", TOKEN_APPEND);
-                    case 's': return check_keyword(scanner, 1, 5, "ssert", TOKEN_ASSERT);
+                    case 's':
+                        if (scanner->current - scanner->start > 2 && scanner->start[2] == 'k')
+                            return check_keyword(scanner, 2, 1, "k", TOKEN_ASK);
+                        return check_keyword(scanner, 1, 5, "ssert", TOKEN_ASSERT);
                 }
             }
             break;
@@ -177,16 +180,9 @@ static TokenType identifier_type(Scanner* scanner) {
             if (scanner->current - scanner->start > 1) {
                 switch (scanner->start[1]) {
                     case 'f': return check_keyword(scanner, 2, 0, "", TOKEN_IF);
-                    case 'n':
-                        if (scanner->current - scanner->start > 2) {
-                            if (scanner->start[2] == 'p')
-                                return check_keyword(scanner, 3, 2, "ut", TOKEN_INPUT);
-                            if (scanner->start[2] == 't')
-                                return check_keyword(scanner, 1, 2, "nt", TOKEN_INT);
-                        }
-                        return check_keyword(scanner, 1, 1, "n", TOKEN_IN);
                     case 'm': return check_keyword(scanner, 2, 4, "port", TOKEN_IMPORT);
                     case 's': return check_keyword(scanner, 1, 1, "s", TOKEN_IS);
+                    case 'n': return check_keyword(scanner, 2, 0, "", TOKEN_INT);
                 }
             }
             break;
@@ -210,23 +206,29 @@ static TokenType identifier_type(Scanner* scanner) {
             if (scanner->current - scanner->start > 1) {
                 switch (scanner->start[1]) {
                     case 'e': return check_keyword(scanner, 2, 1, "w", TOKEN_NEW);
-                    case 'i': return check_keyword(scanner, 2, 1, "l", TOKEN_NIL);
                     case 'o': return check_keyword(scanner, 2, 1, "t", TOKEN_NOT);
                     case 'u': return check_keyword(scanner, 2, 4, "mber", TOKEN_TO_NUM);
                 }
             }
             break;
-        case 'o': return check_keyword(scanner, 1, 1, "r", TOKEN_OR);
+        case 'o':
+            if (scanner->current - scanner->start > 1) {
+                switch (scanner->start[1]) {
+                    case 'f': return check_keyword(scanner, 2, 0, "", TOKEN_OF);
+                    case 'r': return check_keyword(scanner, 2, 0, "", TOKEN_OR);
+                }
+            }
+            break;
         case 'p':
             if (scanner->current - scanner->start > 1) {
                 switch (scanner->start[1]) {
                     case 'r':
                         if (scanner->current - scanner->start > 3 && scanner->start[2] == 'e')
                             return check_keyword(scanner, 2, 5, "edict", TOKEN_PREDICT);
-                        return check_keyword(scanner, 1, 4, "rint", TOKEN_PRINT);
+                        break;
                 }
             }
-            return check_keyword(scanner, 1, 4, "rint", TOKEN_PRINT);
+            break;
         case 'r':
             if (scanner->current - scanner->start > 1) {
                 switch (scanner->start[1]) {
@@ -244,6 +246,7 @@ static TokenType identifier_type(Scanner* scanner) {
         case 's':
             if (scanner->current - scanner->start > 1) {
                 switch (scanner->start[1]) {
+                    case 'a': return check_keyword(scanner, 2, 1, "y", TOKEN_SAY);
                     case 'e':
                         if (scanner->current - scanner->start > 2) {
                             if (scanner->start[2] == 'l')
@@ -280,6 +283,7 @@ static TokenType identifier_type(Scanner* scanner) {
             if (scanner->current - scanner->start > 1) {
                 switch (scanner->start[1]) {
                     case 'a': return check_keyword(scanner, 2, 1, "r", TOKEN_VAR);
+                    case 'o': return check_keyword(scanner, 2, 2, "id", TOKEN_VOID);
                 }
             }
             break;

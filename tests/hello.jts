@@ -1,3 +1,5 @@
 # Hello World - The simplest JTS GO program
-print("Hello, World!")
-print("Welcome to JTS GO!")
+say("Hello, World!")
+say("Welcome to JTS GO!")
+
+

@@ -15,11 +15,11 @@ freqs = []
 
 # ---------- learn ----------
 ctx = "  "
-for i in 0 to len(corpus)
+for i of 0 to len(corpus)
     c = substring(corpus, i, i + 1)
 
     ci = -1
-    for j in 0 to len(contexts)
+    for j of 0 to len(contexts)
         if contexts[j] == ctx
             ci = j
         end
@@ -32,7 +32,7 @@ for i in 0 to len(corpus)
     end
 
     ni = -1
-    for j in 0 to len(nexts[ci])
+    for j of 0 to len(nexts[ci])
         if nexts[ci][j] == c
             ni = j
         end
@@ -47,11 +47,11 @@ for i in 0 to len(corpus)
     ctx = substring(ctx, 1, 2) + c
 end
 
-print("learned " + len(contexts) + " contexts")
+say("learned " + len(contexts) + " contexts")
 
 # ---------- helpers ----------
 func find_context(ctx)
-    for j in 0 to len(contexts)
+    for j of 0 to len(contexts)
         if contexts[j] == ctx
             return j
         end
@@ -61,12 +61,12 @@ end
 
 func sample(ci)
     total = 0
-    for j in 0 to len(freqs[ci])
+    for j of 0 to len(freqs[ci])
         total = total + freqs[ci][j]
     end
     r = rand() * total
     acc = 0
-    for j in 0 to len(freqs[ci])
+    for j of 0 to len(freqs[ci])
         acc = acc + freqs[ci][j]
         if r < acc
             return nexts[ci][j]
@@ -79,7 +79,7 @@ end
 seed(7)
 ctx = "  "
 out = ""
-for i in 0 to 200
+for i of 0 to 200
     ci = find_context(ctx)
     c = " "
     if ci != -1
@@ -89,4 +89,4 @@ for i in 0 to 200
     ctx = substring(ctx, 1, 2) + c
 end
 
-print(out)
+say(out)

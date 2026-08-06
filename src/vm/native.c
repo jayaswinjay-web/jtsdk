@@ -53,7 +53,7 @@ static ObjString* value_to_display_string(Value value) {
         return copy_string(AS_BOOL(value) ? "true" : "false",
                            AS_BOOL(value) ? 4 : 5);
     }
-    if (IS_NIL(value)) return copy_string("nil", 3);
+    if (IS_VOID(value)) return copy_string("void", 3);
     return copy_string("<?>", 4);
 }
 
@@ -63,7 +63,7 @@ static bool native_print(int arg_count, Value* args, Value* result) {
         print_value(args[i]);
     }
     printf("\n");
-    *result = NIL_VAL;
+    *result = VOID_VAL;
     return true;
 }
 
@@ -84,8 +84,8 @@ static bool native_input(int arg_count, Value* args, Value* result) {
             *result = BOOL_VAL(true);
         } else if (len == 5 && memcmp(buffer, "false", 5) == 0) {
             *result = BOOL_VAL(false);
-        } else if (len == 3 && memcmp(buffer, "nil", 3) == 0) {
-            *result = NIL_VAL;
+        } else if (len == 3 && memcmp(buffer, "void", 3) == 0) {
+            *result = VOID_VAL;
         } else {
             char* end;
             double num = strtod(buffer, &end);
@@ -141,7 +141,7 @@ static bool native_type(int arg_count, Value* args, Value* result) {
     }
     const char* type_name = "unknown";
     switch (args[0].type) {
-        case VAL_NIL:     type_name = "nil"; break;
+        case VAL_VOID:     type_name = "void"; break;
         case VAL_BOOL:    type_name = "boolean"; break;
         case VAL_NUMBER:  type_name = "number"; break;
         case VAL_OBJ:
@@ -233,8 +233,8 @@ static bool native_string(int arg_count, Value* args, Value* result) {
         }
         return true;
     }
-    if (IS_NIL(args[0])) {
-        *result = OBJ_VAL(copy_string("nil", 3));
+    if (IS_VOID(args[0])) {
+        *result = OBJ_VAL(copy_string("void", 3));
         return true;
     }
     if (IS_TENSOR(args[0])) {
@@ -308,8 +308,8 @@ static bool native_string(int arg_count, Value* args, Value* result) {
                 } else {
                     memcpy(buf + pos, "false", 5); pos += 5;
                 }
-            } else if (IS_NIL(list->values[i])) {
-                memcpy(buf + pos, "nil", 3); pos += 3;
+            } else if (IS_VOID(list->values[i])) {
+                memcpy(buf + pos, "void", 3); pos += 3;
             } else {
                 buf[pos++] = '?';
             }
@@ -565,7 +565,7 @@ static bool native_http_route(int arg_count, Value* args, Value* result) {
     route->body = args[3];
     server->route_count++;
 
-    *result = NIL_VAL;
+    *result = VOID_VAL;
     return true;
 }
 
@@ -707,7 +707,7 @@ static bool native_http_start(int arg_count, Value* args, Value* result) {
     WSACleanup();
 #endif
 
-    *result = NIL_VAL;
+    *result = VOID_VAL;
     return true;
 }
 
@@ -1612,7 +1612,7 @@ static bool native_randint(int arg_count, Value* args, Value* result) {
 static bool native_seed(int arg_count, Value* args, Value* result) {
     if (arg_count != 1 || !IS_NUMBER(args[0])) { fprintf(stderr, "JTS GO: seed() expects 1 number argument\n"); return false; }
     srand((unsigned)AS_NUMBER(args[0]));
-    *result = NIL_VAL;
+    *result = VOID_VAL;
     return true;
 }
 
@@ -1670,7 +1670,7 @@ static bool native_float(int arg_count, Value* args, Value* result) {
 
 static bool native_bool(int arg_count, Value* args, Value* result) {
     if (arg_count != 1) { fprintf(stderr, "JTS GO: bool() expects 1 argument\n"); return false; }
-    if (IS_NIL(args[0])) { *result = BOOL_VAL(false); return true; }
+    if (IS_VOID(args[0])) { *result = BOOL_VAL(false); return true; }
     if (IS_BOOL(args[0])) { *result = args[0]; return true; }
     if (IS_NUMBER(args[0])) { *result = BOOL_VAL(AS_NUMBER(args[0]) != 0.0); return true; }
     if (IS_STRING(args[0])) { *result = BOOL_VAL(AS_STRING(args[0])->length > 0); return true; }
@@ -2059,7 +2059,7 @@ static bool native_list_insert(int arg_count, Value* args, Value* result) {
     if (index < 0) index = list->count + index;
     if (index < 0) index = 0;
     if (index > list->count) index = list->count;
-    list_append(list, NIL_VAL);
+    list_append(list, VOID_VAL);
     for (int i = list->count - 1; i > index; i--) {
         list->values[i] = list->values[i - 1];
     }
@@ -2310,7 +2310,7 @@ static bool native_dict_get(int arg_count, Value* args, Value* result) {
         }
     }
     if (arg_count == 3) { *result = args[2]; return true; }
-    *result = NIL_VAL;
+    *result = VOID_VAL;
     return true;
 }
 
@@ -2330,7 +2330,7 @@ static bool native_dict_pop(int arg_count, Value* args, Value* result) {
         }
     }
     if (arg_count == 3) { *result = args[2]; return true; }
-    *result = NIL_VAL;
+    *result = VOID_VAL;
     return true;
 }
 
@@ -2448,16 +2448,16 @@ static Value json_parse_value(const char** p) {
     if (**p == '"') return json_parse_string(p);
     if (**p == 't' && strncmp(*p, "true", 4) == 0) { *p += 4; return BOOL_VAL(true); }
     if (**p == 'f' && strncmp(*p, "false", 5) == 0) { *p += 5; return BOOL_VAL(false); }
-    if (**p == 'n' && strncmp(*p, "null", 4) == 0) { *p += 4; return NIL_VAL; }
+    if (**p == 'n' && strncmp(*p, "null", 4) == 0) { *p += 4; return VOID_VAL; }
     if (**p == '-' || (**p >= '0' && **p <= '9')) {
         char* end;
         double v = strtod(*p, &end);
-        if (end == *p) { (*p)++; return NIL_VAL; }
+        if (end == *p) { (*p)++; return VOID_VAL; }
         *p = end;
         return NUMBER_VAL(v);
     }
     (*p)++;
-    return NIL_VAL;
+    return VOID_VAL;
 }
 
 static bool native_json_parse(int arg_count, Value* args, Value* result) {
@@ -2479,7 +2479,7 @@ static void json_stringify_value(Value v, char* buf, int* pos, int depth) {
     } else if (IS_BOOL(v)) {
         if (AS_BOOL(v)) { memcpy(buf + *pos, "true", 4); *pos += 4; }
         else { memcpy(buf + *pos, "false", 5); *pos += 5; }
-    } else if (IS_NIL(v)) {
+    } else if (IS_VOID(v)) {
         memcpy(buf + *pos, "null", 4);
         *pos += 4;
     } else if (IS_STRING(v)) {
@@ -2555,7 +2555,7 @@ static bool native_sleep(int arg_count, Value* args, Value* result) {
     ts.tv_nsec = (long)((secs - (double)ts.tv_sec) * 1000000000);
     nanosleep(&ts, NULL);
 #endif
-    *result = NIL_VAL;
+    *result = VOID_VAL;
     return true;
 }
 
@@ -2590,7 +2590,7 @@ static bool native_strftime(int arg_count, Value* args, Value* result) {
 static bool native_env(int arg_count, Value* args, Value* result) {
     if (arg_count != 1 || !IS_STRING(args[0])) { fprintf(stderr, "JTS GO: env() expects 1 string argument\n"); return false; }
     const char* val = getenv(AS_CSTRING(args[0]));
-    if (val == NULL) { *result = NIL_VAL; return true; }
+    if (val == NULL) { *result = VOID_VAL; return true; }
     *result = OBJ_VAL(copy_string(val, (int)strlen(val)));
     return true;
 }
@@ -2634,8 +2634,8 @@ typedef struct {
 } NativeDef;
 
 static NativeDef native_functions[] = {
-    {"print", -1, native_print},
-    {"input", -1, native_input},
+    {"say", -1, native_print},
+    {"ask", -1, native_input},
     {"len",    1, native_len},
     {"type",   1, native_type},
     {"append", 2, native_append},

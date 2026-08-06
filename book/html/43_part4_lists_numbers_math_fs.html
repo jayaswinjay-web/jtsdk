@@ -8,47 +8,47 @@ Chapter 17: flattening, de-duplication, reversing, chunking, rotation, and arith
 
 <h2>30.1 <code>lists.flatten(lst)</code></h2>
 <p>Flattens nested lists recursively, producing a single flat list.</p>
-<pre><code>print(lists.flatten([[1, 2], [3, [4, 5]]]))
+<pre><code>say(lists.flatten([[1, 2], [3, [4, 5]]]))
 # [1, 2, 3, 4, 5]
 </code></pre>
 
 <h2>30.2 <code>lists.unique(lst)</code></h2>
 <p>Returns a copy with duplicate values removed, preserving first-seen order.</p>
-<pre><code>print(lists.unique([1, 2, 2, 3, 1, 4, 2]))   # [1, 2, 3, 4]
+<pre><code>say(lists.unique([1, 2, 2, 3, 1, 4, 2]))   # [1, 2, 3, 4]
 </code></pre>
 
 <h2>30.3 <code>lists.reversed(lst)</code></h2>
-<pre><code>print(lists.reversed([1, 2, 3]))   # [3, 2, 1]
+<pre><code>say(lists.reversed([1, 2, 3]))   # [3, 2, 1]
 </code></pre>
 
 <h2>30.4 <code>lists.chunk(lst, size)</code></h2>
 <p>Divides a list into consecutive sub-lists of at most <code>size</code> elements.</p>
-<pre><code>print(lists.chunk([1, 2, 3, 4, 5], 2))       # [[1, 2], [3, 4], [5]]
+<pre><code>say(lists.chunk([1, 2, 3, 4, 5], 2))       # [[1, 2], [3, 4], [5]]
 </code></pre>
 
 <h2>30.5 <code>lists.rotate(lst, k)</code></h2>
 <p>Rotates elements <i>right</i> by <code>k</code> positions. Negative values rotate left; <code>k</code> is
 reduced modulo the list length.</p>
-<pre><code>print(lists.rotate([1, 2, 3, 4, 5], 1))      # [5, 1, 2, 3, 4]
-print(lists.rotate([1, 2, 3, 4, 5], -1))     # [2, 3, 4, 5, 1]
-print(lists.rotate([1, 2, 3, 4, 5], 6))      # [5, 1, 2, 3, 4]
+<pre><code>say(lists.rotate([1, 2, 3, 4, 5], 1))      # [5, 1, 2, 3, 4]
+say(lists.rotate([1, 2, 3, 4, 5], -1))     # [2, 3, 4, 5, 1]
+say(lists.rotate([1, 2, 3, 4, 5], 6))      # [5, 1, 2, 3, 4]
 </code></pre>
 
 <h2>30.6 <code>lists.median(sorted_list)</code></h2>
 <p>Computes the median of an already-sorted list. Note the contract: the caller is responsible for sorting.</p>
-<pre><code>print(lists.median([1, 2, 3, 4, 5]))       # 3
-print(lists.median([1, 2, 3, 4]))          # 2.5
-print(lists.median([]))                    # 0
+<pre><code>say(lists.median([1, 2, 3, 4, 5]))       # 3
+say(lists.median([1, 2, 3, 4]))          # 2.5
+say(lists.median([]))                    # 0
 </code></pre>
 
 <h2>30.7 <code>lists.first</code>, <code>lists.last</code></h2>
-<pre><code>print(lists.first([7, 8, 9]))   # 7
-print(lists.last([7, 8, 9]))    # 9
+<pre><code>say(lists.first([7, 8, 9]))   # 7
+say(lists.last([7, 8, 9]))    # 9
 </code></pre>
 
 <h2>30.8 Arithmetic Helpers</h2>
-<pre><code>print(lists.sum_squares([1, 2, 3]))              # 14
-print(lists.count_occurrences([1, 2, 2, 3], 2))  # 2
+<pre><code>say(lists.sum_squares([1, 2, 3]))              # 14
+say(lists.count_occurrences([1, 2, 2, 3], 2))  # 2
 </code></pre>
 
 <h1 id="ch31">31. The <code>numbers</code> Scroll</h1>
@@ -60,59 +60,59 @@ conversion, percentages, formatting, ordinals, and bit analysis.</p>
 </code></pre>
 
 <h2>31.1 Testing and Coercion</h2>
-<pre><code>print(numbers.is_numeric("12345"))   # true
-print(numbers.is_numeric("-42"))     # true
-print(numbers.is_numeric("12a4"))    # false
-print(numbers.is_numeric(""))        # false
-print(numbers.is_integer(7))         # true
-print(numbers.is_integer(7.5))       # false
-print(numbers.is_whole(3.0))         # true
+<pre><code>say(numbers.is_numeric("12345"))   # true
+say(numbers.is_numeric("-42"))     # true
+say(numbers.is_numeric("12a4"))    # false
+say(numbers.is_numeric(""))        # false
+say(numbers.is_integer(7))         # true
+say(numbers.is_integer(7.5))       # false
+say(numbers.is_whole(3.0))         # true
 </code></pre>
 
 <h2>31.2 Digit Tools</h2>
-<pre><code>print(numbers.digit_count(12345))    # 5
-print(numbers.digit_count(0))        # 1
-print(numbers.digits(1234))          # [1, 2, 3, 4]
-print(numbers.from_digits([1, 2, 3]))  # 123
-print(numbers.reverse_digits(1234))  # 4321
+<pre><code>say(numbers.digit_count(12345))    # 5
+say(numbers.digit_count(0))        # 1
+say(numbers.digits(1234))          # [1, 2, 3, 4]
+say(numbers.from_digits([1, 2, 3]))  # 123
+say(numbers.reverse_digits(1234))  # 4321
 </code></pre>
 
 <h2>31.3 Base Conversion</h2>
-<pre><code>print(numbers.to_binary(42))     # 101010
-print(numbers.to_octal(42))      # 52
-print(numbers.to_hex(255))       # ff
-print(numbers.to_hex(-255))      # -ff
+<pre><code>say(numbers.to_binary(42))     # 101010
+say(numbers.to_octal(42))      # 52
+say(numbers.to_hex(255))       # ff
+say(numbers.to_hex(-255))      # -ff
 
-print(numbers.from_binary("101010"))   # 42
-print(numbers.from_octal("52"))        # 42
-print(numbers.from_hex("ff"))          # 255
-print(numbers.from_base("ff", 16))     # 255
-print(numbers.from_base("2", 2))       # nil   (2 is not a valid binary digit)
+say(numbers.from_binary("101010"))   # 42
+say(numbers.from_octal("52"))        # 42
+say(numbers.from_hex("ff"))          # 255
+say(numbers.from_base("ff", 16))     # 255
+say(numbers.from_base("2", 2))       # void   (2 is not a valid binary digit)
 </code></pre>
 
 <h2>31.4 Percentages</h2>
-<pre><code>print(numbers.percent(30, 200))        # 15
-print(numbers.percent_change(50, 60))  # 20
+<pre><code>say(numbers.percent(30, 200))        # 15
+say(numbers.percent_change(50, 60))  # 20
 </code></pre>
 
 <h2>31.5 Formatting</h2>
-<pre><code>print(numbers.round_to(3.14159, 2))   # 3.14
-print(numbers.with_commas(1234567))   # 1,234,567
-print(numbers.with_commas(-9876543))  # -9,876,543
+<pre><code>say(numbers.round_to(3.14159, 2))   # 3.14
+say(numbers.with_commas(1234567))   # 1,234,567
+say(numbers.with_commas(-9876543))  # -9,876,543
 </code></pre>
 
 <h2>31.6 Ordinals</h2>
-<pre><code>print(numbers.ordinal(1))    # 1st
-print(numbers.ordinal(2))    # 2nd
-print(numbers.ordinal(3))    # 3rd
-print(numbers.ordinal(11))   # 11th   (the special 11/12/13 case)
-print(numbers.ordinal(21))   # 21st
+<pre><code>say(numbers.ordinal(1))    # 1st
+say(numbers.ordinal(2))    # 2nd
+say(numbers.ordinal(3))    # 3rd
+say(numbers.ordinal(11))   # 11th   (the special 11/12/13 case)
+say(numbers.ordinal(21))   # 21st
 </code></pre>
 
 <h2>31.7 Bits</h2>
-<pre><code>print(numbers.is_power_of_two(16))   # true
-print(numbers.is_power_of_two(18))   # false
-print(numbers.count_bits(13))        # 3   (13 = 1101 in binary)
+<pre><code>say(numbers.is_power_of_two(16))   # true
+say(numbers.is_power_of_two(18))   # false
+say(numbers.count_bits(13))        # 3   (13 = 1101 of binary)
 </code></pre>
 
 <h2>31.8 A Guessing-Game Check</h2>
@@ -121,7 +121,7 @@ print(numbers.count_bits(13))        # 3   (13 = 1101 in binary)
 secret = 42
 guess = 42
 if guess == secret
-    print("You guessed " + numbers.ordinal(guess) + " correct!")
+    say("You guessed " + numbers.ordinal(guess) + " correct!")
 end
 </code></pre>
 <pre class="output"><code>You guessed 42nd correct!
@@ -136,46 +136,46 @@ built-in from Chapter 15 and the core numeric built-ins.</p>
 </code></pre>
 
 <h2>32.1 Constants</h2>
-<pre><code>print(math.pi)       # 3.14159
-print(math.e)        # 2.71828
-print(math.tau)      # 6.28319
-print(math.phi)      # 1.61803
-print(math.sqrt2)    # 1.41421
+<pre><code>say(math.pi)       # 3.14159
+say(math.e)        # 2.71828
+say(math.tau)      # 6.28319
+say(math.phi)      # 1.61803
+say(math.sqrt2)    # 1.41421
 </code></pre>
 
 <h2>32.2 Logarithms (any base)</h2>
-<pre><code>print(math.log2(8))    # 3
-print(math.log10(100)) # 2
+<pre><code>say(math.log2(8))    # 3
+say(math.log10(100)) # 2
 </code></pre>
 
 <h2>32.3 Geometry</h2>
-<pre><code>print(math.hypot(3, 4))       # 5
-print(math.degrees(pi))       # 180
-print(math.radians(180))      # 3.14159
+<pre><code>say(math.hypot(3, 4))       # 5
+say(math.degrees(pi))       # 180
+say(math.radians(180))      # 3.14159
 </code></pre>
 
 <h2>32.4 Sign, Clamping, and Interpolation</h2>
-<pre><code>print(math.sign(-5))   # -1
-print(math.sign(0))    # 0
-print(math.sign(7))    # 1
-print(math.clamp(150, 0, 100))   # 100
-print(math.lerp(0, 10, 0.5))     # 5
+<pre><code>say(math.sign(-5))   # -1
+say(math.sign(0))    # 0
+say(math.sign(7))    # 1
+say(math.clamp(150, 0, 100))   # 100
+say(math.lerp(0, 10, 0.5))     # 5
 </code></pre>
 
 <h2>32.5 Parity and Number Theory</h2>
-<pre><code>print(math.is_even(4))    # true
-print(math.is_odd(5))     # true
-print(math.factorial(5))  # 120
-print(math.gcd(12, 18))   # 6
-print(math.lcm(4, 6))     # 12
-print(math.is_prime(17))  # true
-print(math.is_prime(18))  # false
+<pre><code>say(math.is_even(4))    # true
+say(math.is_odd(5))     # true
+say(math.factorial(5))  # 120
+say(math.gcd(12, 18))   # 6
+say(math.lcm(4, 6))     # 12
+say(math.is_prime(17))  # true
+say(math.is_prime(18))  # false
 </code></pre>
 
 <h2>32.6 Averages and Digits</h2>
-<pre><code>print(math.avg([10, 20, 30]))   # 20
-print(math.midpoint(2, 6))      # 4
-print(math.digit_sum(12345))    # 15
+<pre><code>say(math.avg([10, 20, 30]))   # 20
+say(math.midpoint(2, 6))      # 4
+say(math.digit_sum(12345))    # 15
 </code></pre>
 
 <h1 id="ch33">33. The <code>fs</code> Scroll</h1>
@@ -187,32 +187,32 @@ reading, and file inspection.</p>
 </code></pre>
 
 <h2>33.1 Reading and Writing</h2>
-<pre><code>print(fs.write("demo.txt", "hello\nworld\n"))   # true
-print(fs.read("demo.txt"))                      # hello\nworld\n
-print(fs.read_lines("demo.txt"))                # [hello, world]
-print(fs.count_lines("demo.txt"))               # 2
-print(fs.first_line("demo.txt"))                # hello
-print(fs.last_line("demo.txt"))                 # world
-print(fs.append_text("demo.txt", "again\n"))    # true
-print(fs.read("demo.txt"))                      # hello\nworld\nagain\n
+<pre><code>say(fs.write("demo.txt", "hello\nworld\n"))   # true
+say(fs.read("demo.txt"))                      # hello\nworld\n
+say(fs.read_lines("demo.txt"))                # [hello, world]
+say(fs.count_lines("demo.txt"))               # 2
+say(fs.first_line("demo.txt"))                # hello
+say(fs.last_line("demo.txt"))                 # world
+say(fs.append_text("demo.txt", "again\n"))    # true
+say(fs.read("demo.txt"))                      # hello\nworld\nagain\n
 </code></pre>
 
 <div class="tip"><b>Tip:</b> <code>read_lines</code> also drops the trailing empty line created by a final
 newline, which makes line counting exact.</div>
 
 <h2>33.2 File Facts</h2>
-<pre><code>print(fs.exists("demo.txt"))          # true
-print(fs.file_size("demo.txt"))       # number of bytes
-print(fs.is_empty_file("demo.txt"))   # false
+<pre><code>say(fs.exists("demo.txt"))          # true
+say(fs.file_size("demo.txt"))       # number of bytes
+say(fs.is_empty_file("demo.txt"))   # false
 </code></pre>
 
 <h2>33.3 Path Tools</h2>
-<pre><code>print(fs.basename("C:/docs/report.txt"))    # report.txt
-print(fs.dirname("C:/docs/report.txt"))     # C:/docs
-print(fs.ext("report.txt"))                 # .txt   (includes the dot)
-print(fs.with_extension("report.txt", ".csv"))  # report.csv
-print(fs.join_path("a", "b"))               # a/b
-print(fs.join_path("a/", "b"))              # a/b
+<pre><code>say(fs.basename("C:/docs/report.txt"))    # report.txt
+say(fs.dirname("C:/docs/report.txt"))     # C:/docs
+say(fs.ext("report.txt"))                 # .txt   (includes the dot)
+say(fs.with_extension("report.txt", ".csv"))  # report.csv
+say(fs.join_path("a", "b"))               # a/b
+say(fs.join_path("a/", "b"))              # a/b
 </code></pre>
 
 <div class="note"><b>Note:</b> <code>fs.ext</code> returns the extension <i>with</i> its leading dot, so
@@ -220,12 +220,12 @@ print(fs.join_path("a/", "b"))              # a/b
 languages, which usually omit the dot.</div>
 
 <h2>33.4 Copying</h2>
-<pre><code>print(fs.copy_text("demo.txt", "copy.txt"))   # true
-print(fs.read("copy.txt"))                    # hello\nworld\nagain\n
+<pre><code>say(fs.copy_text("demo.txt", "copy.txt"))   # true
+say(fs.read("copy.txt"))                    # hello\nworld\nagain\n
 </code></pre>
 
 <h2>33.5 Word Count</h2>
-<pre><code>print(fs.word_count("scrolls/text.jts"))   # number of words in the file
+<pre><code>say(fs.word_count("scrolls/text.jts"))   # number of words of the file
 </code></pre>
 
 <div class="note"><b>Note:</b> the exact word count depends on the file contents on your machine. The functions are
@@ -240,22 +240,22 @@ epoch seconds (as returned by <code>now()</code>).</p>
 </code></pre>
 
 <h2>34.1 Readable Timestamps</h2>
-<pre><code>print(dates.unix())          # current epoch seconds
-print(dates.today())         # YYYY-MM-DD
-print(dates.time_str())      # HH:MM:SS
-print(dates.stamp())         # YYYY-MM-DD HH:MM:SS
-print(dates.fmt(now(), "%A, %B %d"))   # e.g. Tuesday, August 04
+<pre><code>say(dates.unix())          # current epoch seconds
+say(dates.today())         # YYYY-MM-DD
+say(dates.time_str())      # HH:MM:SS
+say(dates.stamp())         # YYYY-MM-DD HH:MM:SS
+say(dates.fmt(now(), "%A, %B %d"))   # e.g. Tuesday, August 04
 </code></pre>
 
 <h2>34.2 Date Arithmetic</h2>
 <pre><code>t = now()
-print(dates.add_seconds(t, 30))    # t + 30
-print(dates.add_minutes(t, 5))     # t + 300
-print(dates.add_hours(t, 1))       # t + 3600
-print(dates.add_days(t, 1))        # t + 86400
-print(dates.add_weeks(t, 1))       # t + 604800
-print(dates.add_months(t, 2))      # t + 5184000
-print(dates.add_years(t, 1))       # t + 31557600
+say(dates.add_seconds(t, 30))    # t + 30
+say(dates.add_minutes(t, 5))     # t + 300
+say(dates.add_hours(t, 1))       # t + 3600
+say(dates.add_days(t, 1))        # t + 86400
+say(dates.add_weeks(t, 1))       # t + 604800
+say(dates.add_months(t, 2))      # t + 5184000
+say(dates.add_years(t, 1))       # t + 31557600
 </code></pre>
 
 <div class="note"><b>Note:</b> months and years are approximate (30 days and 365.25 days). For calendar-accurate
@@ -264,55 +264,55 @@ month arithmetic, work with <code>strftime</code> components as shown in section
 <h2>34.3 Differences Between Two Stamps</h2>
 <pre><code>a = now()
 b = dates.add_hours(a, 2)
-print(dates.seconds_between(a, b))   # 7200
-print(dates.minutes_between(a, b))   # 120
-print(dates.hours_between(a, b))     # 2
-print(dates.days_between(a, b))      # 0.0833333
+say(dates.seconds_between(a, b))   # 7200
+say(dates.minutes_between(a, b))   # 120
+say(dates.hours_between(a, b))     # 2
+say(dates.days_between(a, b))      # 0.0833333
 </code></pre>
 
 <h2>34.4 Weekdays</h2>
-<pre><code>print(dates.day_of_week(now()))     # 1..7  (1 = Monday ... 7 = Sunday)
-print(dates.day_name(now()))        # e.g. Tue
-print(dates.day_name_full(now()))   # e.g. Tuesday
-print(dates.is_weekend(now()))      # true or false
-print(dates.is_weekday(now()))      # the opposite
+<pre><code>say(dates.day_of_week(now()))     # 1..7  (1 = Monday ... 7 = Sunday)
+say(dates.day_name(now()))        # e.g. Tue
+say(dates.day_name_full(now()))   # e.g. Tuesday
+say(dates.is_weekend(now()))      # true or false
+say(dates.is_weekday(now()))      # the opposite
 </code></pre>
 
 <h2>34.5 Decomposing and Rebuilding</h2>
 <pre><code>d = dates.date_parts(now())
-print(d["year"])     # e.g. 2026
-print(d["month"])    # e.g. 8
-print(d["day"])      # e.g. 4
-print(d["hour"])     # current hour
-print(d["weekday"])  # 1..7
+say(d["year"])     # e.g. 2026
+say(d["month"])    # e.g. 8
+say(d["day"])      # e.g. 4
+say(d["hour"])     # current hour
+say(d["weekday"])  # 1..7
 
-print(dates.start_of_day(now()))    # midnight today (epoch)
-print(dates.end_of_day(now()))      # 23:59:59 today (epoch)
-print(dates.start_of_hour(now()))   # top of the current hour
-print(dates.start_of_minute(now())) # top of the current minute
+say(dates.start_of_day(now()))    # midnight today (epoch)
+say(dates.end_of_day(now()))      # 23:59:59 today (epoch)
+say(dates.start_of_hour(now()))   # top of the current hour
+say(dates.start_of_minute(now())) # top of the current minute
 </code></pre>
 
 <h2>34.6 Calendar Facts</h2>
-<pre><code>print(dates.is_leap_year(2024))   # true
-print(dates.is_leap_year(2025))   # false
-print(dates.month_days(2026, 2))  # 28
-print(dates.month_days(2024, 2))  # 29
-print(dates.day_of_year(now()))   # e.g. 216
-print(dates.iso_week(now()))      # e.g. 32
+<pre><code>say(dates.is_leap_year(2024))   # true
+say(dates.is_leap_year(2025))   # false
+say(dates.month_days(2026, 2))  # 28
+say(dates.month_days(2024, 2))  # 29
+say(dates.day_of_year(now()))   # e.g. 216
+say(dates.iso_week(now()))      # e.g. 32
 </code></pre>
 
 <h2>34.7 Human-Readable Durations</h2>
-<pre><code>print(dates.human_duration(45))       # 45s
-print(dates.human_duration(90))       # 1m 30s
-print(dates.human_duration(3600))     # 1h
-print(dates.human_duration(90061))    # 1d 1h 1m 1s
+<pre><code>say(dates.human_duration(45))       # 45s
+say(dates.human_duration(90))       # 1m 30s
+say(dates.human_duration(3600))     # 1h
+say(dates.human_duration(90061))    # 1d 1h 1m 1s
 </code></pre>
 
 <h2>34.8 A Countdown Program</h2>
 <pre><code>bring dates
 
 launch = dates.add_days(now(), 14)
-print("T-minus " + dates.human_duration(launch - now()) + " to launch")
+say("T-minus " + dates.human_duration(launch - now()) + " to launch")
 </code></pre>
 <pre class="output"><code>T-minus 14d to launch
 </code></pre>

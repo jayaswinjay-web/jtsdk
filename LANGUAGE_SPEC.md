@@ -49,9 +49,9 @@ All keywords are lowercase:
 ```
 and         break       catch       class       continue
 bring       elif        else        end         extends     false
-for         func        if          in          import
-input       len         list        new         nil
-not         or          print       return      self
+for         func        if          of          import
+ask       len         list        new         void
+not         or          say       return      self
 super       throw       to          true        try
 type        var         while       append      int
 float       string      bool        number
@@ -66,7 +66,7 @@ Reserved but unused in user code: `server`, `request`, `response`, `train`, `mod
 | Number | `42`, `3.14`, `-7`, `0` | `number` (always 64-bit float) |
 | String | `"hello"`, `""`, `"hello\nworld"` | `string` |
 | Boolean | `true`, `false` | `boolean` |
-| Nil | `nil` | `nil` |
+| Nil | `void` | `void` |
 | List | `[1, 2, 3]`, `[]` | `list` |
 | Dict | `{"key": "val"}` | `dict` |
 
@@ -100,7 +100,7 @@ JTS is dynamically typed. Every value has a runtime type.
 
 | Type | `type()` returns | Description |
 |------|-----------------|-------------|
-| `nil` | `"nil"` | Absence of a value |
+| `void` | `"void"` | Absence of a value |
 | `boolean` | `"boolean"` | `true` or `false` |
 | `number` | `"number"` | All numbers are 64-bit IEEE 754 doubles |
 | `string` | `"string"` | Sequence of characters |
@@ -119,13 +119,13 @@ A value is **falsy** if:
 
 | Condition | Example |
 |-----------|---------|
-| Is `nil` | `nil` |
+| Is `void` | `void` |
 | Is boolean `false` | `false` |
 | Is number `0` | `0`, `0.0` |
 | Is empty string | `""` |
 
 **All other values are truthy**, including:
-- Non-empty strings: `"false"`, `"0"`, `"nil"` are all truthy
+- Non-empty strings: `"false"`, `"0"`, `"void"` are all truthy
 - Negative numbers: `-1` is truthy
 - Empty lists: `[]` is truthy
 - Empty dicts: `{}` is truthy
@@ -154,7 +154,7 @@ All other operators (`-`, `*`, `/`, `%`, comparisons) require both operands to b
 name = "Alice"       # string
 age = 25              # number
 is_active = true      # boolean
-result = nil          # nil
+result = void          # void
 ```
 
 ### 3.2 Type-Annotated Declaration
@@ -168,11 +168,11 @@ list nums = [1, 2, 3]
 var x = 42            # same as dynamic
 ```
 
-Type annotations are syntactic sugar — they are not enforced at runtime. Unassigned type-annotated variables default to `nil`:
+Type annotations are syntactic sugar — they are not enforced at runtime. Unassigned type-annotated variables default to `void`:
 
 ```
 int count
-print(count)          # nil
+say(count)          # void
 ```
 
 ### 3.3 Assignment
@@ -259,13 +259,13 @@ end
 ```
 score = 85
 if score >= 90
-    print("A")
+    say("A")
 elif score >= 80
-    print("B")
+    say("B")
 elif score >= 70
-    print("C")
+    say("C")
 else
-    print("F")
+    say("F")
 end
 ```
 
@@ -280,7 +280,7 @@ end
 ```
 i = 0
 while i < 5
-    print(i)
+    say(i)
     i = i + 1
 end
 ```
@@ -288,14 +288,14 @@ end
 ### 5.3 For Loop
 
 ```
-for variable in start to end
+for variable of start to end
     body
 end
 ```
 
-- Range is **inclusive** on both ends: `for i in 0 to 5` visits 0, 1, 2, 3, 4, 5
+- Range is **inclusive** on both ends: `for i of 0 to 5` visits 0, 1, 2, 3, 4, 5
 - Increments by 1 each iteration
-- Works with negative ranges (counts down): `for i in 10 to 0`
+- Works with negative ranges (counts down): `for i of 10 to 0`
 
 ### 5.4 Break and Continue
 
@@ -309,7 +309,7 @@ Only valid inside `while` or `for` loops.
 ### 5.5 Return
 
 ```
-return              # returns nil
+return              # returns void
 return expression   # returns the expression value
 ```
 
@@ -340,7 +340,7 @@ result = function_name(arg1, arg2)
 
 ### 6.4 Return Values
 
-Use `return` to return a value. If no `return` is present, the function returns `nil`.
+Use `return` to return a value. If no `return` is present, the function returns `void`.
 
 ```
 func add(a, b)
@@ -348,8 +348,8 @@ func add(a, b)
 end
 
 func greet(name)
-    print("Hello, " + name)
-    # implicitly returns nil
+    say("Hello, " + name)
+    # implicitly returns void
 end
 ```
 
@@ -383,16 +383,16 @@ empty = []
 
 ```
 fruits = ["apple", "banana", "cherry"]
-print(fruits[0])     # apple
-print(fruits[1])     # banana
-print(fruits[2])     # cherry
+say(fruits[0])     # apple
+say(fruits[1])     # banana
+say(fruits[2])     # cherry
 ```
 
 ### 7.3 Index Assignment
 
 ```
 fruits[1] = "blueberry"
-print(fruits)        # [apple, blueberry, cherry]
+say(fruits)        # [apple, blueberry, cherry]
 ```
 
 ### 7.4 Negative Indexing
@@ -412,16 +412,16 @@ See [Section 14: List Methods](#14-list-methods).
 Build a new list from an iterable (list, string, dict, or range) with an inline `for`. An optional `if` filter is supported. Nested comprehensions work too.
 
 ```
-squares = [x * x for x in range(1, 6)]
+squares = [x * x for x of range(1, 6)]
 # [1, 4, 9, 16, 25]
 
-evens = [x for x in range(10) if x % 2 == 0]
+evens = [x for x of range(10) if x % 2 == 0]
 # [0, 2, 4, 6, 8]
 
-upper = [n.upper() for n in ["alice", "bob"]]
+upper = [n.upper() for n of ["alice", "bob"]]
 # [ALICE, BOB]
 
-nested = [[a for a in range(b)] for b in range(1, 4)]
+nested = [[a for a of range(b)] for b of range(1, 4)]
 # [[0], [0, 1], [0, 1, 2]]
 ```
 
@@ -447,11 +447,11 @@ Keys must be string literals or identifiers (both become strings).
 
 ```
 d = {"name": "JTS", "version": "2.0"}
-print(d["name"])     # JTS
-print(d["version"])  # 2.0
+say(d["name"])     # JTS
+say(d["version"])  # 2.0
 ```
 
-Accessing a missing key returns `nil`.
+Accessing a missing key returns `void`.
 
 ### 8.3 Setting Values
 
@@ -483,31 +483,31 @@ Number-to-string auto-conversion with `+`:
 
 ```
 age = 25
-print("Age: " + age)               # "Age: 25"
-print(age + " years old")          # "25 years old"
+say("Age: " + age)               # "Age: 25"
+say(age + " years old")          # "25 years old"
 ```
 
 ### 9.3 Length
 
 ```
-print(len("hello"))                # 5
-print(len(""))                     # 0
+say(len("hello"))                # 5
+say(len(""))                     # 0
 ```
 
 ### 9.4 Indexing
 
 ```
 s = "hello"
-print(s[0])                        # h
-print(s[1])                        # e
+say(s[0])                        # h
+say(s[1])                        # e
 ```
 
 **Negative indexing IS supported for strings:**
 
 ```
 s = "hello"
-print(s[-1])                       # o (last character)
-print(s[-2])                       # l (second to last)
+say(s[-1])                       # o (last character)
+say(s[-2])                       # l (second to last)
 ```
 
 Out-of-bounds indexing raises a runtime error.
@@ -530,7 +530,7 @@ class ClassName
     end
 
     func method_name(self)
-        print(self.field1)
+        say(self.field1)
     end
 end
 ```
@@ -540,7 +540,7 @@ end
 ```
 obj = new ClassName("value1", "value2")
 obj.method_name()
-print(obj.field1)       # value1
+say(obj.field1)       # value1
 ```
 
 ### 10.3 Methods
@@ -558,13 +558,13 @@ class Parent
     end
 
     func speak(self)
-        print(self.name + " makes a sound")
+        say(self.name + " makes a sound")
     end
 end
 
 class Child extends Parent
     func bark(self)
-        print(self.name + " barks!")
+        say(self.name + " barks!")
     end
 end
 
@@ -583,7 +583,7 @@ c.bark()        # Rex barks! (own method)
 class Child extends Parent
     func speak(self)
         super.speak(self)
-        print("and also barks!")
+        say("and also barks!")
     end
 end
 ```
@@ -600,7 +600,7 @@ class Timer
 end
 
 t = new Timer()
-print(t.count)     # 0
+say(t.count)     # 0
 ```
 
 ---
@@ -622,7 +622,7 @@ end
 ```
 throw "Something went wrong!"
 throw 42
-throw nil
+throw void
 ```
 
 Any value can be thrown.
@@ -633,7 +633,7 @@ Any value can be thrown.
 try
     throw "error"
 catch
-    print("Something failed!")
+    say("Something failed!")
 end
 ```
 
@@ -645,9 +645,9 @@ A `finally` block runs whether or not the `try` body raised an error. If there i
 try
     file = open("data.txt")
 catch e
-    print("Could not open: " + e)
+    say("Could not open: " + e)
 finally
-    print("Cleanup done")
+    say("Cleanup done")
 end
 ```
 
@@ -655,7 +655,7 @@ end
 try
     throw "unhandled"
 finally
-    print("cleanup runs first")
+    say("cleanup runs first")
 end
 # cleanup runs first, then the error propagates
 ```
@@ -683,8 +683,8 @@ These functions are always available. No imports needed.
 
 | Function | Signature | Returns | Description |
 |----------|-----------|---------|-------------|
-| `print` | `print(value, ...)` | `nil` | Print values space-separated + newline |
-| `input` | `input(prompt?)` | `string`/`number`/`boolean`/`nil` | Read from stdin; auto-parses types |
+| `say` | `say(value, ...)` | `void` | Print values space-separated + newline |
+| `ask` | `ask(prompt?)` | `string`/`number`/`boolean`/`void` | Read from stdin; auto-parses types |
 | `len` | `len(obj)` | `number` | Length of string, list, tensor, or matrix |
 | `type` | `type(obj)` | `string` | Type name as string |
 | `str` | `str(value)` | `string` | Convert to string |
@@ -721,7 +721,7 @@ These functions are always available. No imports needed.
 | Function | Signature | Returns | Description |
 |----------|-----------|---------|-------------|
 | `http_server` | `http_server(port)` | `http_server` | Create HTTP server |
-| `http_start` | `http_start(server)` | `nil` | Start server (blocking) |
+| `http_start` | `http_start(server)` | `void` | Start server (blocking) |
 | `http_request` | `http_request(url)` | `list` | GET request; returns `[status, body]` |
 
 ### File I/O
@@ -731,13 +731,13 @@ These functions are always available. No imports needed.
 | `read_file` | `read_file(path)` | `string` | Read file contents |
 | `write_file` | `write_file(path, content)` | `boolean` | Write to file; `true` on success |
 
-### `input()` Auto-Parsing
+### `ask()` Auto-Parsing
 
-| User enters | `input()` returns |
+| User enters | `ask()` returns |
 |-------------|-------------------|
 | `true` | boolean `true` |
 | `false` | boolean `false` |
-| `nil` | `nil` |
+| `void` | `void` |
 | `42`, `3.14`, `-7` | number |
 | `hello`, `123abc` | string |
 
@@ -766,14 +766,14 @@ result = string_value.method(args)
 
 ```
 s = "Hello World"
-print(s.upper())                    # HELLO WORLD
-print(s.lower())                    # hello world
-print(s.trim())                     # Hello World
-print(s.contains("World"))          # true
-print(s.replace("World", "JTS"))    # Hello JTS
-print(s.substring(0, 5))            # Hello
-print(s.starts_with("Hello"))       # true
-print(s.ends_with("World"))         # true
+say(s.upper())                    # HELLO WORLD
+say(s.lower())                    # hello world
+say(s.trim())                     # Hello World
+say(s.contains("World"))          # true
+say(s.replace("World", "JTS"))    # Hello JTS
+say(s.substring(0, 5))            # Hello
+say(s.starts_with("Hello"))       # true
+say(s.ends_with("World"))         # true
 ```
 
 ---
@@ -794,16 +794,16 @@ Called on list values using dot notation:
 ```
 nums = [3, 1, 4, 1, 5]
 nums.sort()
-print(nums)              # [1, 1, 3, 4, 5]
+say(nums)              # [1, 1, 3, 4, 5]
 
 nums.append(9)
-print(nums)              # [1, 1, 3, 4, 5, 9]
+say(nums)              # [1, 1, 3, 4, 5, 9]
 
 nums.remove(1)
-print(nums)              # [1, 3, 4, 5, 9]
+say(nums)              # [1, 3, 4, 5, 9]
 
 nums.pop()
-print(nums)              # [1, 3, 4, 5]
+say(nums)              # [1, 3, 4, 5]
 ```
 
 ---
@@ -814,7 +814,7 @@ print(nums)              # [1, 3, 4, 5]
 
 ```
 content = read_file("data.txt")
-print(content)
+say(content)
 ```
 
 Returns the entire file contents as a string. Raises error if file doesn't exist.
@@ -835,12 +835,12 @@ write_file("log.txt", "Entry 1\nEntry 2")
 
 # Read it back
 data = read_file("log.txt")
-print(data)
+say(data)
 
 # Process file content
 content = read_file("config.txt")
 if content.contains("debug")
-    print("Debug mode enabled")
+    say("Debug mode enabled")
 end
 ```
 
@@ -860,8 +860,8 @@ http_start(server)
 ```
 response = http_request("https://api.example.com/data")
 # response = [status_code, body_string]
-print(response[0])     # 200
-print(response[1])     # response body
+say(response[0])     # 200
+say(response[1])     # response body
 ```
 
 ---
@@ -872,8 +872,8 @@ print(response[1])     # response body
 
 ```
 t = tensor([1, 2, 3, 4, 5])
-print(t)            # [1, 2, 3, 4, 5]
-print(len(t))       # 5
+say(t)            # [1, 2, 3, 4, 5]
+say(len(t))       # 5
 ```
 
 ### Matrices
@@ -882,16 +882,16 @@ print(len(t))       # 5
 m1 = matrix([[1, 2], [3, 4]])
 m2 = matrix([[5, 6], [7, 8]])
 result = matmul(m1, m2)
-print(result)        # [[19, 22] [43, 50]]
+say(result)        # [[19, 22] [43, 50]]
 ```
 
 ### Activation Functions
 
 ```
-print(sigmoid(0))    # 0.5
-print(sigmoid(1))    # 0.731059
-print(relu(-5))      # 0
-print(relu(5))       # 5
+say(sigmoid(0))    # 0.5
+say(sigmoid(1))    # 0.731059
+say(relu(-5))      # 0
+say(relu(5))       # 5
 ```
 
 ### Loss Functions
@@ -899,7 +899,7 @@ print(relu(5))       # 5
 ```
 predicted = [1.0, 2.0, 3.0]
 actual = [1.1, 2.2, 3.1]
-print(mse(predicted, actual))   # 0.02
+say(mse(predicted, actual))   # 0.02
 ```
 
 ---
@@ -959,12 +959,12 @@ statement       = print_stmt
                 | type_decl
                 | expr_stmt ;
 
-print_stmt      = "print" expression NEWLINE ;
+print_stmt      = "say" expression NEWLINE ;
 if_stmt         = "if" expression NEWLINE block
                   { "elif" expression NEWLINE block }
                   [ "else" NEWLINE block ] "end" ;
 while_stmt      = "while" expression NEWLINE block "end" ;
-for_stmt        = "for" IDENTIFIER "in" expression "to" expression NEWLINE block "end" ;
+for_stmt        = "for" IDENTIFIER "of" expression "to" expression NEWLINE block "end" ;
 return_stmt     = "return" [ expression ] NEWLINE ;
 try_stmt        = "try" NEWLINE block
                   [ "catch" [ IDENTIFIER ] NEWLINE block ]
@@ -999,7 +999,7 @@ term            = factor { ( "+" | "-" ) factor } ;
 factor          = unary { ( "*" | "/" | "%" ) unary } ;
 unary           = ( "-" | "not" ) unary | call ;
 call            = primary { "(" [ arg_list ] ")" | "." IDENTIFIER [ "(" [ arg_list ] ")" ] | "[" expression "]" } ;
-primary         = NUMBER | STRING | "true" | "false" | "nil"
+primary         = NUMBER | STRING | "true" | "false" | "void"
                 | IDENTIFIER
                 | "(" expression ")"
                 | list_literal
@@ -1009,12 +1009,12 @@ primary         = NUMBER | STRING | "true" | "false" | "nil"
                 | builtin_call ;
 
 list_literal    = "[" [ expression { "," expression } ] "]" 
-                | "[" expression "for" IDENTIFIER "in" expression [ "if" expression ] "]" ;
+                | "[" expression "for" IDENTIFIER "of" expression [ "if" expression ] "]" ;
 dict_literal    = "{" [ ( STRING | IDENTIFIER ) ":" expression { "," ( STRING | IDENTIFIER ) ":" expression } ] "}" ;
 new_expr        = "new" IDENTIFIER "(" [ arg_list ] ")" ;
 super_expr      = "super" "." IDENTIFIER "(" [ arg_list ] ")" ;
-builtin_call    = ( "len" | "type" | "input" | "append" | "number" | "str"
-                  | "print" | "math" | "sqrt" | "tensor" | "matrix" | "matmul"
+builtin_call    = ( "len" | "type" | "ask" | "append" | "number" | "str"
+                  | "say" | "math" | "sqrt" | "tensor" | "matrix" | "matmul"
                   | "sigmoid" | "relu" | "mse" | "read_file" | "write_file"
                   | "http_server" | "http_start" | "http_request" )
                   "(" [ arg_list ] ")" ;

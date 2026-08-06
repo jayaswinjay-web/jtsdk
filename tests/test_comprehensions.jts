@@ -1,50 +1,52 @@
 # List comprehension tests
-print("--- basic ---")
-squares = [x * x for x in range(1, 6)]
-print(squares)
+say("--- basic ---")
+squares = [x * x for x of range(1, 6)]
+say(squares)
 
-evens = [x for x in range(10) if x % 2 == 0]
-print(evens)
+evens = [x for x of range(10) if x % 2 == 0]
+say(evens)
 
 names = ["alice", "bob", "carol"]
-upper = [n.upper() for n in names]
-print(upper)
+upper = [n.upper() for n of names]
+say(upper)
 
 nums = [1, 2, 3, 4, 5]
-doubled = [n * 2 for n in nums]
-print(doubled)
+doubled = [n * 2 for n of nums]
+say(doubled)
 
 neg = [-3, -1, 0, 2, 4]
-pos = [x for x in neg if x > 0]
-print(pos)
+pos = [x for x of neg if x > 0]
+say(pos)
 
 word = "hello"
-chars = [c + c for c in word]
-print(chars)
+chars = [c + c for c of word]
+say(chars)
 
-print([i * 10 for i in range(3)])
+say([i * 10 for i of range(3)])
 
-print("--- in try ---")
+say("--- of try ---")
 try
-    x = [n for n in range(4)]
-    print(x)
+    x = [n for n of range(4)]
+    say(x)
 catch e
-    print("caught")
+    say("caught")
 end
 
-total = sum([n for n in range(100) if n % 5 == 0])
-print(total)
+total = sum([n for n of range(100) if n % 5 == 0])
+say(total)
 
-print("--- nested ---")
-nested = [[a for a in range(b)] for b in range(1, 4)]
-print(nested)
+say("--- nested ---")
+nested = [[a for a of range(b)] for b of range(1, 4)]
+say(nested)
 
 func build(max)
-    return [x * 3 for x in range(max)]
+    return [x * 3 for x of range(max)]
 end
 
-print(build(4))
+say(build(4))
 
 d = {"k1": 10, "k2": 20, "k3": 30}
-print([v for v in d.values()])
-print([k for k in d.keys()])
+say([v for v of d.values()])
+say([k for k of d.keys()])
+
+

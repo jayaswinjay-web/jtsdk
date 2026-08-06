@@ -16,7 +16,7 @@ end
 
 ```jts
 func greet()
-    print("Hello from JTS GO!")
+    say("Hello from JTS GO!")
 end
 
 greet()    # Hello from JTS GO!
@@ -28,7 +28,7 @@ Parameters are variables that receive values when the function is called.
 
 ```jts
 func say_hello(name)
-    print("Hello, " + name + "!")
+    say("Hello, " + name + "!")
 end
 
 say_hello("Alice")    # Hello, Alice!
@@ -45,7 +45,7 @@ func add(a, b)
 end
 
 result = add(3, 4)
-print("3 + 4 = " + result)    # 3 + 4 = 7
+say("3 + 4 = " + result)    # 3 + 4 = 7
 ```
 
 ## Return Values
@@ -57,8 +57,8 @@ func square(x)
     return x * x
 end
 
-print(square(5))    # 25
-print(square(10))   # 100
+say(square(5))    # 25
+say(square(10))   # 100
 ```
 
 A function can return different values depending on the logic inside it.
@@ -72,21 +72,21 @@ func absolute(n)
     end
 end
 
-print(absolute(-7))    # 7
-print(absolute(7))     # 7
+say(absolute(-7))    # 7
+say(absolute(7))     # 7
 ```
 
 ### No Explicit Return
 
-If a function has no `return` statement, it returns `nil` implicitly.
+If a function has no `return` statement, it returns `void` implicitly.
 
 ```jts
 func say_hi()
-    print("Hi!")
+    say("Hi!")
 end
 
 result = say_hi()
-print(result)    # nil (the "Hi!" was printed as a side effect)
+say(result)    # void (the "Hi!" was printed as a side effect)
 ```
 
 ## Functions Calling Functions
@@ -102,7 +102,7 @@ func sum_of_squares(a, b)
     return square(a) + square(b)
 end
 
-print("3^2 + 4^2 = " + sum_of_squares(3, 4))
+say("3^2 + 4^2 = " + sum_of_squares(3, 4))
 # Output: 3^2 + 4^2 = 25
 ```
 
@@ -121,8 +121,8 @@ func factorial(n)
     end
 end
 
-print(factorial(5))    # 120
-print(factorial(10))   # 3628800
+say(factorial(5))    # 120
+say(factorial(10))   # 3628800
 ```
 
 How `factorial(5)` works:
@@ -145,9 +145,9 @@ func fibonacci(n)
     return fibonacci(n - 1) + fibonacci(n - 2)
 end
 
-print("Fibonacci sequence:")
-for i in 0 to 12
-    print("fib(" + i + ") = " + fibonacci(i))
+say("Fibonacci sequence:")
+for i of 0 to 12
+    say("fib(" + i + ") = " + fibonacci(i))
 end
 ```
 
@@ -156,9 +156,9 @@ end
 ```jts
 func countdown(n)
     if n <= 0
-        print("Go!")
+        say("Go!")
     else
-        print(n)
+        say(n)
         countdown(n - 1)
     end
 end
@@ -176,11 +176,11 @@ Variables created inside a function are local — they only exist within that fu
 ```jts
 func example()
     local_var = 42
-    print(local_var)    # 42
+    say(local_var)    # 42
 end
 
 example()
-# print(local_var)    # Error — local_var doesn't exist here
+# say(local_var)    # Error — local_var doesn't exist here
 ```
 
 ### Global Variables
@@ -189,7 +189,7 @@ example()
 greeting = "Hello"
 
 func greet(name)
-    print(greeting + ", " + name + "!")
+    say(greeting + ", " + name + "!")
 end
 
 greet("Alice")    # Hello, Alice!
@@ -202,11 +202,11 @@ x = 10
 
 func modify()
     x = 20
-    print("Inside function: " + x)    # 20
+    say("Inside function: " + x)    # 20
 end
 
 modify()
-print("Outside function: " + x)       # 10
+say("Outside function: " + x)       # 10
 ```
 
 ## Practical Examples
@@ -226,11 +226,11 @@ func is_odd(n)
     return not is_even(n)
 end
 
-for i in 0 to 10
+for i of 0 to 10
     if is_even(i)
-        print(i + " is even")
+        say(i + " is even")
     else
-        print(i + " is odd")
+        say(i + " is odd")
     end
 end
 ```
@@ -246,8 +246,8 @@ func max(a, b)
     end
 end
 
-print(max(10, 20))    # 20
-print(max(99, 1))     # 99
+say(max(10, 20))    # 20
+say(max(99, 1))     # 99
 ```
 
 ### Power Function
@@ -263,17 +263,17 @@ func power(base, exp)
     return result
 end
 
-print(power(2, 10))    # 1024
-print(power(5, 3))     # 125
+say(power(2, 10))    # 1024
+say(power(5, 3))     # 125
 ```
 
 ### Print All Even Numbers in a Range
 
 ```jts
 func print_evens(start, end_val)
-    for i in start to end_val
+    for i of start to end_val
         if i % 2 == 0
-            print(i)
+            say(i)
         end
     end
 end
@@ -295,6 +295,6 @@ print_evens(1, 20)
 
 ## Next Steps
 
-- [Built-in Functions](builtins.md) — print, input, len, type
+- [Built-in Functions](builtins.md) — say, ask, len, type
 - [Control Flow](control-flow.md) — if/else and loops inside functions
 - [Examples](../examples/) — Factorial and Fibonacci programs

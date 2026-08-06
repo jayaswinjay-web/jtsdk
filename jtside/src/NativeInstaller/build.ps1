@@ -78,11 +78,11 @@ IDI_APP ICON "$iconEscaped"
 
 IDD_WELCOME DIALOGEX 0, 0, 317, 193
 STYLE DS_SETFONT | DS_CONTROL | WS_CHILD
-CAPTION "Welcome to the JTS GO 2.1.0 Setup Wizard"
+CAPTION "Welcome to the JTS GO 2.1.13 Setup Wizard"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     ICON IDI_APP, -1, 10, 10, 0, 0
-    LTEXT "Welcome to the JTS GO 2.1.0 Setup Wizard", -1, 60, 12, 240, 16, SS_NOPREFIX
+    LTEXT "Welcome to the JTS GO 2.1.13 Setup Wizard", -1, 60, 12, 240, 16, SS_NOPREFIX
     LTEXT "JTS GO is a modern programming language with a bytecode virtual machine, the jtsc compiler, and a built-in IDE.", -1, 60, 34, 240, 44, SS_NOPREFIX
     LTEXT "This wizard will install JTS GO and the JTS IDE on your computer. No administrator rights are required.", -1, 60, 82, 240, 36, SS_NOPREFIX
     LTEXT "Click Next to continue.", -1, 60, 160, 240, 16, SS_NOPREFIX
@@ -126,7 +126,7 @@ STYLE DS_SETFONT | DS_CONTROL | WS_CHILD
 CAPTION "Ready to Install"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
-    LTEXT "The installer is ready to install JTS GO 2.1.0 on your computer. Review the details below, then click Next.", -1, 10, 8, 297, 26, SS_NOPREFIX
+    LTEXT "The installer is ready to install JTS GO 2.1.13 on your computer. Review the details below, then click Next.", -1, 10, 8, 297, 26, SS_NOPREFIX
     CONTROL "", IDC_SUMMARY, "EDIT", ES_MULTILINE | ES_READONLY | WS_VSCROLL | WS_BORDER, 10, 42, 297, 118
 END
 
@@ -147,14 +147,14 @@ FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     ICON IDI_APP, -1, 10, 10, 0, 0
     LTEXT "Setup Completed", -1, 60, 12, 240, 16, SS_NOPREFIX
-    LTEXT "JTS GO 2.1.0 was installed successfully. Commands are ready to use in new terminals.", -1, 60, 34, 240, 44, SS_NOPREFIX
+    LTEXT "JTS GO 2.1.13 was installed successfully. Commands are ready to use in new terminals.", -1, 60, 34, 240, 44, SS_NOPREFIX
     CONTROL "Launch JTS IDE", IDC_LAUNCH, "BUTTON", BS_AUTOCHECKBOX | WS_TABSTOP, 60, 100, 240, 14
     LTEXT "Click Finish to exit the wizard.", -1, 60, 160, 240, 16, SS_NOPREFIX
 END
 
 1 VERSIONINFO
-FILEVERSION 2,1,0,0
-PRODUCTVERSION 2,1,0,0
+FILEVERSION 2,1,13,0
+PRODUCTVERSION 2,1,13,0
 BEGIN
   BLOCK "StringFileInfo"
   BEGIN
@@ -162,12 +162,12 @@ BEGIN
     BEGIN
       VALUE "CompanyName", "JayTech Solutions"
       VALUE "FileDescription", "JTS GO installer"
-      VALUE "FileVersion", "2.1.0"
+      VALUE "FileVersion", "2.1.13"
       VALUE "InternalName", "JTS-IDE-Setup"
       VALUE "LegalCopyright", "Copyright (c) JayTech Solutions"
       VALUE "OriginalFilename", "JTS-IDE-Setup.exe"
       VALUE "ProductName", "JTS GO"
-      VALUE "ProductVersion", "2.1.0"
+      VALUE "ProductVersion", "2.1.13"
     END
   END
   BLOCK "VarFileInfo"
@@ -207,3 +207,4 @@ END
 finally {
     Remove-Item $tmp -Recurse -Force -ErrorAction SilentlyContinue
 }
+

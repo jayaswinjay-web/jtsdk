@@ -5,7 +5,7 @@
 
 func flatten(lst)
     out = []
-    for item in lst
+    for item of lst
         if type(item) == "list"
             out.extend(flatten(item))
         else
@@ -15,12 +15,12 @@ func flatten(lst)
     return out
 end
 
-print("--- recursion ---")
-print("flatten([1, [2, 3], [4, [5, 6]]]) = ", flatten([1, [2, 3], [4, [5, 6]]]))
+say("--- recursion ---")
+say("flatten([1, [2, 3], [4, [5, 6]]]) = ", flatten([1, [2, 3], [4, [5, 6]]]))
 
 func collect_evens(lst)
     evens = []
-    for item in lst
+    for item of lst
         if type(item) == "list"
             evens.extend(collect_evens(item))
         else
@@ -32,7 +32,7 @@ func collect_evens(lst)
     return evens
 end
 
-print("collect_evens([1, [2, [3, 4]], 6]) = ", collect_evens([1, [2, [3, 4]], 6]))
+say("collect_evens([1, [2, [3, 4]], 6]) = ", collect_evens([1, [2, [3, 4]], 6]))
 
 func fib(n)
     if n <= 1
@@ -41,7 +41,7 @@ func fib(n)
     return fib(n - 1) + fib(n - 2)
 end
 
-print("fib(10) = ", fib(10))
+say("fib(10) = ", fib(10))
 
 func counter(n)
     total = 0
@@ -52,23 +52,23 @@ func counter(n)
     return total
 end
 
-print("counter(5) = ", counter(5))
+say("counter(5) = ", counter(5))
 
 # Persisting a local across loop iterations (reassignment)
 func sum_list(lst)
     total = 0
-    for x in lst
+    for x of lst
         total = total + x
     end
     return total
 end
 
-print("sum_list([1, 2, 3, 4, 5]) = ", sum_list([1, 2, 3, 4, 5]))
+say("sum_list([1, 2, 3, 4, 5]) = ", sum_list([1, 2, 3, 4, 5]))
 
 # Recursion must not corrupt outer loop state
 func nested(lst, depth)
     result = []
-    for item in lst
+    for item of lst
         if depth > 0 and type(item) == "list"
             result.extend(nested(item, depth - 1))
         else
@@ -78,6 +78,8 @@ func nested(lst, depth)
     return result
 end
 
-print("nested([1, [2, [3, [4]]]], 3) = ", nested([1, [2, [3, [4]]]], 3))
+say("nested([1, [2, [3, [4]]]], 3) = ", nested([1, [2, [3, [4]]]], 3))
 
-print("--- All recursion tests passed! ---")
+say("--- All recursion tests passed! ---")
+
+

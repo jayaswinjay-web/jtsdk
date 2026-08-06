@@ -133,7 +133,7 @@ static void patch_jump(Compiler* compiler, int offset) {
 }
 
 static void emit_return(Compiler* compiler) {
-    emit_byte(compiler, OP_NIL);
+    emit_byte(compiler, OP_VOID);
     emit_byte(compiler, OP_RETURN);
 }
 
@@ -281,12 +281,12 @@ static void expression(Compiler* compiler) {
 
 static void print_statement(Compiler* compiler) {
     expression(compiler);
-    emit_byte(compiler, OP_PRINT);
+    emit_byte(compiler, OP_SAY);
 }
 
 static void input_expression(Compiler* compiler, bool can_assign) {
-    emit_constant(compiler, OBJ_VAL(copy_string("input", 5)));
-    consume(compiler, TOKEN_LEFT_PAREN, "Expect '(' after 'input'");
+    emit_constant(compiler, OBJ_VAL(copy_string("ask", 3)));
+    consume(compiler, TOKEN_LEFT_PAREN, "Expect '(' after 'ask'");
     if (compiler->current.type != TOKEN_RIGHT_PAREN) {
         expression(compiler);
     } else {
@@ -434,7 +434,7 @@ static void for_statement(Compiler* compiler) {
     Token var_name = compiler->previous;
     uint8_t var_constant = identifier_constant(compiler, &var_name);
 
-    consume(compiler, TOKEN_IN, "Expect 'in' after variable name");
+    consume(compiler, TOKEN_OF, "Expect 'of' after variable name");
     expression(compiler);
 
     if (match(compiler, TOKEN_TO)) {
@@ -705,7 +705,7 @@ static void begin_function_compile(Compiler* outer, Compiler* fn, Token name,
 // Compile a function body twice when needed: the first pass runs with
 // detect_hoists set so that implicit locals assigned inside loops can be
 // discovered. When any are found, the body is recompiled with those names
-// hoisted to function scope (pre-filled with OP_NIL before the body) so their
+// hoisted to function scope (pre-filled with OP_VOID before the body) so their
 // slots keep stable values across loop iterations instead of relying on the
 // stack-adjacent value-as-slot convention.
 static bool compile_function_body(Compiler* outer, Compiler* fn, Token name,
@@ -732,7 +732,7 @@ static bool compile_function_body(Compiler* outer, Compiler* fn, Token name,
         for (int i = 0; i < hoist_count; i++) {
             add_local(fn, hoists[i]);
             mark_initialized(fn);
-            emit_byte(fn, OP_NIL);
+            emit_byte(fn, OP_VOID);
         }
 
         block(fn);
@@ -888,7 +888,7 @@ static void return_statement(Compiler* compiler) {
             emit_bytes(compiler, OP_LIST, (uint8_t)count);
         }
     } else {
-        emit_byte(compiler, OP_NIL);
+        emit_byte(compiler, OP_VOID);
     }
     emit_byte(compiler, OP_RETURN);
 }
@@ -903,13 +903,13 @@ static void yield_statement(Compiler* compiler) {
         compiler->current.type != TOKEN_EOF) {
         expression(compiler);
     } else {
-        emit_byte(compiler, OP_NIL);
+        emit_byte(compiler, OP_VOID);
     }
     emit_byte(compiler, OP_YIELD);
 }
 
 static void statement(Compiler* compiler) {
-    if (match(compiler, TOKEN_PRINT)) {
+    if (match(compiler, TOKEN_SAY)) {
         print_statement(compiler);
     } else if (match(compiler, TOKEN_IF)) {
         if_statement(compiler);
@@ -1025,7 +1025,7 @@ static void statement(Compiler* compiler) {
         del_statement(compiler);
     } else if (match(compiler, TOKEN_ASSERT)) {
         assert_statement(compiler);
-    } else if (match(compiler, TOKEN_INPUT)) {
+    } else if (match(compiler, TOKEN_ASK)) {
         input_expression(compiler, false);
         emit_byte(compiler, OP_POP);
     } else if (match(compiler, TOKEN_FUNC)) {
@@ -1068,10 +1068,10 @@ static void del_statement(Compiler* compiler) {
         } else {
             int arg = resolve_local(compiler, &name);
             if (arg != -1) {
-                emit_byte(compiler, OP_NIL);
+                emit_byte(compiler, OP_VOID);
                 emit_bytes(compiler, OP_SET_LOCAL, (uint8_t)arg);
             } else if ((arg = resolve_upvalue(compiler, &name)) != -1) {
-                emit_byte(compiler, OP_NIL);
+                emit_byte(compiler, OP_VOID);
                 emit_bytes(compiler, OP_SET_UPVALUE, (uint8_t)arg);
             } else {
                 uint8_t c = identifier_constant(compiler, &name);
@@ -1089,7 +1089,7 @@ static void assert_statement(Compiler* compiler) {
         expression(compiler);
         emit_byte(compiler, OP_ASSERT);
     } else {
-        emit_byte(compiler, OP_NIL);
+        emit_byte(compiler, OP_VOID);
         emit_byte(compiler, OP_ASSERT);
     }
 }
@@ -1161,7 +1161,7 @@ static void declaration(Compiler* compiler) {
                 expression(compiler);
             } else {
                 // Unassigned: int x (default to nil)
-                emit_byte(compiler, OP_NIL);
+                emit_byte(compiler, OP_VOID);
             }
 
             uint8_t arg = identifier_constant(compiler, &name);
@@ -1181,7 +1181,7 @@ static void synchronize(Compiler* compiler) {
             case TOKEN_IF:
             case TOKEN_WHILE:
             case TOKEN_FOR:
-            case TOKEN_PRINT:
+            case TOKEN_SAY:
             case TOKEN_RETURN:
             case TOKEN_CLASS:
                 return;
@@ -1236,7 +1236,7 @@ static void binary(Compiler* compiler, bool can_assign) {
         case TOKEN_LESS:          emit_byte(compiler, OP_LESS); break;
         case TOKEN_GREATER_EQUAL: emit_byte(compiler, OP_GREATER_EQUAL); break;
         case TOKEN_LESS_EQUAL:    emit_byte(compiler, OP_LESS_EQUAL); break;
-        case TOKEN_IN:            emit_byte(compiler, OP_IN); break;
+        case TOKEN_OF:            emit_byte(compiler, OP_OF); break;
         default: return;
     }
 }
@@ -1256,7 +1256,7 @@ static void ternary_expr(Compiler* compiler, bool can_assign) {
 static void literal(Compiler* compiler, bool can_assign) {
     switch (compiler->previous.type) {
         case TOKEN_FALSE: emit_byte(compiler, OP_FALSE); break;
-        case TOKEN_NIL:   emit_byte(compiler, OP_NIL); break;
+        case TOKEN_VOID:   emit_byte(compiler, OP_VOID); break;
         case TOKEN_TRUE:  emit_byte(compiler, OP_TRUE); break;
         default: return;
     }
@@ -1594,7 +1594,7 @@ static void variable(Compiler* compiler, bool can_assign) {    if (can_assign &&
             emit_bytes(compiler, set_op, (uint8_t)arg);
             emit_byte(compiler, OP_POP);
         }
-        emit_byte(compiler, OP_NIL);
+        emit_byte(compiler, OP_VOID);
         return;
     }
     named_variable(compiler, compiler->previous, can_assign);
@@ -1687,7 +1687,7 @@ static bool scan_comprehension(Compiler* compiler, CompInfo* info) {
     Token var = scan_token(&scan);
     if (var.type != TOKEN_IDENTIFIER) return false;
     Token in = scan_token(&scan);
-    if (in.type != TOKEN_IN) return false;
+    if (in.type != TOKEN_OF) return false;
     info->var = var;
     info->iter_start = scan;
 
@@ -1943,20 +1943,20 @@ static void brace_literal(Compiler* compiler, bool can_assign) {
 static void index_expr(Compiler* compiler, bool can_assign) {
     if (compiler->current.type == TOKEN_COLON) {
         advance(compiler);
-        emit_byte(compiler, OP_NIL);
+        emit_byte(compiler, OP_VOID);
         if (compiler->current.type == TOKEN_COLON || compiler->current.type == TOKEN_RIGHT_BRACKET) {
-            emit_byte(compiler, OP_NIL);
+            emit_byte(compiler, OP_VOID);
         } else {
             expression(compiler);
         }
         if (match(compiler, TOKEN_COLON)) {
             if (compiler->current.type == TOKEN_RIGHT_BRACKET) {
-                emit_byte(compiler, OP_NIL);
+                emit_byte(compiler, OP_VOID);
             } else {
                 expression(compiler);
             }
         } else {
-            emit_byte(compiler, OP_NIL);
+            emit_byte(compiler, OP_VOID);
         }
         consume(compiler, TOKEN_RIGHT_BRACKET, "Expect ']' after slice");
         emit_byte(compiler, OP_SLICE);
@@ -1967,18 +1967,18 @@ static void index_expr(Compiler* compiler, bool can_assign) {
 
     if (match(compiler, TOKEN_COLON)) {
         if (compiler->current.type == TOKEN_COLON || compiler->current.type == TOKEN_RIGHT_BRACKET) {
-            emit_byte(compiler, OP_NIL);
+            emit_byte(compiler, OP_VOID);
         } else {
             expression(compiler);
         }
         if (match(compiler, TOKEN_COLON)) {
             if (compiler->current.type == TOKEN_RIGHT_BRACKET) {
-                emit_byte(compiler, OP_NIL);
+                emit_byte(compiler, OP_VOID);
             } else {
                 expression(compiler);
             }
         } else {
-            emit_byte(compiler, OP_NIL);
+            emit_byte(compiler, OP_VOID);
         }
         consume(compiler, TOKEN_RIGHT_BRACKET, "Expect ']' after slice");
         emit_byte(compiler, OP_SLICE);
@@ -2190,7 +2190,7 @@ ParseRule rules[] = {
     [TOKEN_LESS_EQUAL]    = {NULL,     binary,      PREC_COMPARISON},
     [TOKEN_GREATER]       = {NULL,     binary,      PREC_COMPARISON},
     [TOKEN_GREATER_EQUAL] = {NULL,     binary,      PREC_COMPARISON},
-    [TOKEN_IN]            = {NULL,     binary,      PREC_COMPARISON},
+    [TOKEN_OF]            = {NULL,     binary,      PREC_COMPARISON},
     [TOKEN_DOT]           = {NULL,     dot_expr,    PREC_CALL},
     [TOKEN_IDENTIFIER]    = {variable, NULL,        PREC_NONE},
     [TOKEN_STRING]        = {string_literal, NULL,  PREC_NONE},
@@ -2204,12 +2204,12 @@ ParseRule rules[] = {
     [TOKEN_OR]            = {NULL,     binary,      PREC_OR},
     [TOKEN_FALSE]         = {literal,  NULL,        PREC_NONE},
     [TOKEN_TRUE]          = {literal,  NULL,        PREC_NONE},
-    [TOKEN_NIL]           = {literal,  NULL,        PREC_NONE},
+    [TOKEN_VOID]          = {literal,  NULL,        PREC_NONE},
     [TOKEN_NOT]           = {unary,    NULL,        PREC_NONE},
     [TOKEN_LEN]           = {len_expr, NULL,        PREC_NONE},
     [TOKEN_TYPE]          = {type_expr, NULL,       PREC_NONE},
     [TOKEN_SET]           = {set_expr, NULL,        PREC_NONE},
-    [TOKEN_INPUT]         = {input_expression, NULL, PREC_NONE},
+    [TOKEN_ASK]         = {input_expression, NULL, PREC_NONE},
     [TOKEN_APPEND]        = {append_expr, NULL,     PREC_NONE},
     [TOKEN_TO_NUM]        = {number_expr, NULL,     PREC_NONE},
     [TOKEN_NEW]           = {new_expr, NULL,        PREC_NONE},

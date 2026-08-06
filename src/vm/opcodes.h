@@ -3,7 +3,7 @@
 
 typedef enum {
     OP_CONSTANT,
-    OP_NIL,
+    OP_VOID,
     OP_TRUE,
     OP_FALSE,
     OP_POP,
@@ -32,11 +32,11 @@ typedef enum {
     OP_LESS,
     OP_GREATER_EQUAL,
     OP_LESS_EQUAL,
-    OP_IN,
+    OP_OF,
     OP_ASSERT,
     OP_DEL_GLOBAL,
     OP_DEL_INDEX,
-    OP_PRINT,
+    OP_SAY,
     OP_JUMP,
     OP_JUMP_IF_FALSE,
     OP_LOOP,

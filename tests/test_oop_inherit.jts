@@ -4,17 +4,19 @@ class Animal
     end
 
     func speak(self)
-        print(self.name + " makes a sound")
+        say(self.name + " makes a sound")
     end
 end
 
 class Dog extends Animal
     func bark(self)
-        print(self.name + " barks!")
+        say(self.name + " barks!")
     end
 end
 
 d = new Dog("Rex")
 d.speak()
 d.bark()
-print(d.name)
+say(d.name)
+
+

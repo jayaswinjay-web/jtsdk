@@ -18,3 +18,4 @@ end
 func file_write(path, content)
     return write_file(path, content)
 end
+

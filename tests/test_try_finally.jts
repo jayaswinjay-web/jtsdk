@@ -1,28 +1,30 @@
 # Test try/catch/finally
-print("--- Finally: no error ---")
+say("--- Finally: no error ---")
 try
-    print("try body")
+    say("try body")
 finally
-    print("finally body")
+    say("finally body")
 end
-print("after")
+say("after")
 
-print("--- Finally: error caught ---")
+say("--- Finally: error caught ---")
 try
-    print("try body 2")
+    say("try body 2")
     throw "boom"
 catch e
-    print("caught: " + e)
+    say("caught: " + e)
 finally
-    print("finally body 2")
+    say("finally body 2")
 end
-print("after 2")
+say("after 2")
 
-print("--- Finally: error not caught ---")
+say("--- Finally: error not caught ---")
 try
-    print("try body 3")
+    say("try body 3")
     throw "unhandled"
 finally
-    print("finally body 3")
+    say("finally body 3")
 end
-print("unreachable")
+say("unreachable")
+
+
