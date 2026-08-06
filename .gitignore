@@ -1,6 +1,7 @@
 bin/
 *.exe
 *.o
+!docs/llm/llms.txt
 *.txt
 *.log
 *.tmp

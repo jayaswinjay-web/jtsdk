@@ -1,0 +1,22 @@
+# JTS GO
+
+> JTS GO is a beginner-first, English-like programming language. `say` instead of `print`, `ask` instead of `input`, `of` instead of `in`, `void` instead of `nil`. Bytecode-interpreted, with OOP, error handling, file I/O, HTTP, and built-in machine learning.
+
+[Getting started](docs/getting-started.md)
+[Syntax](docs/syntax.md)
+[Types](docs/types.md)
+[Control flow](docs/control-flow.md)
+[Functions](docs/functions.md)
+[Language specification](LANGUAGE_SPEC.md)
+[System prompt for LLM agents](docs/llm/system-prompt.md)
+
+## Quick reference
+
+- Print: `say("hello")`; read input: `ask("name?")`
+- Declare variables by assignment: `x = 10`
+- Lists: `[1, 2, 3]`; dictionaries: `{"key": value}`; sets: `{1, 2, 3}`
+- Functions: `func add(a, b) ... end`; lambdas: `f = fn(x) x * 2 end`
+- Loops: `for i of 0 to 10` (inclusive) / `for x of items` / `while cond`
+- Classes: `class Dog extends Animal ... end`; `new Dog()`
+- Methods take `self` as the first parameter; `super.method(self, ...)` calls a parent method
+- Errors: `try / catch e / end` and `try / finally / end`

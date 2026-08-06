@@ -183,13 +183,15 @@ say(mse([1, 2], [1.1, 2.1]))
 ## Other built-ins
 
 `say(x)`, `ask(prompt)`, `len(x)`, `type(x)`, `append(list, x)`,
-`number(str)`, `str(x)`, `int(x)`, `float(x)`, `bool(x)`, `range(a, b)`,
-`abs(x)`, `min(...)`, `max(...)`, `sum(list)`, `pow(a, b)`, `round(x)`,
+`number(str)`, `str(x)`, `int(x)`, `float(x)`, `bool(x)`, `range(a, b)`,`abs(x)`, `min(...)`, `max(...)`, `sum(list)`, `pow(a, b)`, `round(x)`,
 `floor(x)`, `ceil(x)`, `rand()`, `randint(a, b)`, `seed(n)`,
 `math("sin"|"cos"|"tan"|"sqrt"|"log"|"exp"|"pow"|"floor"|"ceil"|"round"|"abs", x)`,
 `json_parse(str)`, `json_stringify(value)`, `now()`, `sleep(secs)`,
 `strftime(format[, ts])`, `env(name)`, `args()`, `exit(code)`, `cwd()`,
 `file_exists(path)`, `bring scroll_name` (packages/scrolls), `import_file(path)`.
+
+`str(x)` converts scalars, lists, tensors, and matrices — NOT dicts or sets
+(use `say(x)` to print those).
 
 ## Scrolls (packages)
 
