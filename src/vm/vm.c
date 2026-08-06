@@ -1686,14 +1686,15 @@ static InterpretResult run(void) {
 
         case OP_SUPER: {
             ObjString* name = READ_STRING();
-            ObjBoundMethod* bound = AS_BOUND_METHOD(peek(0));
+            Value receiver = peek(0);
             ObjClass* superclass = AS_CLASS(peek(1));
             Value method;
             if (!table_get(&superclass->methods, name, &method)) {
                 runtime_error("Undefined method '%s' in superclass.", name->chars);
                 return INTERPRET_RUNTIME_ERROR;
             }
-            ObjBoundMethod* super_bound = new_bound_method(bound->receiver, method);
+            ObjBoundMethod* super_bound = new_bound_method(receiver, method);
+            pop();
             pop();
             push(OBJ_VAL(super_bound));
             break;

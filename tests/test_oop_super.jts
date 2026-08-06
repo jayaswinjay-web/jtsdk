@@ -1,0 +1,27 @@
+class Parent
+    func init(self, name)
+        self.name = name
+    end
+
+    func speak(self)
+        say(self.name + " says hello")
+    end
+end
+
+class Child extends Parent
+    func init(self, name, age)
+        super.init(self, name)
+        self.age = age
+    end
+
+    func speak(self)
+        super.speak(self)
+        say(self.name + " is " + self.age + " years old")
+    end
+end
+
+c = new Child("Rex", "7")
+c.speak()
+
+say(c.name)
+say(c.age)

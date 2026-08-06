@@ -45,6 +45,8 @@ typedef struct Compiler {
     int upvalue_count;
     DebugFuncInfo* debug_func;
     bool has_yield;
+    bool has_superclass;
+    Token superclass_name;
 } Compiler;
 
 bool compile(const char* source, Chunk* chunk);

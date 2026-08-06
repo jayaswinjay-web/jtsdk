@@ -670,6 +670,8 @@ static void begin_function_compile(Compiler* outer, Compiler* fn, Token name,
     fn->function_type = TYPE_FUNCTION;
     fn->current = outer->current;
     fn->previous = outer->previous;
+    fn->has_superclass = outer->has_superclass;
+    fn->superclass_name = outer->superclass_name;
 
     fn->function = new_function();
     if (name.length > 0) {
@@ -793,8 +795,14 @@ static void class_declaration(Compiler* compiler) {
 
     emit_bytes(compiler, OP_CLASS, name_constant);
 
+    bool prev_has_super = compiler->has_superclass;
+    Token prev_super_name = compiler->superclass_name;
+    compiler->has_superclass = false;
+
     if (match(compiler, TOKEN_EXTENDS)) {
         consume(compiler, TOKEN_IDENTIFIER, "Expect superclass name");
+        compiler->has_superclass = true;
+        compiler->superclass_name = compiler->previous;
         uint8_t super_name = identifier_constant(compiler, &compiler->previous);
 
         emit_bytes(compiler, OP_GET_GLOBAL, super_name);
@@ -864,6 +872,9 @@ static void class_declaration(Compiler* compiler) {
     match(compiler, TOKEN_DEDENT);
     consume(compiler, TOKEN_END, "Expect 'end' after class body");
     match(compiler, TOKEN_NEWLINE);
+
+    compiler->has_superclass = prev_has_super;
+    compiler->superclass_name = prev_super_name;
 
     define_variable(compiler, name_constant);
 }
@@ -2071,9 +2082,18 @@ static void new_expr(Compiler* compiler, bool can_assign) {
 }
 
 static void super_expr(Compiler* compiler, bool can_assign) {
+    if (!compiler->has_superclass) {
+        error(compiler, "Can't use 'super' outside of a subclass method");
+        return;
+    }
     consume(compiler, TOKEN_DOT, "Expect '.' after 'super'");
     consume(compiler, TOKEN_IDENTIFIER, "Expect superclass method name");
     uint8_t name = identifier_constant(compiler, &compiler->previous);
+
+    uint8_t super_const = identifier_constant(compiler, &compiler->superclass_name);
+    emit_bytes(compiler, OP_GET_GLOBAL, super_const);
+    named_variable(compiler,
+        (Token){TOKEN_SELF, "self", 4, compiler->previous.line}, false);
 
     if (match(compiler, TOKEN_LEFT_PAREN)) {
         int arg_count = argument_list(compiler);
@@ -2266,6 +2286,9 @@ bool compile(const char* source, Chunk* chunk) {
     compiler.panic_mode = false;
     compiler.local_count = 0;
     compiler.scope_depth = 0;
+    compiler.has_superclass = false;
+    compiler.superclass_name.start = NULL;
+    compiler.superclass_name.length = 0;
 
     compiler.function = new_function();
     compiler.function->name = NULL;
