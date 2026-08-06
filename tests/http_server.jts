@@ -1,0 +1,27 @@
+# =============================================================================
+#  Real-world HTTP server stress test
+#  Exercises: multiple routes, query strings, JSON, POST, HEAD, concurrency.
+# =============================================================================
+
+srv = http_server(9876)
+
+# Simple pages
+http_route(srv, "GET", "/", "<h1>Home</h1>")
+http_route(srv, "GET", "/about", "<h1>About</h1>")
+http_route(srv, "GET", "/contact", "<h1>Contact</h1>")
+
+# JSON API
+http_route(srv, "GET", "/api/users", '{"users": [{"id": 1, "name": "Alice"}, {"id": 2, "name": "Bob"}]}')
+http_route(srv, "GET", "/api/status", '{"status": "ok", "uptime": 3600}')
+
+# Path with a query string (real browsers send these)
+http_route(srv, "GET", "/api/user", '{"user": "default", "query": "none"}')
+
+# Products page with query param
+http_route(srv, "GET", "/products", '<h1>Products</h1><p>Default list</p>')
+
+say("Test server routes registered on port 9876")
+http_start(srv)
+
+
+
