@@ -1253,11 +1253,34 @@ static bool resolve_scroll_path(const char* name, char* out, size_t outsize) {
     }
     rel[rlen] = '\0';
 
-    const char* roots[3];
+    char roots[8][1024];
     int n_roots = 0;
-    if (vm.program_dir != NULL) roots[n_roots++] = vm.program_dir;
-    if (vm.install_dir != NULL) roots[n_roots++] = vm.install_dir;
-    roots[n_roots++] = ""; // current working directory
+    if (vm.program_dir != NULL) {
+        snprintf(roots[n_roots++], sizeof(roots[0]), "%s", vm.program_dir);
+    }
+    if (vm.install_dir != NULL) {
+        // The binary typically lives in bin/ or bin/win32/, one or two levels
+        // below the directory that holds scrolls/. Walk up a few levels so
+        // `bring` works no matter where the binary was installed.
+        char dir[1024];
+        snprintf(dir, sizeof(dir), "%s", vm.install_dir);
+        for (int depth = 0;
+             depth < 4 && n_roots < (int)(sizeof(roots) / sizeof(roots[0]));
+             depth++) {
+            size_t len = strlen(dir);
+            while (len > 0 && (dir[len - 1] == '/' || dir[len - 1] == '\\')) {
+                dir[--len] = '\0';
+            }
+            snprintf(roots[n_roots++], sizeof(roots[0]), "%s", dir);
+            if (len == 0) break;
+            char* slash = strrchr(dir, '/');
+            char* bslash = strrchr(dir, '\\');
+            char* last = (slash > bslash) ? slash : bslash;
+            if (last == NULL) break;
+            *last = '\0';
+        }
+    }
+    snprintf(roots[n_roots++], sizeof(roots[0]), ""); // current working directory
 
     char candidate[1024];
     for (int i = 0; i < n_roots; i++) {

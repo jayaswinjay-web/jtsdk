@@ -82,7 +82,11 @@ async function main() {
     process.exit(1);
   }
 
-  const tar = spawnSync("tar", ["-xf", tmp, "-C", outDir], { stdio: "inherit" });
+  // POSIX archives contain a top-level <platform>/ dir (e.g. linux/jts),
+  // so extract into bin/ to land at bin/linux/jts. The Windows zip contains
+  // the exes at the top level, so it extracts straight into bin/win32/.
+  const extractDir = isWindows ? outDir : binDir;
+  const tar = spawnSync("tar", ["-xf", tmp, "-C", extractDir], { stdio: "inherit" });
   fs.unlinkSync(tmp);
 
   if (tar.status !== 0 || !fs.existsSync(binaryPath)) {

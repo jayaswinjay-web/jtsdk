@@ -70,5 +70,25 @@ for (const f of fs.readdirSync(testsDir)) {
   check(path.join(testsDir, f), expected);
 }
 
+// Bring must resolve scrolls from a different working directory (walk-up
+// from the binary's location, e.g. npm-installed packages).
+try {
+  const tmp = fs.mkdtempSync(path.join(require("os").tmpdir(), "jts-scroll-"));
+  const probe = path.join(tmp, "scroll_probe.jts");
+  fs.writeFileSync(probe, 'bring math\nsay("cwd-bring-ok")\n');
+  ran++;
+  try {
+    execFileSync(binary, [probe], { cwd: tmp, stdio: "pipe" });
+    console.log("PASS scrolls-from-other-cwd (exit 0)");
+  } catch (err) {
+    failed++;
+    console.log("FAIL scrolls-from-other-cwd expected 0 got " + (typeof err.status === "number" ? err.status : 1));
+  }
+  fs.rmSync(tmp, { recursive: true, force: true });
+} catch (err) {
+  failed++;
+  console.log("FAIL scrolls-from-other-cwd (setup error: " + err.message + ")");
+}
+
 console.log(ran + " tests, " + failed + " failed");
 process.exit(failed ? 1 : 0);
