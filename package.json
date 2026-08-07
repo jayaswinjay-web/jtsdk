@@ -1,6 +1,6 @@
 {
   "name": "@jaytechsolutions/jts-go",
-  "version": "0.9.2-beta",
+  "version": "0.9.3-beta",
   "description": "JTS GO - The easiest programming language to learn. Open-source beta: say() instead of print(), ask() instead of input(), of instead of in, void instead of nil.",
   "keywords": [
     "programming language",
