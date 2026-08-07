@@ -7,6 +7,7 @@ bin/
 *.tmp
 node_modules/
 jtsdk/
+PROPRIETARY_LICENSE
 build-mingw/
 build/
 jtside/
