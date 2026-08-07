@@ -1,0 +1,29 @@
+<h1 id="tut05">Tutorial 5: Strings</h1>
+<p>Source file: <code>tutorials/05_strings.jts</code> — a complete, runnable program. Every tutorial in this book is a file in the repository's <code>tutorials/</code> folder.</p>
+<p><strong>Goal:</strong> Slice, search, and transform text.</p>
+<p>Strings have methods: upper(), lower(), trim(), contains(s),</p>
+<p>replace(a, b), substring(s, e), starts_with(s), split(sep), join(list).</p>
+<p>The <code>strings</code> scroll adds more helpers.</p>
+<pre><code>greeting = "  Hello, JTS GO!  "
+say("trimmed: [" + greeting.trim() + "]")
+say("upper: " + greeting.upper())
+say("lower: " + greeting.lower())
+say("contains 'JTS': " + str(greeting.contains("JTS")))
+say("starts with 'Hi': " + str(greeting.starts_with("Hi")))
+say("replaced: " + greeting.replace("JTS", "World"))
+
+text = "a,b,c,d"
+parts = text.split(",")
+say("split: " + str(parts))
+say("joined: " + "-".join(parts))
+say("length: " + str(len(text)))
+
+bring strings
+say("reversed: " + strings.reverse("hello"))
+say("repeat: " + strings.repeat("ab", 3))
+say("is palindrome: " + str(strings.is_palindrome("racecar")))
+say("word count: " + str(strings.count_words("the quick brown fox")))
+say("words: " + str(strings.words("one two three")))
+
+# Challenge: print your name, then reverse it.
+</code></pre>

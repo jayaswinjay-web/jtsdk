@@ -1,0 +1,32 @@
+<h1 id="tut04">Tutorial 4: Loops</h1>
+<p>Source file: <code>tutorials/04_loops.jts</code> — a complete, runnable program. Every tutorial in this book is a file in the repository's <code>tutorials/</code> folder.</p>
+<p><strong>Goal:</strong> Repeat work with for and while.</p>
+<p>IMPORTANT: <code>for i of 0 to 10</code> is INCLUSIVE: i = 0, 1, ..., 10.</p>
+<p><code>for x of items</code> iterates a list. <code>while cond</code> loops until false.</p>
+<pre><code>for i of 1 to 5
+    say("Counting: " + str(i))
+end
+
+items = ["apple", "banana", "cherry"]
+for fruit of items
+    say("I like " + fruit)
+end
+
+n = 0
+while n &lt; 3
+    n = n + 1
+    if n == 2
+        continue
+    end
+    say("while n = " + str(n))
+end
+
+for i of 1 to 10
+    if i == 4
+        break
+    end
+    say("until break: " + str(i))
+end
+
+# Challenge: print the first 5 even numbers using a loop.
+</code></pre>

@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
-"""Build the JTS GO Programming Language book as a single PDF using WeasyPrint."""
+"""Build a JTS GO book as a single PDF using WeasyPrint.
+
+Default behaviour builds the reference book (book/html -> JTS-GO-Programming-Language.pdf).
+Pass --html-dir/--out/--title to render a different book (e.g. the tutorial book).
+"""
+import argparse
 import html as html_mod
 import glob
 import os
@@ -12,6 +17,7 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 HTML_DIR = os.path.join(ROOT, "html")
 CSS_FILE = os.path.join(ROOT, "css", "book.css")
 OUT_PDF = os.path.join(ROOT, "JTS-GO-Programming-Language.pdf")
+BOOK_TITLE = "The JTS GO Programming Language"
 
 KEYWORDS = {
     "and", "or", "not", "if", "elif", "else", "end", "while", "for", "of",
@@ -97,12 +103,12 @@ def collect_headings(fragment):
     return headings
 
 
-def build():
-    files = sorted(glob.glob(os.path.join(HTML_DIR, "*.html")))
+def build(html_dir=HTML_DIR, out_pdf=OUT_PDF, title=BOOK_TITLE):
+    files = sorted(glob.glob(os.path.join(html_dir, "*.html")))
     # Exclude cover.html from chapter list
     files = [f for f in files if not f.endswith("cover.html")]
     if not files:
-        print("No chapter files found in", HTML_DIR)
+        print("No chapter files found in", html_dir)
         sys.exit(1)
 
     toc_entries = []
@@ -124,24 +130,25 @@ def build():
 
     with open(CSS_FILE, encoding="utf-8") as fh:
         css = fh.read()
+    css = css.replace(BOOK_TITLE, title)
 
     doc = """<!DOCTYPE html>
 <html>
 <head>
 <meta charset="utf-8">
-<title>The JTS GO Programming Language</title>
+<title>%s</title>
 </head>
 <body>
-""" + "\n".join(body) + """
+""" % title + "\n".join(body) + """
 </body>
 </html>
 """
     print("Rendering PDF with %d chapters..." % len(files))
     html_doc = weasyprint.HTML(string=doc)
-    html_doc.write_pdf(OUT_PDF, stylesheets=[weasyprint.CSS(string=css)])
+    html_doc.write_pdf(out_pdf, stylesheets=[weasyprint.CSS(string=css)])
 
     # Render cover as separate PDF and prepend
-    cover_html_path = os.path.join(HTML_DIR, "cover.html")
+    cover_html_path = os.path.join(html_dir, "cover.html")
     if os.path.exists(cover_html_path):
         print("Rendering cover page...")
         import PyPDF2
@@ -150,13 +157,13 @@ def build():
         # Merge: cover + book
         merger = PyPDF2.PdfMerger()
         merger.append(cover_pdf_path)
-        merger.append(OUT_PDF)
-        merger.write(OUT_PDF)
+        merger.append(out_pdf)
+        merger.write(out_pdf)
         merger.close()
         os.remove(cover_pdf_path)
         print("Cover prepended.")
 
-    print("Wrote", OUT_PDF)
+    print("Wrote", out_pdf)
 
 
 def build_toc(entries):
@@ -173,4 +180,9 @@ def build_toc(entries):
 
 
 if __name__ == "__main__":
-    build()
+    parser = argparse.ArgumentParser(description="Build a JTS GO book PDF with WeasyPrint")
+    parser.add_argument("--html-dir", default=HTML_DIR)
+    parser.add_argument("--out", default=OUT_PDF)
+    parser.add_argument("--title", default=BOOK_TITLE)
+    args = parser.parse_args()
+    build(html_dir=args.html_dir, out_pdf=args.out, title=args.title)

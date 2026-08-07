@@ -1,0 +1,46 @@
+<h1 id="tut06">Tutorial 6: Functions</h1>
+<p>Source file: <code>tutorials/06_functions.jts</code> — a complete, runnable program. Every tutorial in this book is a file in the repository's <code>tutorials/</code> folder.</p>
+<p><strong>Goal:</strong> Reuse code with func, parameters, return, and recursion.</p>
+<p>Define: func name(params) ... end. Call: name(args).</p>
+<p>A function without <code>return</code> returns <code>void</code>.</p>
+<pre><code>func greet(name)
+    say("Hello, " + name + "!")
+end
+
+func add(a, b)
+    return a + b
+end
+
+func is_even(n)
+    if n % 2 == 0
+        return true
+    end
+    return false
+end
+
+func factorial(n)
+    if n &lt;= 1
+        return 1
+    end
+    return n * factorial(n - 1)
+end
+
+greet("Alex")
+say("add(3, 4) = " + str(add(3, 4)))
+say("is_even(10) = " + str(is_even(10)))
+say("is_even(7) = " + str(is_even(7)))
+say("factorial(5) = " + str(factorial(5)))
+
+# Functions calling functions.
+func square(x)
+    return x * x
+end
+
+func sum_of_squares(a, b)
+    return square(a) + square(b)
+end
+
+say("sum_of_squares(3, 4) = " + str(sum_of_squares(3, 4)))
+
+# Challenge: write a function that counts down from n to 1.
+</code></pre>

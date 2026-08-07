@@ -1,0 +1,29 @@
+<h1 id="tut03">Tutorial 3: Conditionals</h1>
+<p>Source file: <code>tutorials/03_conditionals.jts</code> — a complete, runnable program. Every tutorial in this book is a file in the repository's <code>tutorials/</code> folder.</p>
+<p><strong>Goal:</strong> Make decisions with if / elif / else.</p>
+<p>Comparisons: == != < <= > >= . Logic: and or not . Membership: <code>of</code>.</p>
+<pre><code>score = 85
+if score &gt;= 90
+    say("Grade: A")
+elif score &gt;= 80
+    say("Grade: B")
+elif score &gt;= 70
+    say("Grade: C")
+else
+    say("Grade: F")
+end
+
+x = 7
+if x &gt; 0 and x % 2 == 0
+    say("positive and even")
+elif x &gt; 0
+    say("positive and odd")
+end
+
+primes = {2, 3, 5, 7}
+if 7 of primes
+    say("7 is prime")
+end
+
+# Challenge: print "hot", "warm", or "cold" based on a temperature variable.
+</code></pre>

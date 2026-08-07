@@ -1,0 +1,31 @@
+<h1 id="tut12">Tutorial 12: Machine Learning and Web</h1>
+<p>Source file: <code>tutorials/12_ml_web.jts</code> — a complete, runnable program. Every tutorial in this book is a file in the repository's <code>tutorials/</code> folder.</p>
+<p><strong>Goal:</strong> Peek at JTS GO's built-in AI/ML and web features.</p>
+<p>ML: seed(), rand(), sigmoid(), mse(), matrix(), matmul(), relu().</p>
+<p>Web: http_server(port), http_route(srv, method, path, body),</p>
+<p>http_start(srv) -- the last one blocks and serves requests.</p>
+<pre><code># --- machine learning ---
+seed(42)
+say("sigmoid(0) = " + str(sigmoid(0)))
+say("sigmoid(2) = " + str(sigmoid(2)))
+
+actual = [0, 0, 1, 1]
+predicted = [0.1, 0.4, 0.8, 0.9]
+say("mse = " + str(mse(predicted, actual)))
+
+a = matrix([[1, 2], [3, 4]])
+b = matrix([[5, 6], [7, 8]])
+say("matmul = " + str(matmul(a, b)))
+
+say("rand in [0,1): " + str(rand() &gt;= 0 and rand() &lt; 1))
+say("randint(1, 6) = " + str(randint(1, 6)))
+
+# --- web server (register routes, do not start) ---
+srv = http_server(8080)
+http_route(srv, "GET", "/", "&lt;h1&gt;Hello from JTS GO&lt;/h1&gt;")
+http_route(srv, "GET", "/api/time", '{"now": 2026}')
+say("server on port 8080 with 2 routes registered")
+say("call http_start(srv) to serve, or run examples/website/server.jts")
+
+# Challenge: train sigmoid on [0,1] -&gt; 0 and [1,0] -&gt; 1, then print mse.
+</code></pre>

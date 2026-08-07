@@ -1,0 +1,33 @@
+<h1 id="tut10">Tutorial 10: Files and JSON</h1>
+<p>Source file: <code>tutorials/10_files_json.jts</code> — a complete, runnable program. Every tutorial in this book is a file in the repository's <code>tutorials/</code> folder.</p>
+<p><strong>Goal:</strong> Read and write files, and work with JSON data.</p>
+<p>Built-ins: write_file(path, text), read_file(path).</p>
+<p>The <code>json</code> scroll adds parse/stringify, the <code>fs</code> scroll adds file helpers.</p>
+<pre><code>write_file("_tutorial_notes.txt", "line one\nline two\nline three\n")
+content = read_file("_tutorial_notes.txt")
+say("read back:")
+say(content)
+
+bring fs
+say("fs.exists: " + str(fs.exists("_tutorial_notes.txt")))
+say("line count: " + str(fs.count_lines("_tutorial_notes.txt")))
+say("first line: " + fs.first_line("_tutorial_notes.txt"))
+say("last line: " + fs.last_line("_tutorial_notes.txt"))
+
+bring json
+data = json.parse('{"name": "JTS GO", "version": 1, "features": ["easy", "fast"]}')
+say("name: " + data["name"])
+say("version: " + str(data["version"]))
+say("first feature: " + data["features"][0])
+say("stringify: " + json.stringify({"a": 1, "b": [2, 3]}))
+
+json.save("_tutorial_data.json", {"app": "demo", "count": 3})
+loaded = json.load("_tutorial_data.json")
+say("loaded app: " + loaded["app"])
+say("loaded count: " + str(loaded["count"]))
+say("pretty:")
+say(json.pretty(loaded))
+
+# The files created above (_tutorial_*.txt/_tutorial_data.json) are
+# gitignored scratch files; delete them before moving on if you like.
+</code></pre>

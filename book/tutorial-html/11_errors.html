@@ -1,0 +1,45 @@
+<h1 id="tut11">Tutorial 11: Errors and try/catch/finally</h1>
+<p>Source file: <code>tutorials/11_errors.jts</code> — a complete, runnable program. Every tutorial in this book is a file in the repository's <code>tutorials/</code> folder.</p>
+<p><strong>Goal:</strong> Handle problems gracefully instead of crashing.</p>
+<p>throw "message" raises an error.</p>
+<p>try ... catch e ... finally ... end catches it and always runs cleanup.</p>
+<pre><code>func divide(a, b)
+    if b == 0
+        throw "cannot divide by zero"
+    end
+    return a / b
+end
+
+func require_positive(n)
+    if n &lt;= 0
+        throw "expected a positive number, got " + str(n)
+    end
+    return n
+end
+
+try
+    result = divide(10, 0)
+    say("result: " + str(result))
+catch err
+    say("caught: " + err)
+finally
+    say("cleanup always runs")
+end
+
+say("still running after the error")
+
+try
+    say("10 / 2 = " + str(divide(10, 2)))
+catch err
+    say("should not reach here")
+end
+
+try
+    require_positive(-3)
+    say("never printed")
+catch err
+    say("caught: " + err)
+end
+
+# Challenge: wrap an ask() in try/catch to reject empty input.
+</code></pre>
