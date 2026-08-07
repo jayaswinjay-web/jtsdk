@@ -54,7 +54,7 @@ static ObjString* value_to_display_string(Value value) {
         return copy_string(AS_BOOL(value) ? "true" : "false",
                            AS_BOOL(value) ? 4 : 5);
     }
-    if (IS_VOID(value)) return copy_string("void", 3);
+    if (IS_VOID(value)) return copy_string("void", 4);
     return copy_string("<?>", 4);
 }
 
@@ -235,7 +235,7 @@ static bool native_string(int arg_count, Value* args, Value* result) {
         return true;
     }
     if (IS_VOID(args[0])) {
-        *result = OBJ_VAL(copy_string("void", 3));
+        *result = OBJ_VAL(copy_string("void", 4));
         return true;
     }
     if (IS_TENSOR(args[0])) {
