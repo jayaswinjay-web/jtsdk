@@ -1,0 +1,46 @@
+# Tutorial 6: Functions
+# Goal: Reuse code with func, parameters, return, and recursion.
+#
+# Define: func name(params) ... end. Call: name(args).
+# A function without `return` returns `void`.
+
+func greet(name)
+    say("Hello, " + name + "!")
+end
+
+func add(a, b)
+    return a + b
+end
+
+func is_even(n)
+    if n % 2 == 0
+        return true
+    end
+    return false
+end
+
+func factorial(n)
+    if n <= 1
+        return 1
+    end
+    return n * factorial(n - 1)
+end
+
+greet("Alex")
+say("add(3, 4) = " + str(add(3, 4)))
+say("is_even(10) = " + str(is_even(10)))
+say("is_even(7) = " + str(is_even(7)))
+say("factorial(5) = " + str(factorial(5)))
+
+# Functions calling functions.
+func square(x)
+    return x * x
+end
+
+func sum_of_squares(a, b)
+    return square(a) + square(b)
+end
+
+say("sum_of_squares(3, 4) = " + str(sum_of_squares(3, 4)))
+
+# Challenge: write a function that counts down from n to 1.

@@ -1,0 +1,29 @@
+# Tutorial 3: Conditionals
+# Goal: Make decisions with if / elif / else.
+#
+# Comparisons: == != < <= > >= . Logic: and or not . Membership: `of`.
+
+score = 85
+if score >= 90
+    say("Grade: A")
+elif score >= 80
+    say("Grade: B")
+elif score >= 70
+    say("Grade: C")
+else
+    say("Grade: F")
+end
+
+x = 7
+if x > 0 and x % 2 == 0
+    say("positive and even")
+elif x > 0
+    say("positive and odd")
+end
+
+primes = {2, 3, 5, 7}
+if 7 of primes
+    say("7 is prime")
+end
+
+# Challenge: print "hot", "warm", or "cold" based on a temperature variable.

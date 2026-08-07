@@ -1,0 +1,17 @@
+# Tutorial 2: Variables and Math
+# Goal: Store values in variables and do arithmetic.
+#
+# JTS is dynamically typed: x = 42. Optional type hints: int age = 25.
+# Operators: + - * / % and bitwise & | ^ ~ << >>
+# str(x) converts numbers so you can join them with +.
+
+name = "Alex"
+age = 7
+say("Hi, " + name + "!")
+say("In 3 years you will be " + str(age + 3))
+
+pi = 3.14159
+say("Pi doubled: " + str(pi * 2))
+say("Remainder of 17 / 5: " + str(17 % 5))
+
+# Challenge: compute and print the area of a circle with radius 4.

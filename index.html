@@ -315,6 +315,39 @@
     }
     .tool-cell p { font-size: 0.84rem; color: var(--muted); line-height: 1.6; }
 
+    /* ===== TUTORIALS ===== */
+    .tutorial-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+    }
+    .tutorial-cell {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 3px;
+      padding: 16px 16px 18px;
+    }
+    .tutorial-cell .num {
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 6px;
+    }
+    .tutorial-cell h3 {
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 5px;
+    }
+    .tutorial-cell h3 a { color: var(--text); }
+    .tutorial-cell p {
+      font-size: 0.8rem;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
     /* ===== FOOTER ===== */
     .site-footer {
       background: var(--bg);
@@ -370,6 +403,7 @@
       .hero-grid { grid-template-columns: 1fr; gap: 36px; padding: 48px 24px 56px; }
       .hero p { max-width: none; }
       .features-grid, .get-started-grid { grid-template-columns: 1fr 1fr; }
+      .tutorial-grid { grid-template-columns: 1fr 1fr; }
       .language-grid { grid-template-columns: 1fr; gap: 32px; }
       .toolchain-grid { grid-template-columns: 1fr 1fr; }
       .footer-inner { grid-template-columns: 1fr 1fr; }
@@ -391,6 +425,7 @@
       nav.show { display: flex; }
       .hamburger { display: block; }
       .features-grid, .get-started-grid, .toolchain-grid { grid-template-columns: 1fr; }
+      .tutorial-grid { grid-template-columns: 1fr; }
       .footer-inner { grid-template-columns: 1fr; }
       .section-block { padding: 48px 20px; }
       .hero h1 { font-size: 1.7rem; }
@@ -405,6 +440,7 @@
       <nav id="nav">
         <a href="#features">Features</a>
         <a href="#language">Language</a>
+        <a href="#tutorials">Tutorials</a>
         <a href="#install">Install</a>
         <a href="#book">Book</a>
         <a href="#toolchain">Toolchain</a>
@@ -527,6 +563,77 @@ del odds</pre>
     </div>
   </section>
 
+  <section class="section-block alt" id="tutorials">
+    <div class="container">
+      <div class="section-label">Tutorials</div>
+      <h2 class="section-title">Learn by running code</h2>
+      <p class="section-subtitle">A 12-part hands-on ladder — from "Hello, World!" to machine learning and web servers. Every tutorial is a runnable program with a challenge at the end.</p>
+      <div class="tutorial-grid">
+        <div class="tutorial-cell">
+          <div class="num">01</div>
+          <h3><a href="tutorials/01_hello.jts" target="_blank" rel="noopener">Hello, World!</a></h3>
+          <p><code>say</code> and your first program.</p>
+        </div>
+        <div class="tutorial-cell">
+          <div class="num">02</div>
+          <h3><a href="tutorials/02_variables_math.jts" target="_blank" rel="noopener">Variables and Math</a></h3>
+          <p>Variables, arithmetic, <code>str()</code>.</p>
+        </div>
+        <div class="tutorial-cell">
+          <div class="num">03</div>
+          <h3><a href="tutorials/03_conditionals.jts" target="_blank" rel="noopener">Conditionals</a></h3>
+          <p><code>if</code> / <code>elif</code> / <code>else</code>.</p>
+        </div>
+        <div class="tutorial-cell">
+          <div class="num">04</div>
+          <h3><a href="tutorials/04_loops.jts" target="_blank" rel="noopener">Loops</a></h3>
+          <p><code>for</code> / <code>while</code>, break &amp; continue.</p>
+        </div>
+        <div class="tutorial-cell">
+          <div class="num">05</div>
+          <h3><a href="tutorials/05_strings.jts" target="_blank" rel="noopener">Strings</a></h3>
+          <p>Methods and the <code>strings</code> scroll.</p>
+        </div>
+        <div class="tutorial-cell">
+          <div class="num">06</div>
+          <h3><a href="tutorials/06_functions.jts" target="_blank" rel="noopener">Functions</a></h3>
+          <p><code>func</code>, <code>return</code>, recursion.</p>
+        </div>
+        <div class="tutorial-cell">
+          <div class="num">07</div>
+          <h3><a href="tutorials/07_lists.jts" target="_blank" rel="noopener">Lists</a></h3>
+          <p>Indexing, methods, the <code>lists</code> scroll.</p>
+        </div>
+        <div class="tutorial-cell">
+          <div class="num">08</div>
+          <h3><a href="tutorials/08_dicts_sets.jts" target="_blank" rel="noopener">Dicts and Sets</a></h3>
+          <p>Key-value pairs and unique collections.</p>
+        </div>
+        <div class="tutorial-cell">
+          <div class="num">09</div>
+          <h3><a href="tutorials/09_classes.jts" target="_blank" rel="noopener">Classes</a></h3>
+          <p>OOP, <code>extends</code>, and <code>super</code>.</p>
+        </div>
+        <div class="tutorial-cell">
+          <div class="num">10</div>
+          <h3><a href="tutorials/10_files_json.jts" target="_blank" rel="noopener">Files and JSON</a></h3>
+          <p>Read/write files, <code>bring json</code>.</p>
+        </div>
+        <div class="tutorial-cell">
+          <div class="num">11</div>
+          <h3><a href="tutorials/11_errors.jts" target="_blank" rel="noopener">Errors</a></h3>
+          <p><code>throw</code> and <code>try/catch/finally</code>.</p>
+        </div>
+        <div class="tutorial-cell">
+          <div class="num">12</div>
+          <h3><a href="tutorials/12_ml_web.jts" target="_blank" rel="noopener">ML and Web</a></h3>
+          <p><code>sigmoid</code>, <code>mse</code>, <code>http_server</code>.</p>
+        </div>
+      </div>
+      <p class="section-subtitle" style="margin-bottom:0;">Run any tutorial with <code>jts tutorials/01_hello.jts</code>. See the <a href="https://github.com/jayaswinjay-web/jtsdk/tree/main/docs/tutorials.md" target="_blank" rel="noopener">tutorial index</a> for details.</p>
+    </div>
+  </section>
+
   <section class="section-block alt" id="install">
     <div class="container">
       <div class="section-label">Get Started</div>
@@ -585,7 +692,7 @@ del odds</pre>
     <div class="container">
       <div class="section-label">Learn</div>
       <h2 class="section-title">The JTS GO Programming Language</h2>
-      <p class="section-subtitle">139-page comprehensive reference and learning guide.</p>
+      <p class="section-subtitle">149-page comprehensive reference and learning guide.</p>
       <div style="text-align:center; margin-top:30px;">
         <img src="assets/logo-512.png" alt="JTS GO Book" style="width:160px;margin-bottom:24px;border-radius:16px;">
         <p style="max-width:600px;margin:0 auto 24px;color:#999;line-height:1.7;">From syntax basics to machine learning, web development, and the complete standard library. Every concept with verified code examples and output.</p>
@@ -610,6 +717,7 @@ del odds</pre>
       <div class="footer-col">
         <h4>Resources</h4>
         <a href="#language">Language Guide</a>
+        <a href="#tutorials">Tutorials</a>
         <a href="#book">Book (PDF)</a>
         <a href="https://github.com/jayaswinjay-web/jtsdk/tree/main/docs" target="_blank" rel="noopener">Documentation</a>
         <a href="https://github.com/jayaswinjay-web/jtsdk/tree/main/examples" target="_blank" rel="noopener">Examples</a>
@@ -623,7 +731,7 @@ del odds</pre>
     </div>
     <div class="footer-bottom">
       <span>© 2026 JTS GO. JayTech Solutions.</span>
-      <span><a href="https://github.com/jayaswinjay-web/jtsdk" target="_blank" rel="noopener">jayaswinjay-web/jtsdk</a> · v0.9.0-beta</span>
+      <span><a href="https://github.com/jayaswinjay-web/jtsdk" target="_blank" rel="noopener">jayaswinjay-web/jtsdk</a> · v0.9.1-beta</span>
     </div>
   </footer>
 

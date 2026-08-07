@@ -1,0 +1,35 @@
+# Tutorial 7: Lists
+# Goal: Store many values and transform them.
+#
+# Indexing starts at 0: items[0]. Append with append(list, v) or list.append(v).
+# Iterate with `for x of items`. Built-ins: len(), sort(), pop(), reverse().
+
+fruits = ["apple", "banana", "cherry"]
+say("first: " + fruits[0])
+say("last: " + fruits[2])
+say("length: " + str(len(fruits)))
+
+fruits.append("date")
+say("after append: " + str(fruits))
+fruits.pop()
+say("after pop: " + str(fruits))
+
+numbers = [5, 3, 9, 1, 7]
+numbers.sort()
+say("sorted: " + str(numbers))
+
+total = 0
+for n of numbers
+    total = total + n
+end
+say("sum: " + str(total))
+
+bring lists
+nested = [1, [2, 3], [4, [5, 6]]]
+say("flattened: " + str(lists.flatten(nested)))
+say("unique of [1,2,2,3,3,3]: " + str(lists.unique([1, 2, 2, 3, 3, 3])))
+say("reversed [1,2,3,4]: " + str(lists.reversed([1, 2, 3, 4])))
+say("first [9,8,7]: " + str(lists.first([9, 8, 7])))
+say("last [9,8,7]: " + str(lists.last([9, 8, 7])))
+
+# Challenge: find the largest value in a list using a loop.

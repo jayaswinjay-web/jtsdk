@@ -1,0 +1,32 @@
+# Tutorial 4: Loops
+# Goal: Repeat work with for and while.
+#
+# IMPORTANT: `for i of 0 to 10` is INCLUSIVE: i = 0, 1, ..., 10.
+# `for x of items` iterates a list. `while cond` loops until false.
+
+for i of 1 to 5
+    say("Counting: " + str(i))
+end
+
+items = ["apple", "banana", "cherry"]
+for fruit of items
+    say("I like " + fruit)
+end
+
+n = 0
+while n < 3
+    n = n + 1
+    if n == 2
+        continue
+    end
+    say("while n = " + str(n))
+end
+
+for i of 1 to 10
+    if i == 4
+        break
+    end
+    say("until break: " + str(i))
+end
+
+# Challenge: print the first 5 even numbers using a loop.

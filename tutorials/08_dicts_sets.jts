@@ -1,0 +1,40 @@
+# Tutorial 8: Dictionaries and Sets
+# Goal: Store key-value pairs and unique collections.
+#
+# Dict: {"key": value}, read with d["key"], write with d["key"] = value.
+# Set: {1, 2, 3}. Membership: `value of set`. Sets have no duplicates.
+
+person = {"name": "Alex", "age": 7, "city": "Madurai"}
+say("name: " + person["name"])
+say("age: " + str(person["age"]))
+person.update({"hobby": "coding"})
+say("has hobby: " + str("hobby" of person))
+say("hobby: " + person["hobby"])
+say("keys: " + str(person.keys()))
+say("get city: " + person.get("city"))
+say("get missing (default void): " + str(person.get("missing")))
+say("length: " + str(len(person)))
+
+for key of person
+    say("  " + key + " = " + str(person[key]))
+end
+
+primes = {2, 3, 5, 7, 11}
+say("7 in primes: " + str(7 of primes))
+say("8 in primes: " + str(8 of primes))
+say("set size: " + str(len(primes)))
+
+a = {1, 2, 3, 4}
+b = {3, 4, 5}
+say("a = " + str(list(a)))
+say("a | b = " + str(list(a | b)))
+say("a & b = " + str(list(a & b)))
+say("a - b = " + str(list(a - b)))
+
+bring sets
+say("union: " + str(list(sets.union(a, b))))
+say("intersection: " + str(list(sets.intersection(a, b))))
+say("difference: " + str(list(sets.difference(a, b))))
+say("is subset: " + str(sets.is_subset({1, 2}, a)))
+
+# Challenge: count how many unique letters are in your name using a set.

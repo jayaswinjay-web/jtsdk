@@ -1,0 +1,47 @@
+# Tutorial 9: Classes and Inheritance
+# Goal: Bundle data and behavior with object-oriented programming.
+#
+# class Name ... end, constructor is init(self, ...), use `self`.
+# Create instances with new. Inherit with `extends`.
+# `super` only works inside a subclass method.
+
+class Animal
+    func init(self, name)
+        self.name = name
+    end
+
+    func speak(self)
+        say(self.name + " makes a sound")
+    end
+end
+
+class Dog extends Animal
+    func speak(self)
+        super.speak(self)
+        say(self.name + " barks!")
+    end
+end
+
+class Puppy extends Dog
+    func init(self, name)
+        super.init(self, name)
+        self.cute = true
+    end
+
+    func speak(self)
+        super.speak(self)
+        say("So cute!")
+    end
+end
+
+a = new Animal("Generic")
+a.speak()
+
+d = new Dog("Rex")
+d.speak()
+
+p = new Puppy("Milo")
+p.speak()
+say("Milo is cute: " + str(p.cute))
+
+# Challenge: add a Cat class with its own speak() and try it out.

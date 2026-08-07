@@ -1,0 +1,8 @@
+# Tutorial 1: Hello, World!
+# Goal: Write your first program with `say`.
+#
+# Try it: jts tutorials/01_hello.jts
+# Challenge: change the greeting to your own name.
+
+say("Hello, World!")
+say("Welcome to the JTS GO tutorial!")

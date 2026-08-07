@@ -1,0 +1,366 @@
+<h1 id="ch43">43. Learn by Doing: The 12 Tutorials</h1>
+
+<p>This chapter is a hands-on recap of the whole book. Twelve short programs walk you through the language from
+your first <code>say</code> to machine learning and web servers. Every program is a complete, runnable file in the
+repository's <code>tutorials/</code> folder:</p>
+
+<pre><code>jts tutorials/01_hello.jts</code></pre>
+
+<p>The scrolls used by some tutorials (<code>math</code>, <code>strings</code>, <code>lists</code>, <code>sets</code>,
+<code>json</code>, <code>fs</code>) resolve from any working directory, so you can run a tutorial from anywhere.
+Each section ends with a <em>Challenge</em> for you to try before moving on.</p>
+
+<h2>43.1 Hello, World!</h2>
+<p>The very first program. <code>say</code> prints a value to the console (Chapter 14).</p>
+<pre><code>say("Hello, World!")
+say("Welcome to the JTS GO tutorial!")
+</code></pre>
+<p><em>Challenge: change the greeting to your own name.</em></p>
+
+<h2>43.2 Variables and Math</h2>
+<p>JTS GO is dynamically typed: <code>x = 42</code> needs no type keyword. Arithmetic uses <code>+ - * / %</code>,
+and <code>str()</code> converts numbers for string concatenation (Chapters 5, 6, and 7).</p>
+<pre><code>name = "Alex"
+age = 7
+say("Hi, " + name + "!")
+say("In 3 years you will be " + str(age + 3))
+
+pi = 3.14159
+say("Pi doubled: " + str(pi * 2))
+say("Remainder of 17 / 5: " + str(17 % 5))
+</code></pre>
+<p><em>Challenge: compute and print the area of a circle with radius 4.</em></p>
+
+<h2>43.3 Conditionals</h2>
+<p>Decision-making with <code>if</code> / <code>elif</code> / <code>else</code>, comparisons, the logical operators
+<code>and</code> / <code>or</code> / <code>not</code>, and the <code>of</code> membership test (Chapter 8).</p>
+<pre><code>score = 85
+if score &gt;= 90
+    say("Grade: A")
+elif score &gt;= 80
+    say("Grade: B")
+elif score &gt;= 70
+    say("Grade: C")
+else
+    say("Grade: F")
+end
+
+x = 7
+if x &gt; 0 and x % 2 == 0
+    say("positive and even")
+elif x &gt; 0
+    say("positive and odd")
+end
+
+primes = {2, 3, 5, 7}
+if 7 of primes
+    say("7 is prime")
+end
+</code></pre>
+<p><em>Challenge: print "hot", "warm", or "cold" based on a temperature variable.</em></p>
+
+<h2>43.4 Loops</h2>
+<p>Note that <code>for i of 0 to 10</code> is <strong>inclusive</strong>: it visits 0, 1, ..., 10. Lists iterate with
+<code>for x of items</code>, and <code>break</code> / <code>continue</code> control the flow (Chapter 8).</p>
+<pre><code>for i of 1 to 5
+    say("Counting: " + str(i))
+end
+
+items = ["apple", "banana", "cherry"]
+for fruit of items
+    say("I like " + fruit)
+end
+
+n = 0
+while n &lt; 3
+    n = n + 1
+    if n == 2
+        continue
+    end
+    say("while n = " + str(n))
+end
+
+for i of 1 to 10
+    if i == 4
+        break
+    end
+    say("until break: " + str(i))
+end
+</code></pre>
+<p><em>Challenge: print the first 5 even numbers using a loop.</em></p>
+
+<h2>43.5 Strings</h2>
+<p>Strings expose methods such as <code>upper()</code>, <code>trim()</code>, <code>contains()</code>,
+<code>replace()</code>, <code>split()</code>, and <code>join()</code> (Chapters 12 and 16). The <code>strings</code>
+scroll adds more helpers (Chapter 27).</p>
+<pre><code>greeting = "  Hello, JTS GO!  "
+say("trimmed: [" + greeting.trim() + "]")
+say("upper: " + greeting.upper())
+say("lower: " + greeting.lower())
+say("contains 'JTS': " + str(greeting.contains("JTS")))
+say("replaced: " + greeting.replace("JTS", "World"))
+
+text = "a,b,c,d"
+parts = text.split(",")
+say("split: " + str(parts))
+say("joined: " + "-".join(parts))
+say("length: " + str(len(text)))
+
+bring strings
+say("reversed: " + strings.reverse("hello"))
+say("repeat: " + strings.repeat("ab", 3))
+say("is palindrome: " + str(strings.is_palindrome("racecar")))
+say("word count: " + str(strings.count_words("the quick brown fox")))
+say("words: " + str(strings.words("one two three")))
+</code></pre>
+<p><em>Challenge: print your name, then reverse it.</em></p>
+
+<h2>43.6 Functions</h2>
+<p>Functions group reusable code with <code>func</code>, parameters, <code>return</code>, and recursion (Chapter 9).
+A function without <code>return</code> returns <code>void</code>.</p>
+<pre><code>func greet(name)
+    say("Hello, " + name + "!")
+end
+
+func add(a, b)
+    return a + b
+end
+
+func is_even(n)
+    if n % 2 == 0
+        return true
+    end
+    return false
+end
+
+func factorial(n)
+    if n &lt;= 1
+        return 1
+    end
+    return n * factorial(n - 1)
+end
+
+greet("Alex")
+say("add(3, 4) = " + str(add(3, 4)))
+say("is_even(10) = " + str(is_even(10)))
+say("factorial(5) = " + str(factorial(5)))
+
+func square(x)
+    return x * x
+end
+
+func sum_of_squares(a, b)
+    return square(a) + square(b)
+end
+
+say("sum_of_squares(3, 4) = " + str(sum_of_squares(3, 4)))
+</code></pre>
+<p><em>Challenge: write a function that counts down from n to 1.</em></p>
+
+<h2>43.7 Lists</h2>
+<p>Ordered collections with zero-based indexing, built-in methods (<code>append()</code>, <code>sort()</code>,
+<code>pop()</code>), iteration, and the <code>lists</code> scroll (Chapters 11 and 17, 30).</p>
+<pre><code>fruits = ["apple", "banana", "cherry"]
+say("first: " + fruits[0])
+say("last: " + fruits[2])
+say("length: " + str(len(fruits)))
+
+fruits.append("date")
+say("after append: " + str(fruits))
+fruits.pop()
+say("after pop: " + str(fruits))
+
+numbers = [5, 3, 9, 1, 7]
+numbers.sort()
+say("sorted: " + str(numbers))
+
+total = 0
+for n of numbers
+    total = total + n
+end
+say("sum: " + str(total))
+
+bring lists
+nested = [1, [2, 3], [4, [5, 6]]]
+say("flattened: " + str(lists.flatten(nested)))
+say("unique of [1,2,2,3,3,3]: " + str(lists.unique([1, 2, 2, 3, 3, 3])))
+say("first [9,8,7]: " + str(lists.first([9, 8, 7])))
+say("last [9,8,7]: " + str(lists.last([9, 8, 7])))
+</code></pre>
+<p><em>Challenge: find the largest value in a list using a loop.</em></p>
+
+<h2>43.8 Dictionaries and Sets</h2>
+<p>Dicts map string keys to values; sets hold unique values. Sets support <code>|</code>, <code>&amp;</code>, and
+<code>-</code> operators and membership with <code>of</code> (Chapter 11). Dicts update with
+<code>d.update({...})</code> (Chapter 18).</p>
+<pre><code>person = {"name": "Alex", "age": 7, "city": "Madurai"}
+say("name: " + person["name"])
+say("age: " + str(person["age"]))
+person.update({"hobby": "coding"})
+say("has hobby: " + str("hobby" of person))
+say("keys: " + str(person.keys()))
+say("get city: " + person.get("city"))
+say("length: " + str(len(person)))
+
+for key of person
+    say("  " + key + " = " + str(person[key]))
+end
+
+primes = {2, 3, 5, 7, 11}
+say("7 in primes: " + str(7 of primes))
+say("set size: " + str(len(primes)))
+
+a = {1, 2, 3, 4}
+b = {3, 4, 5}
+say("a | b = " + str(list(a | b)))
+say("a &amp; b = " + str(list(a &amp; b)))
+say("a - b = " + str(list(a - b)))
+
+bring sets
+say("union: " + str(list(sets.union(a, b))))
+say("is subset: " + str(sets.is_subset({1, 2}, a)))
+</code></pre>
+<p><em>Challenge: count how many unique letters are in your name using a set.</em></p>
+
+<h2>43.9 Classes and Inheritance</h2>
+<p>OOP with <code>class</code>, constructors <code>init(self, ...)</code>, <code>self</code>, <code>new</code>, and
+inheritance via <code>extends</code>. Inside a subclass method, <code>super</code> reaches the parent (Chapter 10).</p>
+<pre><code>class Animal
+    func init(self, name)
+        self.name = name
+    end
+
+    func speak(self)
+        say(self.name + " makes a sound")
+    end
+end
+
+class Dog extends Animal
+    func speak(self)
+        super.speak(self)
+        say(self.name + " barks!")
+    end
+end
+
+class Puppy extends Dog
+    func init(self, name)
+        super.init(self, name)
+        self.cute = true
+    end
+
+    func speak(self)
+        super.speak(self)
+        say("So cute!")
+    end
+end
+
+a = new Animal("Generic")
+a.speak()
+
+d = new Dog("Rex")
+d.speak()
+
+p = new Puppy("Milo")
+p.speak()
+say("Milo is cute: " + str(p.cute))
+</code></pre>
+<p><em>Challenge: add a Cat class with its own speak() and try it out.</em></p>
+
+<h2>43.10 Files and JSON</h2>
+<p>The built-ins <code>write_file()</code> / <code>read_file()</code> handle text files (Chapter 20). The
+<code>json</code> scroll parses, stringifies, loads, and saves JSON (Chapter 21), and the <code>fs</code> scroll adds
+file helpers (Chapter 33).</p>
+<pre><code>write_file("_tutorial_notes.txt", "line one\nline two\nline three\n")
+content = read_file("_tutorial_notes.txt")
+say(content)
+
+bring fs
+say("fs.exists: " + str(fs.exists("_tutorial_notes.txt")))
+say("line count: " + str(fs.count_lines("_tutorial_notes.txt")))
+say("first line: " + fs.first_line("_tutorial_notes.txt"))
+say("last line: " + fs.last_line("_tutorial_notes.txt"))
+
+bring json
+data = json.parse('{"name": "JTS GO", "version": 1, "features": ["easy", "fast"]}')
+say("name: " + data["name"])
+say("first feature: " + data["features"][0])
+say("stringify: " + json.stringify({"a": 1, "b": [2, 3]}))
+
+json.save("_tutorial_data.json", {"app": "demo", "count": 3})
+loaded = json.load("_tutorial_data.json")
+say("loaded app: " + loaded["app"])
+say("pretty:")
+say(json.pretty(loaded))
+</code></pre>
+<p>The scratch files created here (<code>_tutorial_notes.txt</code>, <code>_tutorial_data.json</code>) are
+gitignored.</p>
+
+<h2>43.11 Errors</h2>
+<p><code>throw "message"</code> raises an error; <code>try</code> / <code>catch</code> / <code>finally</code> handle it
+(Chapter 13). Explicit <code>throw</code> calls are catchable; low-level runtime failures stop the program.</p>
+<pre><code>func divide(a, b)
+    if b == 0
+        throw "cannot divide by zero"
+    end
+    return a / b
+end
+
+func require_positive(n)
+    if n &lt;= 0
+        throw "expected a positive number, got " + str(n)
+    end
+    return n
+end
+
+try
+    result = divide(10, 0)
+    say("result: " + str(result))
+catch err
+    say("caught: " + err)
+finally
+    say("cleanup always runs")
+end
+
+say("still running after the error")
+
+try
+    say("10 / 2 = " + str(divide(10, 2)))
+catch err
+    say("should not reach here")
+end
+
+try
+    require_positive(-3)
+    say("never printed")
+catch err
+    say("caught: " + err)
+end
+</code></pre>
+<p><em>Challenge: wrap an ask() in try/catch to reject empty input.</em></p>
+
+<h2>43.12 Machine Learning and Web</h2>
+<p>JTS GO ships ML built-ins — <code>seed()</code>, <code>rand()</code>, <code>sigmoid()</code>, <code>mse()</code>,
+<code>matrix()</code>, <code>matmul()</code> — and a built-in HTTP server: <code>http_server()</code>,
+<code>http_route()</code>, and <code>http_start()</code> (Chapters 23, 24, 40, and 41). Registering routes does not
+block; <code>http_start(srv)</code> serves until stopped.</p>
+<pre><code>seed(42)
+say("sigmoid(0) = " + str(sigmoid(0)))
+say("sigmoid(2) = " + str(sigmoid(2)))
+
+actual = [0, 0, 1, 1]
+predicted = [0.1, 0.4, 0.8, 0.9]
+say("mse = " + str(mse(predicted, actual)))
+
+a = matrix([[1, 2], [3, 4]])
+b = matrix([[5, 6], [7, 8]])
+say("matmul = " + str(matmul(a, b)))
+
+say("randint(1, 6) = " + str(randint(1, 6)))
+
+srv = http_server(8080)
+http_route(srv, "GET", "/", "&lt;h1&gt;Hello from JTS GO&lt;/h1&gt;")
+http_route(srv, "GET", "/api/time", '{"now": 2026}')
+say("server on port 8080 with 2 routes registered")
+say("call http_start(srv) to serve")
+</code></pre>
+<p><em>Challenge: train sigmoid on [0,1] -&gt; 0 and [1,0] -&gt; 1, then print mse.</em></p>
