@@ -37,6 +37,7 @@ if (process.platform === "win32" && process.arch === "x64") {
 const binDir = path.join(__dirname, "bin");
 const outDir = path.join(binDir, subDir);
 const binaryPath = path.join(outDir, binaryName);
+const markerPath = path.join(binDir, ".installed-version");
 
 function download(url, dest) {
   return new Promise((resolve, reject) => {
@@ -62,7 +63,14 @@ function download(url, dest) {
 }
 
 async function main() {
-  if (fs.existsSync(binaryPath)) {
+  // Only trust an existing binary when our marker confirms it matches this
+  // package version. The tarball may carry stale committed binaries, so a
+  // bare existence check would silently ship the wrong version on upgrade.
+  if (
+    fs.existsSync(binaryPath) &&
+    fs.existsSync(markerPath) &&
+    fs.readFileSync(markerPath, "utf8").trim() === version
+  ) {
     console.log("[jts-go] JTS GO Development Kit v" + version + " installed successfully!");
     console.log("[jts-go] Run 'jts yourfile.jts' to get started.");
     return;
@@ -97,6 +105,8 @@ async function main() {
   if (!isWindows) {
     fs.chmodSync(binaryPath, 0o755);
   }
+
+  fs.writeFileSync(markerPath, version);
 
   console.log("[jts-go] JTS GO Development Kit v" + version + " installed successfully!");
   console.log("[jts-go] Run 'jts yourfile.jts' to get started.");
