@@ -292,6 +292,35 @@
       word-break: break-all;
     }
     .step .external { font-size: 0.88rem; font-weight: 500; }
+    .os-picker {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .os-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      padding: 12px 6px;
+      background: var(--code-bg);
+      border: 1px solid var(--line);
+      border-radius: 3px;
+      color: var(--text);
+      font-size: 0.82rem;
+      font-weight: 600;
+      text-align: center;
+    }
+    .os-btn span { font-size: 0.7rem; font-weight: 400; color: var(--muted); }
+    .os-btn:hover {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+      text-decoration: none;
+    }
+    .os-btn:hover span { color: rgba(255,255,255,0.85); }
 
     /* ===== TOOLCHAIN ===== */
     .toolchain-grid {
@@ -436,6 +465,7 @@
       .hero-grid { grid-template-columns: 1fr; gap: 36px; padding: 48px 24px 56px; }
       .hero p { max-width: none; }
       .features-grid, .get-started-grid { grid-template-columns: 1fr 1fr; }
+      .os-picker { grid-template-columns: 1fr 1fr 1fr; }
       .tutorial-grid { grid-template-columns: 1fr 1fr; }
       .book-grid { grid-template-columns: 1fr; }
       .language-grid { grid-template-columns: 1fr; gap: 32px; }
@@ -459,6 +489,7 @@
       nav.show { display: flex; }
       .hamburger { display: block; }
       .features-grid, .get-started-grid, .toolchain-grid { grid-template-columns: 1fr; }
+      .os-picker { grid-template-columns: 1fr; }
       .tutorial-grid { grid-template-columns: 1fr; }
       .footer-inner { grid-template-columns: 1fr; }
       .section-block { padding: 48px 20px; }
@@ -682,9 +713,14 @@ del odds</pre>
         </div>
         <div class="step">
           <div class="step-num">2</div>
-          <h3>Pre-built Binaries</h3>
-          <p>Windows, macOS, and Linux binaries on every GitHub release. No Node.js needed.</p>
-          <a class="btn" href="https://github.com/jayaswinjay-web/jtsdk/releases/latest" target="_blank" rel="noopener">Download for Your OS</a>
+          <h3>Download for Your OS</h3>
+          <p>Windows gets the full JTS IDE with the SDK, tutorials, scrolls, and examples bundled. macOS and Linux ship as a CLI binary. No Node.js needed.</p>
+          <div class="os-picker">
+            <a class="os-btn" href="https://github.com/jayaswinjay-web/jtsdk/releases/download/v0.9.3-beta/JTS-IDE-Setup.exe">Windows<span>IDE + SDK installer</span></a>
+            <a class="os-btn" href="https://github.com/jayaswinjay-web/jtsdk/releases/download/v0.9.3-beta/jts-linux-x64.tar.gz">Linux<span>CLI binary</span></a>
+            <a class="os-btn" href="https://github.com/jayaswinjay-web/jtsdk/releases/download/v0.9.3-beta/jts-darwin-arm64.tar.gz">macOS<span>CLI binary</span></a>
+          </div>
+          <p class="note">Windows CLI only? Grab <a class="external" href="https://github.com/jayaswinjay-web/jtsdk/releases/download/v0.9.3-beta/jts-win32-x64.zip">jts-win32-x64.zip</a> instead.</p>
         </div>
         <div class="step">
           <div class="step-num">3</div>
