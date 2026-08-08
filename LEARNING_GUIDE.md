@@ -1,9 +1,16 @@
+<div align="center">
+
+<img src="assets/logo-512.png" alt="JTS GO" width="100"/>
+
 # JTS GO Learning Guide
 
-<p align="center">
-  <b>The Complete Guide to Learning JTS GO</b><br>
-  From zero to confident programmer
-</p>
+**The Complete Guide to Learning JTS GO — From zero to confident programmer.**
+
+![Difficulty](https://img.shields.io/badge/Difficulty-Beginner-green) ![Time](https://img.shields.io/badge/Time-~2%20Hours-blueviolet) ![Prereq](https://img.shields.io/badge/Prerequisites-None-success)
+
+*New to programming? You're in the right place. No prior experience required.*
+
+</div>
 
 ---
 

@@ -1,6 +1,16 @@
-# JTS GO Language Specification 0.9.0-beta
+<div align="center">
+
+<img src="assets/logo-512.png" alt="JTS GO" width="90"/>
+
+# JTS GO Language Specification
+
+**v0.9.3 — the formal, complete language reference.**
 
 This document is the complete, formal specification of the JTS GO programming language. It covers every keyword, operator, type, function, and semantic rule. AI language models can use this document to generate correct JTS GO code.
+
+![Spec Version](https://img.shields.io/badge/spec-v0.9.3-informational) ![Status](https://img.shields.io/badge/status-stable-brightgreen)
+
+</div>
 
 ---
 
